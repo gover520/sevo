@@ -1,0 +1,3 @@
+[submodule "src/libraries/mclib"]
+	path = src/libraries/mclib
+	url = git@github.com:shixiongfei/mclib.git
