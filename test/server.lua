@@ -101,8 +101,6 @@ function test_timer()
                 print('Timer expired: ' .. timeout)
                 t:set(timeout - 1000)
                 return timer_iter(t, timeout - 1000)
-            else
-                return
             end
         else
             return timer_iter(t, timeout)

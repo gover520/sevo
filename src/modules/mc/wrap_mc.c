@@ -89,9 +89,10 @@ static int mcl_timer_expired(lua_State * L) {
 }
 
 static int mcl_timer_new(lua_State * L) {
+    int top = lua_gettop(L);
     mc_timer_t *tmr = (mc_timer_t *)luaX_newuserdata(L, g_meta_timer, sizeof(mc_timer_t));
 
-    if (lua_gettop(L) > 0) {
+    if (top > 1) {
         mc_timer_set(tmr, NULL, (unsigned int)luaL_checkinteger(L, 1));
     } else {
         mc_timer_set(tmr, NULL, 0);
