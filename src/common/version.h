@@ -20,6 +20,8 @@ extern "C" {
     #define SONIC_VERSION_NUM   ((SONIC_MAJOR * 100) + SONIC_MINOR)
     #define SONIC_VERSION_FULL  ((SONIC_VERSION_NUM * 1000) + SONIC_PATCH)
 
+    const char *sonic_version();
+
 #ifdef __cplusplus
 };
 #endif

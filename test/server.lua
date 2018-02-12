@@ -3,6 +3,7 @@ print('Sonic Full Version: ' .. sonic._version_full)
 print('Sonic Major Version: ' .. sonic._version_major)
 print('Sonic Minor Version: ' .. sonic._version_minor)
 print('Sonic Patch Version: ' .. sonic._version_patch)
+print('Sonic OS: ' .. sonic._os)
 
 function test_bigint()
     local a = sonic.int(0)

@@ -14,6 +14,9 @@
 #include "modules/mc/wrap_mc.h"
 #include "common/version.h"
 
+#define DONE_QUIT       0
+#define DONE_RESTART    1
+
 static const luaL_Reg modules[] = {
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
@@ -70,13 +73,16 @@ static int luaopen_sonic(lua_State * L) {
     return 0;
 }
 
-typedef enum DoneAction {
-    DONE_QUIT,
-    DONE_RESTART,
-} DoneAction;
+static int sonic_run(int argc, char *argv[], int *retval) {
+    lua_State *L;
+    
+    if ((argc > 1) && (0 == strcasecmp("--version", argv[1]))) {
+        printf("Sonic %s\n", sonic_version());
+        *retval = 0;
+        return DONE_QUIT;
+    }
 
-static DoneAction sonic_run(int argc, char *argv[], int *retval) {
-    lua_State *L = luaL_newstate();
+    L = luaL_newstate();
 
     luaL_checkversion(L);
     luaL_openlibs(L);
@@ -91,15 +97,15 @@ static DoneAction sonic_run(int argc, char *argv[], int *retval) {
 
     lua_close(L);
 
+    *retval = 0;
     return DONE_QUIT;
 }
 
 int main(int argc, char *argv[]) {
-    int retval = 0;
-    DoneAction done;
+    int done, retval = 0;
 
-    install_stacktrace(NULL);
     mc_init();
+    install_stacktrace(NULL);
 
     do {
         done = sonic_run(argc, argv, &retval);
