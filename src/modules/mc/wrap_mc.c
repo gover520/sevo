@@ -126,3 +126,6 @@ int luaopen_sonic_mc(lua_State* L) {
 
     return 0;
 }
+
+#define MCLIB_IMPLEMENTION
+#include <mclib.h>

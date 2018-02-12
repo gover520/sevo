@@ -117,11 +117,16 @@ local ffi = require('ffi')
 ffi.cdef[[
     typedef struct { double x, y; } point_t;
     int printf(const char *fmt, ...);
-    int MessageBoxA(void *w, const char *txt, const char *cap, int type);
 ]]
 
 ffi.C.printf("Hello %s!\n", "world")
-ffi.C.MessageBoxA(nil, "Hello world!", "Test", 0)
+
+if ffi.os == "Windows" then
+    ffi.cdef[[
+        int MessageBoxA(void *w, const char *txt, const char *cap, int type);
+    ]]
+    ffi.C.MessageBoxA(nil, "Hello world!", "Test", 0)
+end
 
 local point
 local mt = {

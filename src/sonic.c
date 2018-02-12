@@ -77,7 +77,7 @@ static int luaopen_sonic(lua_State * L) {
 
 static int sonic_run(int argc, char *argv[], int *retval) {
     lua_State *L;
-    
+
     if ((argc > 1) && (0 == strcasecmp("--version", argv[1]))) {
         printf("Sonic %s\n", sonic_version());
         *retval = 0;
@@ -117,6 +117,3 @@ int main(int argc, char *argv[]) {
 
     return retval;
 }
-
-#define MCLIB_IMPLEMENTION
-#include <mclib.h>
