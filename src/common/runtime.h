@@ -32,10 +32,10 @@ extern "C" {
     int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions);
     int luaX_register_type(lua_State *L, const char *metaname, const luaL_Reg *functions);
     int luaX_register_funcs(lua_State *L, const luaL_Reg *functions);
+    int luaX_register_searcher(lua_State *L, lua_CFunction function);
     int luaX_preload(lua_State *L, const char *name, lua_CFunction function);
     int luaX_require(lua_State *L, const char *name);
     void *luaX_newuserdata(lua_State * L, const char *metaname, int size);
-    void luaX_error(lua_State * L, const char *error);
     int luaX_checkint(lua_State *L, int index);
 
 #ifdef __cplusplus

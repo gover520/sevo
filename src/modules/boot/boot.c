@@ -8,6 +8,7 @@
  */
 
 #include "boot.h"
+#include <string.h>
 
 int luaopen_sonic_boot(lua_State* L) {
     static const char test_file[] = { "test/server.lua" };

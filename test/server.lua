@@ -5,6 +5,12 @@ print('Sonic Minor Version: ' .. sonic._version_minor)
 print('Sonic Patch Version: ' .. sonic._version_patch)
 print('Sonic OS: ' .. sonic._os)
 
+local re = require("re")
+print(re.find("the number 423 is odd", "[0-9]+"))           --> 12    14
+print(re.match("the number 423 is odd", "({%a+} / .)*"))    --> the    number    is    odd
+print(re.match("the number 423 is odd", "s <- {%d+} / . s"))--> 423
+print(re.gsub("hello World", "[aeiou]", "."))               --> h.ll. W.rld
+
 function test_bigint()
     local a = sonic.int(0)
     print(type(a))

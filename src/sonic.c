@@ -18,13 +18,43 @@
 #define DONE_QUIT       0
 #define DONE_RESTART    1
 
+extern int luaopen_lpeg (lua_State *L);
+
 static const luaL_Reg modules[] = {
     { "ffi", luaopen_ffi },
+    { "lpeg", luaopen_lpeg },
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
     { LUAX_LIBNAME ".boot", luaopen_sonic_boot },
     { NULL, NULL }
 };
+
+static int loader(lua_State *L) {
+    /* Just a test code */
+    char mod[MC_MAX_PATH] = { 0 };
+    char *buffer = NULL;
+    long long len;
+    FILE *fp;
+
+    sprintf(mod, "src/libraries/lpeg/%s.lua", lua_tostring(L, 1));
+    len = mc_file_length(mod);
+    fp = fopen(mod, "r");
+    if (fp) {
+        buffer = (char *)mc_calloc(1, len + 1);
+        fread(buffer, len, 1, fp);
+
+        if (0 != luaL_loadbuffer(L, buffer, (size_t)strlen(buffer), lua_tostring(L, 1))) {
+            mc_free(buffer);
+            fclose(fp);
+            return luaL_error(L, lua_tostring(L, -1));
+        }
+
+        mc_free(buffer);
+        fclose(fp);
+    }
+
+    return 1;
+}
 
 static int luaopen_sonic(lua_State * L) {
     const luaL_Reg *l;
@@ -63,6 +93,8 @@ static int luaopen_sonic(lua_State * L) {
     for (l = modules; NULL != l->name; ++l) {
         luaX_preload(L, l->name, l->func);
     }
+
+    luaX_register_searcher(L, loader);
 
     luaX_require(L, LUAX_LIBNAME ".int");
     lua_pop(L, 1);  /* pop returned by require */

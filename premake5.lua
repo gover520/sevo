@@ -19,7 +19,8 @@ solution ( "sonic" )
                         "./src/libraries/lua/src",
                         "./src/libraries/mini-gmp",
                         "./src/libraries/luaffifb",
-                        "./src/libraries/luaffifb/dynasm" }
+                        "./src/libraries/luaffifb/dynasm",
+                        "./src/libraries/lpeg" }
         --libdirs { "" }
         --links { "" }
         files { "./src/*.h", "./src/*.c",
@@ -28,7 +29,9 @@ solution ( "sonic" )
                 "./src/libraries/lua/src/*.c",
                 "./src/libraries/mini-gmp/*.h",
                 "./src/libraries/mini-gmp/*.c",
-                "./src/libraries/luaffifb/*.c" }
+                "./src/libraries/luaffifb/*.c",
+                "./src/libraries/lpeg/*.h",
+                "./src/libraries/lpeg/*.c", }
         excludes { "./src/libraries/lua/src/lua.c",
                     "./src/libraries/lua/src/luac.c",
                     "./src/libraries/luaffifb/test.c" }

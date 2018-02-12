@@ -72,7 +72,7 @@ static mc_timer_t *luaX_checktimer(lua_State *L, int index) {
         return (mc_timer_t *)lua_touserdata(L, index);
     }
 
-    luaX_error(L, errmsg);
+    luaL_error(L, errmsg);
     return NULL;
 }
 

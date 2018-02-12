@@ -64,8 +64,7 @@ int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
 
     if (lua_isstring(L, index)) {
         if (0 != mpz_set_str(r, lua_tostring(L, index), 0)) {
-            luaX_error(L, errmsg);
-            return 0;
+            return luaL_error(L, errmsg);
         }
         return 1;
     }
@@ -75,8 +74,7 @@ int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
         return 1;
     }
 
-    luaX_error(L, errmsg);
-    return 0;
+    return luaL_error(L, errmsg);
 }
 
 bigint_t *new_bigint(lua_State *L) {

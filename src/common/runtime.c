@@ -60,6 +60,18 @@ int luaX_register_funcs(lua_State *L, const luaL_Reg *functions) {
     return 0;
 }
 
+int luaX_register_searcher(lua_State *L, lua_CFunction function) {
+    lua_getglobal(L, "package");
+    lua_getfield(L, -1, "searchers");
+
+    lua_pushcfunction(L, function);
+    lua_rawseti(L, -2, lua_rawlen(L, -2) + 1);
+
+    lua_pop(L, 2);
+
+    return 0;
+}
+
 int luaX_preload(lua_State *L, const char *name, lua_CFunction function) {
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
@@ -88,11 +100,6 @@ void *luaX_newuserdata(lua_State * L, const char *metaname, int size) {
     return ud;
 }
 
-void luaX_error(lua_State * L, const char *error) {
-    lua_pushstring(L, error);
-    lua_error(L);
-}
-
 int luaX_checkint(lua_State *L, int index) {
     static const char errmsg[] = { "Invalid operand. Expected 'integer' or 'number'" };
 
@@ -104,6 +111,5 @@ int luaX_checkint(lua_State *L, int index) {
         return (int)lua_tonumber(L, index);
     }
 
-    luaX_error(L, errmsg);
-    return 0;
+    return luaL_error(L, errmsg);
 }
