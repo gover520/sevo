@@ -15,7 +15,11 @@ solution ( "sonic" )
         kind ( "ConsoleApp" )
         language ( "C" )
         targetname ("sonic")
-        includedirs { "./src", "./src/libraries/mclib", "./src/libraries/lua/src", "./src/libraries/mini-gmp" }
+        includedirs { "./src", "./src/libraries/mclib",
+                        "./src/libraries/lua/src",
+                        "./src/libraries/mini-gmp",
+                        "./src/libraries/luaffifb",
+                        "./src/libraries/luaffifb/dynasm" }
         --libdirs { "" }
         --links { "" }
         files { "./src/*.h", "./src/*.c",
@@ -23,9 +27,11 @@ solution ( "sonic" )
                 "./src/libraries/lua/src/*.h",
                 "./src/libraries/lua/src/*.c",
                 "./src/libraries/mini-gmp/*.h",
-                "./src/libraries/mini-gmp/*.c" }
+                "./src/libraries/mini-gmp/*.c",
+                "./src/libraries/luaffifb/*.c" }
         excludes { "./src/libraries/lua/src/lua.c",
-                    "./src/libraries/lua/src/luac.c" }
+                    "./src/libraries/lua/src/luac.c",
+                    "./src/libraries/luaffifb/test.c" }
         defines { "_UNICODE" }
         flags { "StaticRuntime", --[["Unicode"]] }
 

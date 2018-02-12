@@ -10,7 +10,10 @@
 #pragma once
 
 #ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+#pragma warning(disable : 4244)
 #endif
 
 #include <stdint.h>
@@ -42,8 +45,11 @@ extern "C" {
 #include <sys/mman.h>
 #endif
 
+#ifndef _MSC_VER
 #include <complex.h>
 #define HAVE_COMPLEX
+#endif
+
 #define HAVE_LONG_DOUBLE
 
 #ifndef NDEBUG

@@ -112,4 +112,35 @@ end
 
 test_timer()
 
+local ffi = require('ffi')
+
+ffi.cdef[[
+    typedef struct { double x, y; } point_t;
+    int printf(const char *fmt, ...);
+    int MessageBoxA(void *w, const char *txt, const char *cap, int type);
+]]
+
+ffi.C.printf("Hello %s!\n", "world")
+ffi.C.MessageBoxA(nil, "Hello world!", "Test", 0)
+
+local point
+local mt = {
+    __add = function(a, b) return point(a.x+b.x, a.y+b.y) end,
+    __len = function(a) return math.sqrt(a.x*a.x + a.y*a.y) end,
+    __index = {
+        area = function(a) return a.x*a.x + a.y*a.y end,
+    },
+}
+point = ffi.metatype("point_t", mt)
+
+local a = point(3, 4)
+
+print(a.x, a.y)     --> 3  4
+print(#a)           --> 5
+print(a:area())     --> 25
+
+local b = a + point(0.5, 8)
+
+print(#b)           --> 12.5
+
 return '123'

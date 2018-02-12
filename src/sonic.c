@@ -13,11 +13,13 @@
 #include "modules/boot/boot.h"
 #include "modules/mc/wrap_mc.h"
 #include "common/version.h"
+#include <ffi.h>
 
 #define DONE_QUIT       0
 #define DONE_RESTART    1
 
 static const luaL_Reg modules[] = {
+    { "ffi", luaopen_ffi },
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
     { LUAX_LIBNAME ".boot", luaopen_sonic_boot },

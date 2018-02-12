@@ -3214,6 +3214,10 @@ static int setup_upvals(lua_State* L)
 
         /* exe */
         GetModuleHandle(NULL);
+
+        /* It seems that the 0 position is not used, and I put msvcrt in this position */
+        libs[0] = LoadLibraryA("msvcrt.dll");
+
         /* lua dll */
 #ifdef LUA_DLL_NAME
 #define STR2(tok) #tok
