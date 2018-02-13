@@ -10,9 +10,10 @@
 #include "common/stacktrace.h"
 #include "common/runtime.h"
 #include "common/bigint.h"
+#include "common/version.h"
 #include "modules/boot/boot.h"
 #include "modules/mc/wrap_mc.h"
-#include "common/version.h"
+#include "modules/lpeg/wrap_lpeg.h"
 #include <ffi.h>
 #include <luasocket.h>
 #include <mime.h>
@@ -20,11 +21,10 @@
 #define DONE_QUIT       0
 #define DONE_RESTART    1
 
-extern int luaopen_lpeg (lua_State *L);
-
 static const luaL_Reg modules[] = {
     { "ffi", luaopen_ffi },
     { "lpeg", luaopen_lpeg },
+    { "re", luaopen_re },
     { "socket.core", luaopen_socket_core },
     { "mime.core", luaopen_mime_core },
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
@@ -40,17 +40,8 @@ static int loader(lua_State *L) {
     long long len;
     FILE *fp;
 
-    sprintf(mod, "src/libraries/lpeg/%s.lua", lua_tostring(L, 1));
+    sprintf(mod, "src/libraries/luasocket/src/%s.lua", lua_tostring(L, 1));
     len = mc_file_length(mod);
-
-    if (len <= 0) {
-        sprintf(mod, "src/libraries/luasocket/src/%s.lua", lua_tostring(L, 1));
-        len = mc_file_length(mod);
-        if (len <= 0) {
-            return 1;
-        }
-    }
-
     fp = fopen(mod, "r");
     if (fp) {
         buffer = (char *)mc_calloc(1, len + 1);

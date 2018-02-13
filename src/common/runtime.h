@@ -11,6 +11,9 @@
 #define __SONIC_RUNTIME_H__
 
 #include <mclib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #ifdef _MSC_VER
 # define strncasecmp    _strnicmp
@@ -22,10 +25,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-    #include <lua.h>
-    #include <lualib.h>
-    #include <lauxlib.h>
 
     #define LUAX_LIBNAME    "sonic"
 
