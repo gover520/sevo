@@ -14,6 +14,8 @@
 #include "modules/mc/wrap_mc.h"
 #include "common/version.h"
 #include <ffi.h>
+#include <luasocket.h>
+#include <mime.h>
 
 #define DONE_QUIT       0
 #define DONE_RESTART    1
@@ -23,6 +25,8 @@ extern int luaopen_lpeg (lua_State *L);
 static const luaL_Reg modules[] = {
     { "ffi", luaopen_ffi },
     { "lpeg", luaopen_lpeg },
+    { "socket.core", luaopen_socket_core },
+    { "mime.core", luaopen_mime_core },
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
     { LUAX_LIBNAME ".boot", luaopen_sonic_boot },
@@ -38,6 +42,15 @@ static int loader(lua_State *L) {
 
     sprintf(mod, "src/libraries/lpeg/%s.lua", lua_tostring(L, 1));
     len = mc_file_length(mod);
+
+    if (len <= 0) {
+        sprintf(mod, "src/libraries/luasocket/src/%s.lua", lua_tostring(L, 1));
+        len = mc_file_length(mod);
+        if (len <= 0) {
+            return 1;
+        }
+    }
+
     fp = fopen(mod, "r");
     if (fp) {
         buffer = (char *)mc_calloc(1, len + 1);

@@ -11,6 +11,11 @@ print(re.match("the number 423 is odd", "({%a+} / .)*"))    --> the    number   
 print(re.match("the number 423 is odd", "s <- {%d+} / . s"))--> 423
 print(re.gsub("hello World", "[aeiou]", "."))               --> h.ll. W.rld
 
+local socket = require("socket")
+local mime = require("mime")
+
+print("Socket Ver: " .. socket._VERSION .. ", Mime Ver: " .. mime._VERSION .. ".")
+
 function test_bigint()
     local a = sonic.int(0)
     print(type(a))
