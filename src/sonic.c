@@ -14,9 +14,8 @@
 #include "modules/boot/boot.h"
 #include "modules/mc/wrap_mc.h"
 #include "modules/lpeg/wrap_lpeg.h"
+#include "modules/socket/wrap_socket.h"
 #include <ffi.h>
-#include <luasocket.h>
-#include <mime.h>
 
 #define DONE_QUIT       0
 #define DONE_RESTART    1
@@ -27,38 +26,31 @@ static const luaL_Reg modules[] = {
     { "re", luaopen_re },
     { "socket.core", luaopen_socket_core },
     { "mime.core", luaopen_mime_core },
+    { "socket", luaopen_socket },
+    { "socket.ftp", luaopen_socket_ftp },
+    { "socket.http", luaopen_socket_http },
+    { "ltn12", luaopen_ltn12 },
+    { "mime", luaopen_mime },
+    { "socket.smtp", luaopen_socket_smtp },
+    { "socket.tp", luaopen_socket_tp },
+    { "socket.url", luaopen_socket_url },
+    { "socket.headers", luaopen_socket_headers },
+    { "mbox", luaopen_mbox },
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
     { LUAX_LIBNAME ".boot", luaopen_sonic_boot },
     { NULL, NULL }
 };
 
+/*
 static int loader(lua_State *L) {
-    /* Just a test code */
-    char mod[MC_MAX_PATH] = { 0 };
-    char *buffer = NULL;
-    long long len;
-    FILE *fp;
-
-    sprintf(mod, "src/libraries/luasocket/src/%s.lua", lua_tostring(L, 1));
-    len = mc_file_length(mod);
-    fp = fopen(mod, "r");
-    if (fp) {
-        buffer = (char *)mc_calloc(1, len + 1);
-        fread(buffer, len, 1, fp);
-
-        if (0 != luaL_loadbuffer(L, buffer, (size_t)strlen(buffer), lua_tostring(L, 1))) {
-            mc_free(buffer);
-            fclose(fp);
-            return luaL_error(L, lua_tostring(L, -1));
-        }
-
-        mc_free(buffer);
-        fclose(fp);
+    const char *name = lua_tostring(L, 1);
+    if (0 != luaL_loadbuffer(L, buffer, size, name)) {
+        return luaL_error(L, lua_tostring(L, -1));
     }
-
     return 1;
 }
+*/
 
 static int luaopen_sonic(lua_State * L) {
     const luaL_Reg *l;
@@ -98,7 +90,7 @@ static int luaopen_sonic(lua_State * L) {
         luaX_preload(L, l->name, l->func);
     }
 
-    luaX_register_searcher(L, loader);
+    //luaX_register_searcher(L, loader);
 
     luaX_require(L, LUAX_LIBNAME ".int");
     lua_pop(L, 1);  /* pop returned by require */
