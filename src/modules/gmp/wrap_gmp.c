@@ -1,5 +1,5 @@
 /*
- *  bigint.c
+ *  wrap_gmp.c
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -7,7 +7,7 @@
  *  license: Apache-2.0
  */
 
-#include "bigint.h"
+#include "wrap_gmp.h"
 
 static const char g_meta_int[] = { LUAX_LIBNAME ".meta.int" };
 
@@ -466,7 +466,7 @@ int luaopen_sonic_int(lua_State* L) {
         { "le",  bigint_le },
         { NULL, NULL }
     };
-    
+
     luaX_register_type(L, g_meta_int, meta_int);
     luaX_register_funcs(L, mod_int);
 

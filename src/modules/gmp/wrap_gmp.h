@@ -1,5 +1,5 @@
 /*
- *  bigint.h
+ *  wrap_gmp.h
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_BIGINT_H__
-#define __SONIC_BIGINT_H__
+#ifndef __SONIC_WRAP_GMP_H__
+#define __SONIC_WRAP_GMP_H__
 
 #include <mini-gmp.h>
 #include "runtime.h"
@@ -36,4 +36,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_BIGINT_H__ */
+#endif  /* __SONIC_WRAP_GMP_H__ */

@@ -7,12 +7,12 @@
  *  license: Apache-2.0
  */
 
-#include "common/stacktrace.h"
 #include "common/runtime.h"
-#include "common/bigint.h"
 #include "common/version.h"
-#include "modules/boot/boot.h"
+#include "common/stacktrace.h"
+#include "modules/gmp/wrap_gmp.h"
 #include "modules/mc/wrap_mc.h"
+#include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
 #include "modules/socket/wrap_socket.h"
 #include <ffi.h>
@@ -21,9 +21,12 @@
 #define DONE_RESTART    1
 
 static const luaL_Reg modules[] = {
+    /* ffi */
     { "ffi", luaopen_ffi },
+    /* lpeg */
     { "lpeg", luaopen_lpeg },
     { "re", luaopen_re },
+    /* socket */
     { "socket.core", luaopen_socket_core },
     { "mime.core", luaopen_mime_core },
     { "socket", luaopen_socket },
@@ -36,8 +39,11 @@ static const luaL_Reg modules[] = {
     { "socket.url", luaopen_socket_url },
     { "socket.headers", luaopen_socket_headers },
     { "mbox", luaopen_mbox },
+    /* gmp */
     { LUAX_LIBNAME ".int", luaopen_sonic_int },
+    /* mclib */
     { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
+    /* boot loader */
     { LUAX_LIBNAME ".boot", luaopen_sonic_boot },
     { NULL, NULL }
 };
