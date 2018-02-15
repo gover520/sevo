@@ -11,7 +11,7 @@
 #include <string.h>
 
 int luaopen_sonic_boot(lua_State* L) {
-    static const char test_file[] = { "test/server.lua" };
+    static const char test_file[] = { "test/servo.lua" };
 
     char *buffer = NULL;
     long long len = mc_file_length(test_file);
