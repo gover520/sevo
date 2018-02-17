@@ -1,9 +1,10 @@
-print('Sonic Version: ' .. sonic._version)
-print('Sonic Full Version: ' .. sonic._version_full)
-print('Sonic Major Version: ' .. sonic._version_major)
-print('Sonic Minor Version: ' .. sonic._version_minor)
-print('Sonic Patch Version: ' .. sonic._version_patch)
-print('Sonic OS: ' .. sonic._os)
+print('Sevo Version: ' .. sevo._VERSION)
+print('Sevo Version Num: ' .. sevo._VERSION_NUM)
+print('Sevo Version Full: ' .. sevo._VERSION_FULL)
+print('Sevo Version Major: ' .. sevo._VERSION_MAJOR)
+print('Sevo Version Minor: ' .. sevo._VERSION_MINOR)
+print('Sevo Version Patch: ' .. sevo._VERSION_PATCH)
+print('Sevo OS: ' .. sevo._OS)
 
 local re = require("re")
 print(re.find("the number 423 is odd", "[0-9]+"))           --> 12    14
@@ -17,12 +18,12 @@ local mime = require("mime")
 print("Socket Ver: " .. socket._VERSION .. ", Mime Ver: " .. mime._VERSION .. ".")
 
 function test_bigint()
-    local a = sonic.int(0)
+    local a = sevo.int(0)
     print(type(a))
     print(type(0))
     print(type(#a))
     print(a == 0)           -- false, Lua equality must be 2 same objects
-    print(a == sonic.int(0))   -- true
+    print(a == sevo.int(0))   -- true
     print(a:eq(0))          -- a == 0
     print(a:lt(0))          -- a < 1
     print(a:le(0))          -- a <= 1
@@ -30,20 +31,20 @@ function test_bigint()
     print(not a:lt(0))      -- a >= 0
 
     print(#a)
-    print(sonic.int(2) ^ 100)
+    print(sevo.int(2) ^ 100)
 
-    local f = sonic.int('1234567890987654321234567890987654321')
+    local f = sevo.int('1234567890987654321234567890987654321')
     print(f)
     print(-f)
     print(f:bnot())     -- Lua5.3: ~f
 
-    local e = sonic.int(-9)
+    local e = sevo.int(-9)
     print(e / 2)
     print(e % 2)
     print(e:div(2))     -- Lua5.3: e / 2 or e // 2
     print(e:bnot())     -- Lua5.3: ~e
 
-    local b = sonic.int(123456789)
+    local b = sevo.int(123456789)
     print(b:bnot())     -- Lua5.3: ~b
     print(f:band(b))    -- Lua5.3: f & b
     print(f:bor(b))     -- Lua5.3: f | b
@@ -63,7 +64,7 @@ function factorial(n)
         end
         return fact_iter(accum * step, step - 1)
     end
-    return fact_iter(sonic.int(1), n)
+    return fact_iter(sevo.int(1), n)
 end
 
 print(factorial(100))
@@ -75,7 +76,7 @@ function fibonacci(n)
         end
         return fib_iter(a + b, a, step - 1)
     end
-    return fib_iter(sonic.int(0), sonic.int(1), n)
+    return fib_iter(sevo.int(0), sevo.int(1), n)
 end
 
 print(fibonacci(100))
@@ -92,14 +93,14 @@ print(gcd(factorial(123), fibonacci(123)))
 function test_id()
     local ids = {}
 
-    sonic.id.init(1234)
+    sevo.id.init(1234)
 
     for i=1, 10 do
-        table.insert(ids, sonic.id.next())
+        table.insert(ids, sevo.id.next())
     end
 
     for i, v in ipairs(ids) do
-        local ts, nodeid, seq = sonic.id.split(v)
+        local ts, nodeid, seq = sevo.id.split(v)
         print('ID: ' .. v .. ', Timestamp: ' .. ts .. ', NodeID: ' .. nodeid .. ', Sequence: ' .. seq)
     end
 end
@@ -118,7 +119,7 @@ function test_timer()
             return timer_iter(t, timeout)
         end
     end
-    timer_iter(sonic.timer(3000), 3000)
+    timer_iter(sevo.timer(3000), 3000)
 end
 
 test_timer()

@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_BOOT_H__
-#define __SONIC_BOOT_H__
+#ifndef __BOOT_H__
+#define __BOOT_H__
 
 #include "common/runtime.h"
 
@@ -16,10 +16,10 @@
 extern "C" {
 #endif
 
-    int luaopen_sonic_boot(lua_State* L);
+    int luaopen_sevo_boot(lua_State* L);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __SONIC_BOOT_H__ */
+#endif  /* __BOOT_H__ */

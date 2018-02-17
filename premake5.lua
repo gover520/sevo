@@ -1,5 +1,5 @@
 -- A solution contains projects, and defines the available configurations
-solution ( "sonic" )
+solution ( "sevo" )
     configurations { "Release", "Debug" }
     platforms { "x64" }
 
@@ -7,14 +7,14 @@ solution ( "sonic" )
         os.rmdir(".vs")
         os.rmdir("bin")
         os.rmdir("objs")
-        os.remove("sonic.VC.db")
+        os.remove("sevo.VC.db")
     end
 
     -- A project defines one build target
-    project ( "sonic" )
+    project ( "sevo" )
         kind ( "ConsoleApp" )
         language ( "C" )
-        targetname ("sonic")
+        targetname ("sevo")
         includedirs { "./src", "./src/libraries/mclib",
                         "./src/libraries/lua/src",
                         "./src/libraries/mini-gmp",

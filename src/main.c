@@ -1,5 +1,5 @@
 /*
- *  sonic.c
+ *  main.c
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -40,11 +40,11 @@ static const luaL_Reg modules[] = {
     { "socket.headers", luaopen_socket_headers },
     { "mbox", luaopen_mbox },
     /* gmp */
-    { LUAX_LIBNAME ".int", luaopen_sonic_int },
+    { LUAX_LIBNAME ".int", luaopen_sevo_int },
     /* mclib */
-    { LUAX_LIBNAME ".mc", luaopen_sonic_mc },
+    { LUAX_LIBNAME ".mc", luaopen_sevo_mc },
     /* boot loader */
-    { LUAX_LIBNAME ".boot", luaopen_sonic_boot },
+    { LUAX_LIBNAME ".boot", luaopen_sevo_boot },
     { NULL, NULL }
 };
 
@@ -58,27 +58,30 @@ static int loader(lua_State *L) {
 }
 */
 
-static int luaopen_sonic(lua_State * L) {
+static int luaopen_sevo(lua_State * L) {
     const luaL_Reg *l;
 
     lua_newtable(L);
     lua_pushvalue(L, -1);
     lua_setglobal(L, LUAX_LIBNAME);
 
-    lua_pushinteger(L, SONIC_VERSION_NUM);
-    lua_setfield(L, -2, "_version");
+    lua_pushstring(L, VERSION);
+    lua_setfield(L, -2, "_VERSION");
 
-    lua_pushinteger(L, SONIC_VERSION_FULL);
-    lua_setfield(L, -2, "_version_full");
+    lua_pushinteger(L, VERSION_NUM);
+    lua_setfield(L, -2, "_VERSION_NUM");
 
-    lua_pushinteger(L, SONIC_MAJOR);
-    lua_setfield(L, -2, "_version_major");
+    lua_pushinteger(L, VERSION_FULL);
+    lua_setfield(L, -2, "_VERSION_FULL");
 
-    lua_pushinteger(L, SONIC_MINOR);
-    lua_setfield(L, -2, "_version_minor");
+    lua_pushinteger(L, VERSION_MAJOR);
+    lua_setfield(L, -2, "_VERSION_MAJOR");
 
-    lua_pushinteger(L, SONIC_PATCH);
-    lua_setfield(L, -2, "_version_patch");
+    lua_pushinteger(L, VERSION_MINOR);
+    lua_setfield(L, -2, "_VERSION_MINOR");
+
+    lua_pushinteger(L, VERSION_PATCH);
+    lua_setfield(L, -2, "_VERSION_PATCH");
 
 #if defined(_WIN32)
     lua_pushstring(L, "Windows");
@@ -89,7 +92,7 @@ static int luaopen_sonic(lua_State * L) {
 #else
     lua_pushstring(L, "Unknown");
 #endif
-    lua_setfield(L, -2, "_os");
+    lua_setfield(L, -2, "_OS");
 
     /* Preload module loaders */
     for (l = modules; NULL != l->name; ++l) {
@@ -109,11 +112,11 @@ static int luaopen_sonic(lua_State * L) {
     return 0;
 }
 
-static int sonic_run(int argc, char *argv[], int *retval) {
+static int sevo_run(int argc, char *argv[], int *retval) {
     lua_State *L;
 
     if ((argc > 1) && (0 == strcasecmp("--version", argv[1]))) {
-        printf("Sonic %s\n", sonic_version());
+        printf("Sevo %s\n", VERSION);
         *retval = 0;
         return DONE_QUIT;
     }
@@ -123,7 +126,7 @@ static int sonic_run(int argc, char *argv[], int *retval) {
     luaL_checkversion(L);
     luaL_openlibs(L);
 
-    luaX_preload(L, LUAX_LIBNAME, luaopen_sonic);
+    luaX_preload(L, LUAX_LIBNAME, luaopen_sevo);
 
     luaX_require(L, LUAX_LIBNAME);
     lua_pop(L, 1);
@@ -144,7 +147,7 @@ int main(int argc, char *argv[]) {
     install_stacktrace(NULL);
 
     do {
-        done = sonic_run(argc, argv, &retval);
+        done = sevo_run(argc, argv, &retval);
     } while (DONE_QUIT != done);
 
     mc_destroy();

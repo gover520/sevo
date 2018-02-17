@@ -419,7 +419,7 @@ static int bigint_concat(lua_State* L) {
     return 1;
 }
 
-int luaopen_sonic_int(lua_State* L) {
+int luaopen_sevo_int(lua_State* L) {
     luaL_Reg mod_int[] = {
         { "int", bigint_new },
         { NULL, NULL }

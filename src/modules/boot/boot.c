@@ -10,7 +10,7 @@
 #include "boot.h"
 #include <string.h>
 
-int luaopen_sonic_boot(lua_State* L) {
+int luaopen_sevo_boot(lua_State* L) {
     static const char test_file[] = { "test/servo.lua" };
 
     char *buffer = NULL;

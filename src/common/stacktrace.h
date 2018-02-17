@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_STACKTRACE_H__
-#define __SONIC_STACKTRACE_H__
+#ifndef __STACKTRACE_H__
+#define __STACKTRACE_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,4 +20,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_STACKTRACE_H__ */
+#endif  /* __STACKTRACE_H__ */

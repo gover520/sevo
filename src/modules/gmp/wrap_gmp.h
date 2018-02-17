@@ -7,11 +7,11 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_WRAP_GMP_H__
-#define __SONIC_WRAP_GMP_H__
+#ifndef __WRAP_GMP_H__
+#define __WRAP_GMP_H__
 
 #include <mini-gmp.h>
-#include "runtime.h"
+#include "common/runtime.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,10 +30,10 @@ extern "C" {
     int luaX_checkmpz(lua_State *L, int index, mpz_t r);
 
     bigint_t *new_bigint(lua_State *L);
-    int luaopen_sonic_int(lua_State* L);
+    int luaopen_sevo_int(lua_State* L);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __SONIC_WRAP_GMP_H__ */
+#endif  /* __WRAP_GMP_H__ */

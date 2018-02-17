@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_WRAP_LPEG_H__
-#define __SONIC_WRAP_LPEG_H__
+#ifndef __WRAP_LPEG_H__
+#define __WRAP_LPEG_H__
 
 #include "common/runtime.h"
 
@@ -23,4 +23,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_WRAP_LPEG_H__ */
+#endif  /* __WRAP_LPEG_H__ */

@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_RUNTIME_H__
-#define __SONIC_RUNTIME_H__
+#ifndef __RUNTIME_H__
+#define __RUNTIME_H__
 
 #include <mclib.h>
 #include <lua.h>
@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-    #define LUAX_LIBNAME    "sonic"
+    #define LUAX_LIBNAME    "sevo"
 
     int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions);
     int luaX_register_type(lua_State *L, const char *metaname, const luaL_Reg *functions);
@@ -41,4 +41,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_RUNTIME_H__ */
+#endif  /* __RUNTIME_H__ */

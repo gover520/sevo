@@ -7,23 +7,25 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_VERSION_H__
-#define __SONIC_VERSION_H__
+#ifndef __VERSION_H__
+#define __VERSION_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    #define SONIC_MAJOR         0
-    #define SONIC_MINOR         1
-    #define SONIC_PATCH         0
-    #define SONIC_VERSION_NUM   ((SONIC_MAJOR * 100) + SONIC_MINOR)
-    #define SONIC_VERSION_FULL  ((SONIC_VERSION_NUM * 1000) + SONIC_PATCH)
+    #define __STR2(x)       #x
+    #define __STR(x)        __STR2(x)
 
-    const char *sonic_version();
+    #define VERSION_MAJOR   0
+    #define VERSION_MINOR   1
+    #define VERSION_PATCH   0
+    #define VERSION         (__STR(VERSION_MAJOR) "." __STR(VERSION_MINOR) "." __STR(VERSION_PATCH))
+    #define VERSION_NUM     ((VERSION_MAJOR * 100) + VERSION_MINOR)
+    #define VERSION_FULL    ((VERSION_NUM * 1000) + VERSION_PATCH)
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __SONIC_VERSION_H__ */
+#endif  /* __VERSION_H__ */

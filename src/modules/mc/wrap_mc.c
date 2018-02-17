@@ -8,7 +8,7 @@
  */
 
 #include "wrap_mc.h"
-#include "common/bigint.h"
+#include "modules/gmp/wrap_gmp.h"
 
 static mc_id_t g_idgen;
 static unsigned long long ID_EPOCH = 1483228800000ULL;  /* 2017-01-01 00:00:00 (UTC) */
@@ -100,7 +100,7 @@ static int mcl_timer_new(lua_State * L) {
     return 1;
 }
 
-int luaopen_sonic_mc(lua_State* L) {
+int luaopen_sevo_mc(lua_State* L) {
     luaL_Reg mod_id[] = {
         { "init", mcl_id_init },
         { "next", mcl_id_next },

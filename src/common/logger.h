@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_LOGGER_H__
-#define __SONIC_LOGGER_H__
+#ifndef __LOGGER_H__
+#define __LOGGER_H__
 
 #include <stdarg.h>
 
@@ -42,4 +42,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_LOGGER_H__ */
+#endif  /* __LOGGER_H__ */

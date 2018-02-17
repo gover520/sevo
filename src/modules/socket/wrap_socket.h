@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __SONIC_WRAP_SOCKET_H__
-#define __SONIC_WRAP_SOCKET_H__
+#ifndef __WRAP_SOCKET_H__
+#define __WRAP_SOCKET_H__
 
 #include "common/runtime.h"
 #include <luasocket.h>
@@ -33,4 +33,4 @@ extern "C" {
 };
 #endif
 
-#endif  /* __SONIC_WRAP_SOCKET_H__ */
+#endif  /* __WRAP_SOCKET_H__ */
