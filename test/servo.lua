@@ -1,3 +1,9 @@
+local sevo = require('sevo')
+require('sevo.int')
+require('sevo.mc')
+
+print(sevo)
+
 print('Sevo Version: ' .. sevo._VERSION)
 print('Sevo Version Num: ' .. sevo._VERSION_NUM)
 print('Sevo Version Full: ' .. sevo._VERSION_FULL)

@@ -8,11 +8,12 @@
  */
 
 #include "runtime.h"
+#include "version.h"
 
 int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions) {
     const luaL_Reg *l;
 
-    lua_getglobal(L, LUAX_LIBNAME);
+    lua_getglobal(L, CODE_NAME);
     lua_newtable(L);
 
     for (l = functions; NULL != l->name; ++l) {
@@ -48,7 +49,7 @@ int luaX_register_type(lua_State *L, const char *metaname, const luaL_Reg *funct
 int luaX_register_funcs(lua_State *L, const luaL_Reg *functions) {
     const luaL_Reg *l;
 
-    lua_getglobal(L, LUAX_LIBNAME);
+    lua_getglobal(L, CODE_NAME);
 
     for (l = functions; NULL != l->name; ++l) {
         lua_pushcfunction(L, l->func);

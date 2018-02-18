@@ -8,8 +8,9 @@
  */
 
 #include "wrap_gmp.h"
+#include "common/version.h"
 
-static const char g_meta_int[] = { LUAX_LIBNAME ".meta.int" };
+static const char g_meta_int[] = { CODE_NAME ".meta.int" };
 
 long long mpz_get_ll(const mpz_t u) {
     long long r = 0;

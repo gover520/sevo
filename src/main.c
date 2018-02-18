@@ -10,11 +10,13 @@
 #include "common/runtime.h"
 #include "common/version.h"
 #include "common/stacktrace.h"
+#include "common/vfs.h"
 #include "modules/gmp/wrap_gmp.h"
 #include "modules/mc/wrap_mc.h"
 #include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
 #include "modules/socket/wrap_socket.h"
+#include "modules/vfs/wrap_vfs.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -40,30 +42,22 @@ static const luaL_Reg modules[] = {
     { "socket.headers", luaopen_socket_headers },
     { "mbox", luaopen_mbox },
     /* gmp */
-    { LUAX_LIBNAME ".int", luaopen_sevo_int },
+    { CODE_NAME ".int", luaopen_sevo_int },
     /* mclib */
-    { LUAX_LIBNAME ".mc", luaopen_sevo_mc },
+    { CODE_NAME ".mc", luaopen_sevo_mc },
+    /* vfs */
+    { CODE_NAME ".vfs", luaopen_sevo_vfs },
     /* boot loader */
-    { LUAX_LIBNAME ".boot", luaopen_sevo_boot },
+    { CODE_NAME ".boot", luaopen_sevo_boot },
     { NULL, NULL }
 };
-
-/*
-static int loader(lua_State *L) {
-    const char *name = lua_tostring(L, 1);
-    if (0 != luaL_loadbuffer(L, buffer, size, name)) {
-        return luaL_error(L, lua_tostring(L, -1));
-    }
-    return 1;
-}
-*/
 
 static int luaopen_sevo(lua_State * L) {
     const luaL_Reg *l;
 
     lua_newtable(L);
     lua_pushvalue(L, -1);
-    lua_setglobal(L, LUAX_LIBNAME);
+    lua_setglobal(L, CODE_NAME);
 
     lua_pushstring(L, VERSION);
     lua_setfield(L, -2, "_VERSION");
@@ -99,17 +93,7 @@ static int luaopen_sevo(lua_State * L) {
         luaX_preload(L, l->name, l->func);
     }
 
-    //luaX_register_searcher(L, loader);
-
-    luaX_require(L, LUAX_LIBNAME ".int");
-    lua_pop(L, 1);  /* pop returned by require */
-
-    luaX_require(L, LUAX_LIBNAME ".mc");
-    lua_pop(L, 1);  /* pop returned by require */
-
-    lua_pop(L, 1);  /* pop table */
-
-    return 0;
+    return 1;
 }
 
 static int sevo_run(int argc, char *argv[], int *retval) {
@@ -121,27 +105,31 @@ static int sevo_run(int argc, char *argv[], int *retval) {
         return DONE_QUIT;
     }
 
+    vfs_init(argv[0]);
+
     L = luaL_newstate();
 
     luaL_checkversion(L);
     luaL_openlibs(L);
 
-    luaX_preload(L, LUAX_LIBNAME, luaopen_sevo);
+    luaX_preload(L, CODE_NAME, luaopen_sevo);
 
-    luaX_require(L, LUAX_LIBNAME);
+    luaX_require(L, CODE_NAME);
     lua_pop(L, 1);
 
-    luaX_require(L, LUAX_LIBNAME ".boot");
+    luaX_require(L, CODE_NAME ".boot");
     lua_pop(L, 1);
 
     lua_close(L);
+
+    vfs_deinit();
 
     *retval = 0;
     return DONE_QUIT;
 }
 
 int main(int argc, char *argv[]) {
-    int done, retval = 0;
+    int done, retval = -1;
 
     mc_init();
     install_stacktrace(NULL);

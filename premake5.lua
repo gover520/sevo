@@ -21,7 +21,8 @@ solution ( "sevo" )
                         "./src/libraries/luaffifb",
                         "./src/libraries/luaffifb/dynasm",
                         "./src/libraries/lpeg",
-                        "./src/libraries/luasocket/src", }
+                        "./src/libraries/luasocket/src",
+                        "./src/libraries/physfs/src", }
         --libdirs { "" }
         --links { "" }
         files { "./src/*.h", "./src/*.c",
@@ -35,12 +36,19 @@ solution ( "sevo" )
                 "./src/libraries/lpeg/*.h",
                 "./src/libraries/lpeg/*.c",
                 "./src/libraries/luasocket/src/*.h",
-                "./src/libraries/luasocket/src/*.c", }
+                "./src/libraries/luasocket/src/*.c",
+                "./src/libraries/physfs/src/*.h",
+                "./src/libraries/physfs/src/*.c", }
         excludes { "./src/libraries/lua/src/lua.c",
                     "./src/libraries/lua/src/luac.c",
                     "./src/libraries/luaffifb/test.c",
                     "./src/libraries/luasocket/src/serial.c" }
-        defines { "_UNICODE" }
+        defines { "_UNICODE",
+                    "PHYSFS_SUPPORTS_GRP=0", "PHYSFS_SUPPORTS_HOG=0",
+                    "PHYSFS_SUPPORTS_MVL=0", "PHYSFS_SUPPORTS_WAD=0",
+                    "PHYSFS_SUPPORTS_QPAK=0", "PHYSFS_SUPPORTS_SLB=0",
+                    "PHYSFS_SUPPORTS_ISO9660=0", "PHYSFS_SUPPORTS_VDF=0",
+                    "PHYSFS_SUPPORTS_7Z=0", "PHYSFS_NO_CDROM_SUPPORT=1", }
         flags { "StaticRuntime", --[["Unicode"]] }
 
         configuration ( "Release" )
@@ -69,8 +77,9 @@ solution ( "sevo" )
             linkoptions { "-rdynamic" }
 
         configuration { "gmake", "macosx" }
+            files { "./src/libraries/physfs/src/*.m" }
             defines { "__APPLE__", "__MACH__", "__MRC__", "macintosh", }
-            links { "CoreFoundation.framework", "IOKit.framework" }
+            links { "Foundation.framework", "IOKit.framework" }
 
         configuration { "gmake", "linux" }
             defines { "__linux__" }

@@ -26,8 +26,6 @@
 extern "C" {
 #endif
 
-    #define LUAX_LIBNAME    "sevo"
-
     int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions);
     int luaX_register_type(lua_State *L, const char *metaname, const luaL_Reg *functions);
     int luaX_register_funcs(lua_State *L, const luaL_Reg *functions);

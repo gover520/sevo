@@ -24,6 +24,8 @@ extern "C" {
     #define VERSION_NUM     ((VERSION_MAJOR * 100) + VERSION_MINOR)
     #define VERSION_FULL    ((VERSION_NUM * 1000) + VERSION_PATCH)
 
+    #define CODE_NAME       "sevo"
+
 #ifdef __cplusplus
 };
 #endif

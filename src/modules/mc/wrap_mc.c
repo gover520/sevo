@@ -9,6 +9,7 @@
 
 #include "wrap_mc.h"
 #include "modules/gmp/wrap_gmp.h"
+#include "common/version.h"
 
 static mc_id_t g_idgen;
 static unsigned long long ID_EPOCH = 1483228800000ULL;  /* 2017-01-01 00:00:00 (UTC) */
@@ -63,7 +64,7 @@ static int mcl_id_split(lua_State * L) {
     return 3;
 }
 
-static const char g_meta_timer[] = { LUAX_LIBNAME "meta.timer" };
+static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
 
 static mc_timer_t *luaX_checktimer(lua_State *L, int index) {
     static const char errmsg[] = { "Invalid operand. Expected 'timer'" };
