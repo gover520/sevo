@@ -1,5 +1,5 @@
 /*
- *  stacktrace.h
+ *  wrap_logger.h
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -7,17 +7,19 @@
  *  license: Apache-2.0
  */
 
-#ifndef __STACKTRACE_H__
-#define __STACKTRACE_H__
+#ifndef __WRAP_LOGGER_H__
+#define __WRAP_LOGGER_H__
+
+#include "common/runtime.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    int install_stacktrace(void);
+    int luaopen_sevo_logger(lua_State* L);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __STACKTRACE_H__ */
+#endif  /* __WRAP_LOGGER_H__ */

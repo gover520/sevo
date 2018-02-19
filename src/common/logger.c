@@ -11,46 +11,14 @@
 #include <stdio.h>
 #include "logger.h"
 
-static FILE *LG_STREAM = NULL;
 static int LG_LEVEL = LGL_MIN;
 
-#define LG_MAXLEN               1024
-#define LG_FD                   (LG_STREAM ? LG_STREAM : stdout)
-
-#define LG_TIME_STR(b, s, u)    do { time_t t = (s); int ms = (int)((u) * 0.001);  \
-                                    int o = (int)strftime((b), sizeof(b), "%Y-%m-%d %H:%M:%S.", localtime(&t));  \
-                                    snprintf((b) + o, sizeof(b) - o, "%03d", ms); } while (0)
-
-void logger_set(int level, const char *filename) {
-    FILE *lg_steam = NULL;
-
+int logger_level(int level) {
+    int old = LG_LEVEL;
     if ((level >= LGL_MIN) && (level <= LGL_MAX)) {
         LG_LEVEL = level;
     }
-
-    logger_flush();
-
-    if (LGL_DISABLE == LG_LEVEL) {
-        return;
-    }
-
-    if (filename) {
-        lg_steam = fopen(filename, "a");
-    }
-
-    if (lg_steam != LG_STREAM) {
-        FILE *tmp_stream = LG_STREAM;
-
-        LG_STREAM = lg_steam;
-
-        if (tmp_stream) {
-            fclose(tmp_stream);
-        }
-    }
-}
-
-void logger_flush(void) {
-    fflush(LG_FD);
+    return old;
 }
 
 int logger(int type, int level, const char *fmt, ...) {
@@ -69,8 +37,9 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     static const char *p[] = { " C ", "LUA" };
 
     struct timeval tv;
-    char tm[64];
-    char msg[LG_MAXLEN];
+    char msg[1024];
+    char tm[20];
+    int ms;
 
     if ((type < LGT_MIN) || (type >= LGT_MAX)) {
         return -1;
@@ -81,13 +50,14 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     }
 
     if (level < LG_LEVEL) {
-        return -1;
+        return 0;
     }
-
-    gettimeofday(&tv, NULL);
-    LG_TIME_STR(tm, tv.tv_sec, tv.tv_usec);
 
     vsnprintf(msg, sizeof(msg), fmt, argv);
 
-    return fprintf(LG_FD, "[%s] %s %c %s\n", p[type], tm, c[level], msg);
+    gettimeofday(&tv, NULL);
+    strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime(&tv.tv_sec));
+    ms = (int)(tv.tv_usec * 0.001f);
+
+    return fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
 }

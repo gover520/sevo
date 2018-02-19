@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "stacktrace.h"
+#include "logger.h"
 
 #ifdef _WIN32
 # include <Windows.h>
@@ -33,10 +34,8 @@ typedef BOOL (WINAPI *pfn_SymGetLineFromAddr64)(HANDLE, DWORD64, PDWORD, PIMAGEH
 # include <unistd.h>
 #endif
 
-static char g_outfile[MC_MAX_PATH] = { 0 };
-
 #ifdef _WIN32
-static void stackwalker(FILE *fp, CONTEXT *context) {
+static void stackwalker(CONTEXT *context) {
     STACKFRAME64 s = { 0 };
     CONTEXT c = { 0 };
     DWORD imageType, symOptions, dis = 0;
@@ -79,7 +78,7 @@ static void stackwalker(FILE *fp, CONTEXT *context) {
     }
 
     if (!mod_dbghelp) {
-        fprintf(fp, "Error while loading dbghelp.dll\n");
+        LG_ERR("Error while loading dbghelp.dll");
         return;
     }
 
@@ -93,7 +92,7 @@ static void stackwalker(FILE *fp, CONTEXT *context) {
 
     if (!pfSymInitialize || !pfSymGetOptions || !pfSymSetOptions || !pfStackWalk64 
         || !pfSymGetSymFromAddr64 || !pfSymGetLineFromAddr64 || !pfSymCleanup) {
-        fprintf(fp, "Error while initializing dbghelp.dll\n");
+        LG_ERR("Error while initializing dbghelp.dll");
         return;
     }
 
@@ -105,7 +104,7 @@ static void stackwalker(FILE *fp, CONTEXT *context) {
     pfSymSetOptions(symOptions);
 
     if (!pfSymInitialize(hProcess, NULL, TRUE)) {
-        fprintf(fp, "SymInitialize GetLastError: %u\n", GetLastError());
+        LG_ERR("SymInitialize GetLastError: %u", GetLastError());
         return;
     }
 
@@ -155,21 +154,21 @@ static void stackwalker(FILE *fp, CONTEXT *context) {
 
     for (frameCount = 0; ; ++frameCount) {
         if (!pfStackWalk64(imageType, hProcess, hThread, &s, &c, NULL, NULL, NULL, NULL)) {
-            fprintf(fp, "Error: StackWalk64, GetLastError: %u (Address: %p)\n", GetLastError(), (LPVOID)s.AddrPC.Offset);
+            LG_ERR("Error: StackWalk64, GetLastError: %u (Address: %p)", GetLastError(), (LPVOID)s.AddrPC.Offset);
             break;
         }
 
         if (!pfSymGetSymFromAddr64(hProcess, s.AddrPC.Offset, &dis64, pSym)) {
-            fprintf(fp, "Error: SymGetSymFromAddr64, GetLastError: %u (Address: %p)\n", GetLastError(), (LPVOID)s.AddrPC.Offset);
+            LG_ERR("Error: SymGetSymFromAddr64, GetLastError: %u (Address: %p)", GetLastError(), (LPVOID)s.AddrPC.Offset);
             continue;
         }
         strcpy(symbolName, pSym->Name);
 
         if (!pfSymGetLineFromAddr64(hProcess, s.AddrPC.Offset, &dis, &line)) {
-            fprintf(fp, "%s Error: SymGetLineFromAddr64, GetLastError: %u (Address: %p)\n", symbolName, GetLastError(), (LPVOID)s.AddrPC.Offset);
+            LG_ERR("%s Error: SymGetLineFromAddr64, GetLastError: %u (Address: %p)", symbolName, GetLastError(), (LPVOID)s.AddrPC.Offset);
             continue;
         }
-        fprintf(fp, "%d -> %s (%s, %d)\n", ++count, symbolName, line.FileName, line.LineNumber);
+        LG_ERR("%d -> %s (%s, %d)", ++count, symbolName, line.FileName, line.LineNumber);
 
         if (0 == s.AddrReturn.Offset) {
             break;
@@ -180,27 +179,16 @@ static void stackwalker(FILE *fp, CONTEXT *context) {
     mc_dl_close(mod_dbghelp);
 }
 
-static void output_stacktrace(FILE *fp) {
-    stackwalker(fp, NULL);
+static void output_stacktrace() {
+    stackwalker(NULL);
 }
 
 static LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo) {
-    FILE *fp;
-
-    if (*g_outfile) {
-        fp = fopen(g_outfile, "w");
-        if (fp) {
-            stackwalker(fp, ExceptionInfo->ContextRecord);
-            fclose(fp);
-        }
-    } else {
-        stackwalker(stderr, ExceptionInfo->ContextRecord);
-    }
-
+    stackwalker(ExceptionInfo->ContextRecord);
     return EXCEPTION_EXECUTE_HANDLER;
 }
 #else
-static void output_stacktrace(FILE *fp) {
+static void output_stacktrace() {
     void *arr[1024] = { NULL };
     size_t size, i;
     char **strings;
@@ -210,7 +198,7 @@ static void output_stacktrace(FILE *fp) {
 
     if (strings) {
         for (i = 0; i < size; ++i) {
-            fprintf(fp, "%d -> %s\n", (int)(size - i), strings[i]);
+            LG_ERR("%d -> %s", (int)(size - i), strings[i]);
         }
         free(strings);
     }
@@ -218,22 +206,11 @@ static void output_stacktrace(FILE *fp) {
 #endif
 
 static void signal_handler(int sig) {
-    FILE *fp;
-
-    if (*g_outfile) {
-        fp = fopen(g_outfile, "w");
-        if (fp) {
-            output_stacktrace(fp);
-            fclose(fp);
-        }
-    } else {
-        output_stacktrace(stderr);
-    }
-
+    output_stacktrace();
     exit(EXIT_SUCCESS);
 }
 
-int install_stacktrace(const char *outfile) {
+int install_stacktrace(void) {
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 
@@ -243,10 +220,6 @@ int install_stacktrace(const char *outfile) {
     signal(SIGFPE, signal_handler);     /* divide by 0 */
     signal(SIGSEGV, signal_handler);    /* segmentation fault */
     signal(SIGABRT, signal_handler);
-
-    if (outfile) {
-        strncpy(g_outfile, outfile, sizeof(g_outfile));
-    }
 
     return 0;
 }

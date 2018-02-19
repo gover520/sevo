@@ -18,6 +18,7 @@
 #include "modules/lpeg/wrap_lpeg.h"
 #include "modules/socket/wrap_socket.h"
 #include "modules/vfs/wrap_vfs.h"
+#include "modules/logger/wrap_logger.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -49,6 +50,8 @@ static int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".mc", luaopen_sevo_mc },
         /* vfs */
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
+        /* logger */
+        { CODE_NAME ".logger", luaopen_sevo_logger },
         /* boot loader */
         { CODE_NAME ".boot", luaopen_sevo_boot },
         { NULL, NULL }
@@ -146,7 +149,7 @@ int main(int argc, char *argv[]) {
     int done, retval = -1;
 
     mc_init();
-    install_stacktrace(NULL);
+    install_stacktrace();
 
     do {
         done = sevo_run(argc, argv, &retval);
