@@ -17,26 +17,33 @@ extern "C" {
 #endif
 
     enum {
-        LG_CURRENT = -1,
-        LG_MIN,
-        LG_DEBUG = LG_MIN,
-        LG_INFO,
-        LG_WARN,
-        LG_ERROR,
-        LG_MAX,
-        LG_DISABLE = LG_MAX
+        LGL_CURRENT = -1,
+        LGL_MIN,
+        LGL_DEBUG = LGL_MIN,
+        LGL_INFO,
+        LGL_WARN,
+        LGL_ERROR,
+        LGL_MAX,
+        LGL_DISABLE = LGL_MAX
+    };
+
+    enum {
+        LGT_MIN,
+        LGT_C = LGT_MIN,
+        LGT_LUA,
+        LGT_MAX
     };
 
     void logger_set(int level, const char *filename);
     void logger_flush(void);
 
-    int logger(int level, const char *fmt, ...);
-    int vlogger(int level, const char *fmt, va_list argv);
+    int logger(int type, int level, const char *fmt, ...);
+    int vlogger(int type, int level, const char *fmt, va_list argv);
 
-    #define LG_DBG(fmt, ...)    logger(LG_DEBUG, fmt, ##__VA_ARGS__)
-    #define LG_INF(fmt, ...)    logger(LG_INFO, fmt, ##__VA_ARGS__)
-    #define LG_WRN(fmt, ...)    logger(LG_WARN, fmt, ##__VA_ARGS__)
-    #define LG_ERR(fmt, ...)    logger(LG_ERROR, fmt, ##__VA_ARGS__)
+    #define LG_DBG(fmt, ...)    logger(LGT_C, LGL_DEBUG, fmt, ##__VA_ARGS__)
+    #define LG_INF(fmt, ...)    logger(LGT_C, LGL_INFO,  fmt, ##__VA_ARGS__)
+    #define LG_WRN(fmt, ...)    logger(LGT_C, LGL_WARN,  fmt, ##__VA_ARGS__)
+    #define LG_ERR(fmt, ...)    logger(LGT_C, LGL_ERROR, fmt, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 };

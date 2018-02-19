@@ -8,11 +8,12 @@
  */
 
 #include "wrap_mc.h"
-#include "modules/gmp/wrap_gmp.h"
 #include "common/version.h"
+#include "modules/gmp/wrap_gmp.h"
 
 static mc_id_t g_idgen;
 static unsigned long long ID_EPOCH = 1483228800000ULL;  /* 2017-01-01 00:00:00 (UTC) */
+static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
 
 static int mcl_id_init(lua_State * L) {
     unsigned long long epoch = ID_EPOCH;
@@ -20,7 +21,7 @@ static int mcl_id_init(lua_State * L) {
     mpz_t ep;
 
     top = lua_gettop(L);
-    nodeid = luaX_checkint(L, 1);
+    nodeid = luaL_checkinteger(L, 1);
 
     if (top > 1) {
         mpz_init(ep);
@@ -64,8 +65,6 @@ static int mcl_id_split(lua_State * L) {
     return 3;
 }
 
-static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
-
 static mc_timer_t *luaX_checktimer(lua_State *L, int index) {
     static const char errmsg[] = { "Invalid operand. Expected 'timer'" };
 
@@ -90,14 +89,9 @@ static int mcl_timer_expired(lua_State * L) {
 }
 
 static int mcl_timer_new(lua_State * L) {
-    int top = lua_gettop(L);
     mc_timer_t *tmr = (mc_timer_t *)luaX_newuserdata(L, g_meta_timer, sizeof(mc_timer_t));
-
-    if (top > 1) {
-        mc_timer_set(tmr, NULL, (unsigned int)luaL_checkinteger(L, 1));
-    } else {
-        mc_timer_set(tmr, NULL, 0);
-    }
+    unsigned int n = (unsigned int)luaL_optinteger(L, 1, 0);
+    mc_timer_set(tmr, NULL, n);
     return 1;
 }
 

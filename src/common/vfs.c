@@ -7,18 +7,13 @@
  *  license: Apache-2.0
  */
 
-#include "vfs.h"
-#include "version.h"
-#include <mclib.h>
 #include <physfs.h>
 #include <stdio.h>
+#include "vfs.h"
+#include "version.h"
 
 static char g_base_dir[MC_MAX_PATH] = { 0 };
 static char g_ident_dir[MC_MAX_PATH] = { 0 };
-
-struct vfile_t {
-    PHYSFS_File *file;
-};
 
 int vfs_init(const char *argv0) {
     if (!PHYSFS_init(argv0)) {
@@ -35,8 +30,6 @@ int vfs_init(const char *argv0) {
     }
 
     vfs_identity("", 1);
-
-    printf("Base: %s\n", PHYSFS_getBaseDir());
 
     return 0;
 }
@@ -180,9 +173,46 @@ void vfs_freelist(void *lv) {
     PHYSFS_freeList(lv);
 }
 
-vfile_t *vfopen(const char *filename, const char *mode) {
-    PHYSFS_File *handle = NULL;
+mc_sstr_t vfs_read(const char *file, int size) {
     vfile_t *fp;
+    mc_sstr_t data;
+
+    fp = vfopen(NULL, file, "r");
+
+    if (!fp) {
+        return NULL;
+    }
+
+    if (size <= 0) {
+        size = (int)vfsize(fp);
+    }
+
+    data = mc_sstr_from_buffer(NULL, size);
+    size = vfread(fp, data, size);
+
+    mc_sstr_range(data, 0, size);
+    vfclose(fp);
+
+    return data;
+}
+
+int vfs_write(const char *file, const void *data, int size) {
+    vfile_t *fp;
+
+    fp = vfopen(NULL, file, "w");
+
+    if (!fp) {
+        return -1;
+    }
+
+    vfwrite(fp, data, size);
+    vfclose(fp);
+
+    return 0;
+}
+
+vfile_t *vfopen(vfile_t *fp, const char *filename, const char *mode) {
+    PHYSFS_File *handle = NULL;
 
     if (!PHYSFS_isInit()) {
         return NULL;
@@ -208,15 +238,27 @@ vfile_t *vfopen(const char *filename, const char *mode) {
         return NULL;
     }
 
-    fp = (vfile_t *)mc_malloc(sizeof(struct vfile_t));
+    if (!fp) {
+        fp = (vfile_t *)mc_malloc(sizeof(struct vfile_t));
+        fp->need_free = 1;
+    } else {
+        fp->need_free = 0;
+    }
+
     fp->file = handle;
 
     return fp;
 }
 
 void vfclose(vfile_t *fp) {
-    PHYSFS_close(fp->file);
-    mc_free(fp);
+    if (fp->file) {
+        PHYSFS_close(fp->file);
+        fp->file = NULL;
+    }
+
+    if (fp->need_free) {
+        mc_free(fp);
+    }
 }
 
 long long vfsize(vfile_t *fp) {

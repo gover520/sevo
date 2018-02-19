@@ -12,6 +12,7 @@ local sevo = require('sevo')
 local function sevo.init()
     require('sevo.int')
     require('sevo.mc')
+    require('sevo.vfs')
 end
 
 local function sevo.run()

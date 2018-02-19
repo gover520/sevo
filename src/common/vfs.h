@@ -10,6 +10,8 @@
 #ifndef __VFS_H__
 #define __VFS_H__
 
+#include <mclib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +21,10 @@ extern "C" {
     #define FILETYPE_SYMLINK        2
     #define FILETYPE_OTHER          3
 
-    typedef struct vfile_t  vfile_t;
+    typedef struct vfile_t {
+        int     need_free;
+        struct PHYSFS_File  *file;
+    } vfile_t;
 
     typedef struct vfinfo_t {
         int         type;
@@ -45,7 +50,10 @@ extern "C" {
     char **vfs_files(const char *dir);
     void vfs_freelist(void *lv);
 
-    vfile_t *vfopen(const char *filename, const char *mode);
+    mc_sstr_t vfs_read(const char *file, int size);
+    int vfs_write(const char *file, const void *data, int size);
+
+    vfile_t *vfopen(vfile_t *fp, const char *filename, const char *mode);
     void vfclose(vfile_t *fp);
 
     long long vfsize(vfile_t *fp);

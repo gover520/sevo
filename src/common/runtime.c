@@ -101,16 +101,14 @@ void *luaX_newuserdata(lua_State * L, const char *metaname, int size) {
     return ud;
 }
 
-int luaX_checkint(lua_State *L, int index) {
-    static const char errmsg[] = { "Invalid operand. Expected 'integer' or 'number'" };
+int luaX_checkboolean(lua_State *L, int index) {
+    luaL_checktype(L, index, LUA_TBOOLEAN);
+    return lua_toboolean(L, index);
+}
 
-    if (lua_isinteger(L, index)) {
-        return (int)lua_tointeger(L, index);
+int luaX_optboolean(lua_State *L, int index, int opt) {
+    if (lua_isboolean(L, index) ) {
+        return lua_toboolean(L, index);
     }
-
-    if (lua_isnumber(L, index)) {
-        return (int)lua_tonumber(L, index);
-    }
-
-    return luaL_error(L, errmsg);
+    return opt;
 }

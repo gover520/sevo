@@ -1,8 +1,9 @@
 local sevo = require('sevo')
 require('sevo.int')
 require('sevo.mc')
+require('sevo.vfs')
 
-print(sevo)
+--sevo.vfs.identity('test')
 
 print('Sevo Version: ' .. sevo._VERSION)
 print('Sevo Version Num: ' .. sevo._VERSION_NUM)
@@ -11,6 +12,12 @@ print('Sevo Version Major: ' .. sevo._VERSION_MAJOR)
 print('Sevo Version Minor: ' .. sevo._VERSION_MINOR)
 print('Sevo Version Patch: ' .. sevo._VERSION_PATCH)
 print('Sevo OS: ' .. sevo._OS)
+
+for i, v in ipairs(arg) do
+    print(i, v)
+end
+
+print('Work Path: ' .. sevo.vfs.getcwd());
 
 local re = require("re")
 print(re.find("the number 423 is odd", "[0-9]+"))           --> 12    14
