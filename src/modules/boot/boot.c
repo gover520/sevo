@@ -8,33 +8,41 @@
  */
 
 #include "boot.h"
+#define EMBED_BOOT  0
+#if EMBED_BOOT
+#include "boot.lua.h"
+#else
 #include <string.h>
+#endif
 
 int luaopen_sevo_boot(lua_State* L) {
-    static const char test_file[] = { "test/servo.lua" };
+#if EMBED_BOOT
+    if (0 != luaL_loadbuffer(L, (const char *)boot_lua, sizeof(boot_lua), "boot.lua")) {
+        return luaL_error(L, lua_tostring(L, -1));
+    }
+
+    lua_pcall(L, 0, 1, LUA_MULTRET);
+#else
+    static const char boot_file[] = { "src/scripts/boot.lua" };
 
     char *buffer = NULL;
-    long long len = mc_file_length(test_file);
-    FILE *fp = fopen(test_file, "r");
+    int retval, len = (int)mc_file_length(boot_file);
+    FILE *fp = fopen(boot_file, "r");
 
     if (fp) {
         buffer = (char *)mc_calloc(1, len + 1);
         fread(buffer, len, 1, fp);
 
-        if (0 == luaL_loadbuffer(L, buffer, (size_t)strlen(buffer), "boot.lua")) {
-            if (0 != lua_pcall(L, 0, 1, 0)) {
-                printf("-----call error-----\n");
-                printf("%s\n", lua_tostring(L, -1));
-            }
-        }
-        else {
-            printf("-----error-----\n");
-            printf("%s\n", lua_tostring(L, -1));
-        }
+        retval = luaL_loadbuffer(L, buffer, (size_t)strlen(buffer), "boot.lua");
 
         mc_free(buffer);
         fclose(fp);
-    }
 
+        if (0 != retval) {
+            return luaL_error(L, lua_tostring(L, -1));
+        }
+        lua_pcall(L, 0, 1, LUA_MULTRET);
+    }
+#endif
     return 1;
 }

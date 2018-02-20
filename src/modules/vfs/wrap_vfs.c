@@ -20,6 +20,10 @@ static int w_load(lua_State *L, const char *name) {
     int retval;
 
     buffer = vfs_read(name, -1);
+    if (!buffer) {
+        return luaL_error(L, "Can not load %s.", name);
+    }
+
     retval = luaL_loadbuffer(L, buffer, mc_sstr_length(buffer), name);
     mc_sstr_destroy(buffer);
 
@@ -32,12 +36,12 @@ static int w_load(lua_State *L, const char *name) {
 
 static int w_loader(lua_State *L) {
     const char *modname = lua_tostring(L, 1);
-    char name[MC_MAX_PATH] = { 0 };
-    char temp[MC_MAX_PATH] = { 0 };
-    char *p;
+    char *p, name[MC_MAX_PATH] = { 0 };
+    int len;
     vfinfo_t stat;
 
     strcpy(name, modname);
+    len = (int)strlen(name);
 
     for (p = name; *p; ++p) {
         if ('.' == (*p)) {
@@ -45,13 +49,13 @@ static int w_loader(lua_State *L) {
         }
     }
 
-    sprintf(temp, "%s.lua", name);
-    if ((0 == vfs_info(temp, &stat)) && (FILETYPE_DIR != stat.type)) {
+    strcpy(name + len, ".lua");
+    if ((0 == vfs_info(name, &stat)) && (FILETYPE_DIR != stat.type)) {
         return w_load(L, name);
     }
 
-    sprintf(temp, "%s/init.lua", name);
-    if ((0 == vfs_info(temp, &stat)) && (FILETYPE_DIR != stat.type)) {
+    strcpy(name + len, "/init.lua");
+    if ((0 == vfs_info(name, &stat)) && (FILETYPE_DIR != stat.type)) {
         return w_load(L, name);
     }
 

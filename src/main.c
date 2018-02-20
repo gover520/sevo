@@ -13,12 +13,13 @@
 #include "common/logger.h"
 #include "common/vfs.h"
 #include "modules/gmp/wrap_gmp.h"
-#include "modules/mc/wrap_mc.h"
 #include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
 #include "modules/socket/wrap_socket.h"
 #include "modules/vfs/wrap_vfs.h"
 #include "modules/logger/wrap_logger.h"
+#include "modules/id/wrap_id.h"
+#include "modules/time/wrap_time.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -47,7 +48,8 @@ static int luaopen_sevo(lua_State * L) {
         /* gmp */
         { CODE_NAME ".int", luaopen_sevo_int },
         /* mclib */
-        { CODE_NAME ".mc", luaopen_sevo_mc },
+        { CODE_NAME ".id", luaopen_sevo_id },
+        { CODE_NAME ".time", luaopen_sevo_time },
         /* vfs */
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
         /* logger */
@@ -110,16 +112,10 @@ static void createargtable(lua_State * L, int argc, char *argv[]) {
 
 static int sevo_run(int argc, char *argv[], int *retval) {
     lua_State *L;
-
-    if ((argc > 1) && (0 == strcasecmp("--version", argv[1]))) {
-        printf("Sevo %s", VERSION);
-        *retval = 0;
-        return DONE_QUIT;
-    }
+    int done, stack;
 
     if (0 != vfs_init(argv[0])) {
         LG_ERR("VFS init failed.");
-        *retval = -1;
         return DONE_QUIT;
     }
 
@@ -135,23 +131,48 @@ static int sevo_run(int argc, char *argv[], int *retval) {
     lua_pop(L, 1);
 
     luaX_require(L, CODE_NAME ".boot");
-    lua_pop(L, 1);
+
+    /* run boot returned function into a coroutine */
+    lua_newthread(L);
+    lua_pushvalue(L, -2);
+
+    stack = lua_gettop(L);
+
+    while (LUA_YIELD == lua_resume(L, NULL, 0)) {
+        lua_pop(L, lua_gettop(L) - stack);
+    }
+
+    *retval = 0;
+    done = DONE_QUIT;
+
+    if (lua_isstring(L, -1) && (0 == strcmp(lua_tostring(L, -1), "restart"))) {
+        done = DONE_RESTART;
+    }
+
+    if (lua_isinteger(L, -1)) {
+        *retval = (int)lua_tointeger(L, -1);
+    }
 
     lua_close(L);
 
     vfs_deinit();
 
-    *retval = 0;
-    return DONE_QUIT;
+    return done;
 }
 
 int main(int argc, char *argv[]) {
-    int done, retval = -1;
+    int done, retval;
+
+    if ((argc > 1) && (0 == strcmp("--version", argv[1]))) {
+        printf("Sevo %s\n", VERSION);
+        return 0;
+    }
 
     mc_init();
     install_stacktrace();
 
     do {
+        retval = -1;
         done = sevo_run(argc, argv, &retval);
     } while (DONE_QUIT != done);
 

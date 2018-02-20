@@ -50,8 +50,6 @@ bigint_t *luaX_checkbigint(lua_State *L, int index) {
 }
 
 int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
-    static const char errmsg[] = { "Invalid operand. Expected 'integer' or 'number'" };
-
     bigint_t *bi = luaX_checkbigint(L, index);
     if (bi) {
         mpz_set(r, bi->x);
@@ -65,7 +63,7 @@ int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
 
     if (lua_isstring(L, index)) {
         if (0 != mpz_set_str(r, lua_tostring(L, index), 0)) {
-            return luaL_error(L, errmsg);
+            return luaL_error(L, "Invalid operand. Expected 'integer' or 'number'");
         }
         return 1;
     }
@@ -75,7 +73,7 @@ int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
         return 1;
     }
 
-    return luaL_error(L, errmsg);
+    return luaL_error(L, "Invalid operand. Expected 'integer' or 'number'");
 }
 
 bigint_t *new_bigint(lua_State *L) {

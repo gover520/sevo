@@ -15,13 +15,6 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-#ifdef _MSC_VER
-# define strncasecmp    _strnicmp
-# define strcasecmp     _stricmp
-# define strtoll        _strtoi64
-# define strtoull       _strtoui64
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

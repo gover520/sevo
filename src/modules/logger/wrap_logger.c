@@ -9,6 +9,7 @@
 
 #include "wrap_logger.h"
 #include "common/logger.h"
+#include <string.h>
 
 static mc_sstr_t l_buffer(lua_State *L) {
     int i, top = lua_gettop(L);
@@ -95,8 +96,29 @@ static int l_error(lua_State *L) {
     return 0;
 }
 
+static int l_loglevel(lua_State *L) {
+    const char *ls = luaL_checkstring(L, 1);
+
+    if (0 == strcmp(ls, "debug")) {
+        logger_level(LGL_DEBUG);
+    } else if (0 == strcmp(ls, "info")) {
+        logger_level(LGL_INFO);
+    } else if (0 == strcmp(ls, "warn")) {
+        logger_level(LGL_WARN);
+    } else if (0 == strcmp(ls, "error")) {
+        logger_level(LGL_ERROR);
+    } else if (0 == strcmp(ls, "disable")) {
+        logger_level(LGL_DISABLE);
+    } else {
+        return luaL_error(L, "parameter error, Expected 'debug', 'info', 'warn', 'error', 'disable'");
+    }
+
+    return 0;
+}
+
 int luaopen_sevo_logger(lua_State* L) {
     luaL_Reg mod_logger[] = {
+        { "loglevel", l_loglevel },
         { "debug", l_debug },
         { "info", l_info },
         { "warn", l_warn },
