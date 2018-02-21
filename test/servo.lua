@@ -172,7 +172,10 @@ end
 
 function sevo.update(delta)
     sevo.info(delta)
+    if delta > 40 and delta < 55 then sevo.event.quit('restart') end
+    if delta >= 55 then sevo.event.quit() end
 end
 
 function sevo.quit()
+    sevo.info('sevo quit')
 end

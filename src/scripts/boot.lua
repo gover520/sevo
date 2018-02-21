@@ -62,10 +62,12 @@ function sevo.init()
         version = sevo._VERSION,
         fps = 20,
         loglevel = 'debug',
+        maxevent = 64,
         modules = {
             int = true,
             id = true,
             time = true,
+            event = true,
             hash = true,
             net = true,
             rand = true,
@@ -91,9 +93,40 @@ function sevo.init()
         'int',
         'id',
         'time',
+        'event',
     }) do
         if c.modules[v] then
             require('sevo.' .. v)
+        end
+    end
+
+    if sevo.event then
+        local function createhandlers()
+            env.handlers = setmetatable({
+                quit = function()
+                    return
+                end,
+            }, {
+                __index = function(self, name)
+                    error('Unknown event: ' .. name)
+                end,
+            })
+        end
+
+        sevo.event.init(c.maxevent)
+        createhandlers()
+
+        sevo.event.poll_i = function()
+            return table.unpack(sevo.event.poll_t() or {})
+        end
+        sevo.event.poll = function()
+            return sevo.event.poll_i
+        end
+        sevo.event.push = function(...)
+            sevo.event.push_t(table.pack(...))
+        end
+        sevo.event.quit = function(a)
+            sevo.event.push('quit', a or 0)
         end
     end
 
@@ -114,6 +147,18 @@ function sevo.run()
 
     return function()
         fps:wait();
+
+        if sevo.event then
+            sevo.event.pump()
+
+            for name, a, b, c, d, e, f in sevo.event.poll() do
+                if name == 'quit' then
+                    if sevo.quit then sevo.quit() end
+                    return a or 0
+                end
+                env.handlers[name](a, b, c, d, e, f)
+            end
+        end
 
         if sevo.update then sevo.update(fps:delta()) end
     end

@@ -40,39 +40,33 @@ void mpz_set_ull(mpz_t r, unsigned long long x) {
 }
 
 bigint_t *luaX_checkbigint(lua_State *L, int index) {
-    if (!lua_isuserdata(L, index)) {
-        return NULL;
-    }
-    if (!luaL_checkudata(L, index, g_meta_int)) {
-        return NULL;
-    }
-    return (bigint_t *)lua_touserdata(L, index);
+    return (bigint_t *)luaL_checkudata(L, index, g_meta_int);
 }
 
 int luaX_checkmpz(lua_State *L, int index, mpz_t r) {
-    bigint_t *bi = luaX_checkbigint(L, index);
-    if (bi) {
-        mpz_set(r, bi->x);
-        return 1;
-    }
+    bigint_t *bi;
 
-    if (lua_isinteger(L, index)) {
-        mpz_set_ll(r, lua_tointeger(L, index));
+    switch (lua_type(L, index)) {
+    case LUA_TNUMBER:
+        if (lua_isinteger(L, index)) {
+            mpz_set_ll(r, lua_tointeger(L, index));
+        } else {
+            mpz_set_d(r, lua_tonumber(L, index));
+        }
         return 1;
-    }
-
-    if (lua_isstring(L, index)) {
+    case LUA_TSTRING:
         if (0 != mpz_set_str(r, lua_tostring(L, index), 0)) {
             return luaL_error(L, "Invalid operand. Expected 'integer' or 'number'");
         }
         return 1;
+    case LUA_TUSERDATA:
+        bi = luaX_checkbigint(L, index);
+        if (bi) {
+            mpz_set(r, bi->x);
+            return 1;
+        }
+        break;
     }
-
-    if (lua_isnumber(L, index)) {
-        mpz_set_d(r, lua_tonumber(L, index));
-        return 1;
-    }
-
     return luaL_error(L, "Invalid operand. Expected 'integer' or 'number'");
 }
 

@@ -15,6 +15,8 @@
 
 static const char g_meta_vfile[] = { CODE_NAME "meta.vfile" };
 
+#define luaX_checkvfile(L, idx)     (vfile_t *)luaL_checkudata(L, idx, g_meta_vfile)
+
 static int w_load(lua_State *L, const char *name) {
     mc_sstr_t buffer;
     int retval;
@@ -210,16 +212,6 @@ static int w_write(lua_State *L) {
     lua_pushboolean(L, 0 == vfs_write(file, data, size));
 
     return 1;
-}
-
-static vfile_t *luaX_checkvfile(lua_State *L, int index) {
-    if (!lua_isuserdata(L, index)) {
-        return NULL;
-    }
-    if (!luaL_checkudata(L, index, g_meta_vfile)) {
-        return NULL;
-    }
-    return (vfile_t *)lua_touserdata(L, index);
 }
 
 static int w_open(lua_State *L) {

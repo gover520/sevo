@@ -20,6 +20,7 @@
 #include "modules/logger/wrap_logger.h"
 #include "modules/id/wrap_id.h"
 #include "modules/time/wrap_time.h"
+#include "modules/event/event.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -50,6 +51,7 @@ static int luaopen_sevo(lua_State * L) {
         /* mclib */
         { CODE_NAME ".id", luaopen_sevo_id },
         { CODE_NAME ".time", luaopen_sevo_time },
+        { CODE_NAME ".event", luaopen_sevo_event },
         /* vfs */
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
         /* logger */
@@ -116,7 +118,8 @@ static int sevo_run(int argc, char *argv[], int *retval) {
 
     if (0 != vfs_init(argv[0])) {
         LG_ERR("VFS init failed.");
-        return DONE_QUIT;
+        done = DONE_QUIT;
+        goto clean;
     }
 
     L = luaL_newstate();
@@ -155,7 +158,9 @@ static int sevo_run(int argc, char *argv[], int *retval) {
 
     lua_close(L);
 
+clean:
     vfs_deinit();
+    event_deinit();
 
     return done;
 }

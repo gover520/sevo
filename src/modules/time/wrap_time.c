@@ -13,14 +13,8 @@
 static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
 static const char g_meta_fps[] = { CODE_NAME "meta.fps" };
 
-static mc_timer_t *luaX_checktimer(lua_State *L, int index) {
-    if (lua_isuserdata(L, index) && luaL_checkudata(L, index, g_meta_timer)) {
-        return (mc_timer_t *)lua_touserdata(L, index);
-    }
-
-    luaL_error(L, "Invalid operand. Expected 'timer'");
-    return NULL;
-}
+#define luaX_checktimer(L, idx)     (mc_timer_t *)luaL_checkudata(L, idx, g_meta_timer)
+#define luaX_checkfps(L, index)     (mc_fps_t *)luaL_checkudata(L, index, g_meta_fps)
 
 static int mcl_timer_set(lua_State * L) {
     mc_timer_t *tmr = luaX_checktimer(L, 1);
@@ -39,15 +33,6 @@ static int mcl_timer_new(lua_State * L) {
     unsigned int n = (unsigned int)luaL_optinteger(L, 1, 0);
     mc_timer_set(tmr, NULL, n);
     return 1;
-}
-
-static mc_fps_t *luaX_checkfps(lua_State *L, int index) {
-    if (lua_isuserdata(L, index) && luaL_checkudata(L, index, g_meta_fps)) {
-        return (mc_fps_t *)lua_touserdata(L, index);
-    }
-
-    luaL_error(L, "Invalid operand. Expected 'fps'");
-    return NULL;
 }
 
 static int mcl_fps_wait(lua_State * L) {

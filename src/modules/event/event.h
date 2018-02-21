@@ -16,7 +16,10 @@
 extern "C" {
 #endif
 
+    int event_init(int capacity);
+    void event_deinit(void);
 
+    int luaopen_sevo_event(lua_State* L);
 
 #ifdef __cplusplus
 };
