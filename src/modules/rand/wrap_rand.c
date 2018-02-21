@@ -9,3 +9,6 @@
 
 #include "wrap_rand.h"
 
+int luaopen_sevo_rand(lua_State* L) {
+    return 0;
+}

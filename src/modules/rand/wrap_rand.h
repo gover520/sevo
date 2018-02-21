@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-
+    int luaopen_sevo_rand(lua_State* L);
 
 #ifdef __cplusplus
 };

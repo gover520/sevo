@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-
+    int luaopen_sevo_hash(lua_State* L);
 
 #ifdef __cplusplus
 };

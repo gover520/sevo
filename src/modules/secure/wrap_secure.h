@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-
+    int luaopen_sevo_secure(lua_State* L);
 
 #ifdef __cplusplus
 };

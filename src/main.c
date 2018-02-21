@@ -21,6 +21,10 @@
 #include "modules/id/wrap_id.h"
 #include "modules/time/wrap_time.h"
 #include "modules/event/event.h"
+#include "modules/hash/wrap_hash.h"
+#include "modules/rand/wrap_rand.h"
+#include "modules/net/wrap_net.h"
+#include "modules/secure/wrap_secure.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -52,6 +56,10 @@ static int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".id", luaopen_sevo_id },
         { CODE_NAME ".time", luaopen_sevo_time },
         { CODE_NAME ".event", luaopen_sevo_event },
+        { CODE_NAME ".hash", luaopen_sevo_hash },
+        { CODE_NAME ".rand", luaopen_sevo_rand },
+        { CODE_NAME ".net", luaopen_sevo_net },
+        { CODE_NAME ".secure", luaopen_sevo_secure },
         /* vfs */
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
         /* logger */

@@ -9,3 +9,6 @@
 
 #include "wrap_secure.h"
 
+int luaopen_sevo_secure(lua_State* L) {
+    return 0;
+}

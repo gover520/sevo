@@ -9,3 +9,6 @@
 
 #include "wrap_net.h"
 
+int luaopen_sevo_net(lua_State* L) {
+    return 0;
+}

@@ -60,7 +60,7 @@ end
 function sevo.init()
     local c = {
         version = sevo._VERSION,
-        fps = 20,
+        fps = 100,
         loglevel = 'debug',
         maxevent = 64,
         modules = {
@@ -69,8 +69,8 @@ function sevo.init()
             time = true,
             event = true,
             hash = true,
-            net = true,
             rand = true,
+            net = true,
             secure = true,
         }
     }
@@ -94,6 +94,10 @@ function sevo.init()
         'id',
         'time',
         'event',
+        'hash',
+        'rand',
+        'net',
+        'secure',
     }) do
         if c.modules[v] then
             require('sevo.' .. v)
