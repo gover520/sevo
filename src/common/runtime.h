@@ -25,6 +25,7 @@ extern "C" {
     int luaX_register_searcher(lua_State *L, lua_CFunction function);
     int luaX_preload(lua_State *L, const char *name, lua_CFunction function);
     int luaX_require(lua_State *L, const char *name);
+    int luaX_getsevo(lua_State *L, const char *name);
     void *luaX_newuserdata(lua_State * L, const char *metaname, int size);
     int luaX_checkboolean(lua_State *L, int index);
     int luaX_optboolean(lua_State *L, int index, int opt);

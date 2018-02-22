@@ -92,6 +92,19 @@ int luaX_require(lua_State *L, const char *name) {
     return 1;
 }
 
+int luaX_getsevo(lua_State *L, const char *name) {
+    lua_getglobal(L, CODE_NAME);
+
+    if (lua_isnil(L, -1)) {
+        return -1;
+    }
+
+    lua_getfield(L, -1, name);
+    lua_replace(L, -2);
+
+    return 0;
+}
+
 void *luaX_newuserdata(lua_State * L, const char *metaname, int size) {
     void *ud = lua_newuserdata(L, size);
 

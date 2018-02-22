@@ -161,21 +161,58 @@ local test_func = {
         print(#b)           --> 12.5
     end,
     function()
-        m1 = sevo.hash.md5()
-        m1:update('123456')
+        print(sevo.hash.h32("123456"))
+        print(sevo.hash.h64("123456"))
+        print(sevo.hash.m32("123456"))
+        print(sevo.hash.m64("123456"))
+        print(sevo.hash.crc32("123456"))
+        print(sevo.hash.crc64("123456"))
+
+        local a1 = sevo.hash.adler32("HelloWorld.")
+        local a2 = sevo.hash.adler32("Hello")
+        local a3 = sevo.hash.adler32("World.")
+        local a4 = sevo.hash.adler32_combine(a2, a3, 6)
+        local a5 = sevo.hash.adler32("elloWorld.")
+        local a6 = sevo.hash.adler32("HelloWorld")
+        local a7 = sevo.hash.adler32_rolling(a6, string.byte('.'), string.byte('H'), 10)
+
+        print("a1: " .. a1)
+        print("a2: " .. a2)
+        print("a3: " .. a3)
+        print("a4: " .. a4 .. " should be equal a1: " .. a1)
+        print("a5: " .. a5)
+        print("a6: " .. a6)
+        print("a7: " .. a7 .. " should be equal a5: " .. a5)
+
+        local m1 = sevo.hash.md5()
+        m1:update("123456")
         print(m1:digest())
 
-        m2 = sevo.hash.md5()
-        m2:update('123456')
+        local m2 = sevo.hash.md5()
+        m2:update("123456")
         print(m2:hexdigest())
 
-        s1 = sevo.hash.sha1()
-        s1:update('123456')
+        local s1 = sevo.hash.sha1()
+        s1:update("123456")
         print(s1:digest())
 
-        s2 = sevo.hash.sha1()
-        s2:update('123456')
+        local s2 = sevo.hash.sha1()
+        s2:update("123456")
         print(s2:hexdigest())
+    end,
+    function()
+        print("RandMax: " .. sevo.rand.randmax)
+        for i = 0, 10 do print("Rand: " .. sevo.rand.randint()) end
+        for i = 0, 10 do print("Rand10: " .. sevo.rand.randint(10)) end
+        for i = 0, 10 do print("Rand10-100: " .. sevo.rand.randint(10, 100)) end
+        for i = 0, 10 do print("Random: " .. sevo.rand.random()) end
+        for i = 0, 10 do print("Prime: " .. sevo.rand.prime()) end
+        for i = 0, 10 do print("Prime10: " .. sevo.rand.prime(10)) end
+        for i = 0, 10 do print("Prime10-100: " .. sevo.rand.prime(10, 100)) end
+        for i = 0, 10 do print("Normal: " .. sevo.rand.normal(5., 1.)) end
+        for i = 0, 10 do print("Exp: " .. sevo.rand.exp(2.)) end
+        for i = 0, 10 do print("Poisson: " .. sevo.rand.poisson(4000.)) end
+        for i = 0, 10 do print("Binomial: " .. sevo.rand.binomial(4000, 0.3)) end
     end,
 }
 local test_step = 1
