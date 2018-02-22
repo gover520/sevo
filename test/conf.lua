@@ -1,9 +1,20 @@
 
 function sevo.conf(c)
-    print("conf version: " .. c.version)
-    print("conf fps: " .. c.fps)
+    print("-- configure info --")
+    for k, v in pairs(c) do
+        if k == "modules" then
+            print(k .. ":")
+            for l, m in pairs(v) do
+                print(" " .. l .. " = " .. tostring(m))
+            end
+        else
+            print(k .. " = " .. tostring(v))
+        end
+    end
+    print("----- end -----")
 
-    c.fps = 5
+    -- you can modify configure in here
+    c.fps = 60
 
     -- set writeable directory
     sevo.vfs.identity("test")

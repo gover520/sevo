@@ -214,6 +214,35 @@ local test_func = {
         for i = 0, 10 do print("Poisson: " .. sevo.rand.poisson(4000.)) end
         for i = 0, 10 do print("Binomial: " .. sevo.rand.binomial(4000, 0.3)) end
     end,
+    function()
+        sevo.vfs.mkdir("dir/info")
+        sevo.vfs.write("dir/info/lasttime.txt", tostring(os.date()))
+        print(sevo.vfs.read("dir/info/lasttime.txt"))
+
+        local fs = sevo.vfs.files("dir/info")
+
+        print("Files: " .. #fs)
+        for i, v in ipairs(fs) do
+            print(i, v)
+        end
+
+        sevo.vfs.remove("dir/info/lasttime.txt")
+        sevo.vfs.remove("dir/info")
+        sevo.vfs.remove("dir")
+    end,
+    function()
+        local iv = "12345678"
+        xtea = sevo.secure.xtea(sevo.hash.md5("123456"):digest())
+        local e1, i = xtea:encode(iv, "HelloWorld.")
+        local e2 = xtea:encode(i, "1234567890")
+        local d1, j = xtea:decode(iv, e1)
+        local d2 = xtea:decode(j, e2)
+
+        print(e1, i)
+        print(e2)
+        print(d1, j)
+        print(d2)
+    end,
 }
 local test_step = 1
 
