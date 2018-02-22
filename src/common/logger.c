@@ -37,6 +37,7 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     static const char *p[] = { " C ", "LUA" };
 
     struct timeval tv;
+    time_t ts;
     char msg[1024];
     char tm[20];
     int ms;
@@ -56,8 +57,11 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     vsnprintf(msg, sizeof(msg), fmt, argv);
 
     gettimeofday(&tv, NULL);
-    strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime((time_t *)&tv.tv_sec));
+
+    ts = tv.tv_sec;
     ms = (int)(tv.tv_usec * 0.001f);
+
+    strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime(&ts));
 
     return fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
 }
