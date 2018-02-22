@@ -19,7 +19,7 @@ static int mcl_id_init(lua_State * L) {
     mpz_t ep;
 
     top = lua_gettop(L);
-    nodeid = luaL_checkinteger(L, 1);
+    nodeid = (int)luaL_checkinteger(L, 1);
 
     if (top > 1) {
         mpz_init(ep);

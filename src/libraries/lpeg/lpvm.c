@@ -15,6 +15,9 @@
 #include "lpvm.h"
 #include "lpprint.h"
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4244 4267)
+#endif
 
 /* initial size for call/backtrack stack */
 #if !defined(INITBACK)
@@ -158,7 +161,7 @@ const char *match (lua_State *L, const char *o, const char *s, const char *e,
   stack->p = &giveup; stack->s = s; stack->caplevel = 0; stack++;
   lua_pushlightuserdata(L, stackbase);
   for (;;) {
-#if defined(DEBUG)
+#if defined(LPEG_DEBUG)
       printf("-------------------------------------\n");
       printcaplist(capture, capture + captop);
       printf("s: |%s| stck:%d, dyncaps:%d, caps:%d  ",
@@ -287,7 +290,7 @@ const char *match (lua_State *L, const char *o, const char *s, const char *e,
           ndyncap -= removedyncap(L, capture, stack->caplevel, captop);
         captop = stack->caplevel;
         p = stack->p;
-#if defined(DEBUG)
+#if defined(LPEG_DEBUG)
         printf("**FAIL**\n");
 #endif
         continue;

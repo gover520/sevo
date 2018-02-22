@@ -11,8 +11,8 @@
 #define __WRAP_SOCKET_H__
 
 #include "common/runtime.h"
-#include <luasocket.h>
-#include <mime.h>
+#include "libraries/luasocket/src/luasocket.h"
+#include "libraries/luasocket/src/mime.h"
 
 #ifdef __cplusplus
 extern "C" {

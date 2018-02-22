@@ -21,7 +21,6 @@ solution ( "sevo" )
                         "./src/libraries/luaffifb",
                         "./src/libraries/luaffifb/dynasm",
                         "./src/libraries/lpeg",
-                        "./src/libraries/luasocket/src",
                         "./src/libraries/physfs/src", }
         --libdirs { "" }
         --links { "" }
@@ -66,7 +65,7 @@ solution ( "sevo" )
         configuration ( "vs*" )
             excludes { "./src/libraries/luasocket/src/usocket.*",
                         "./src/libraries/luasocket/src/unix.*" }
-            defines { "WIN32", "_WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_DEPRECATE" }
+            defines { "WIN32", "_WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE", "_CRT_NONSTDC_NO_DEPRECATE", "_WINSOCK_DEPRECATED_NO_WARNINGS" }
             editandcontinue "Off"
 
         configuration ( "gmake" )

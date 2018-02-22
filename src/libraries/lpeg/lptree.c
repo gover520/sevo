@@ -17,6 +17,9 @@
 #include "lpprint.h"
 #include "lptree.h"
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4244 4267)
+#endif
 
 /* number of siblings for each tree */
 const byte numsiblings[] = {

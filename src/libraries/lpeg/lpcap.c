@@ -9,6 +9,9 @@
 #include "lpcap.h"
 #include "lptypes.h"
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4244 4267)
+#endif
 
 #define captype(cap)	((cap)->kind)
 

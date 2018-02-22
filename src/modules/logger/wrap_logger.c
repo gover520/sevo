@@ -34,7 +34,7 @@ static mc_sstr_t l_buffer(lua_State *L) {
         if (i > 1) {
             buf = mc_sstr_cat_buffer(buf, "\t", 1);
         }
-        buf = mc_sstr_cat_buffer(buf, s, l);
+        buf = mc_sstr_cat_buffer(buf, s, (int)l);
 
         lua_pop(L, 1);  /* pop result */
     }

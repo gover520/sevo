@@ -12,6 +12,9 @@
 #include "lpprint.h"
 #include "lpcode.h"
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4244 4267)
+#endif
 
 #if defined(LPEG_DEBUG)
 

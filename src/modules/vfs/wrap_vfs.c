@@ -276,7 +276,7 @@ static int w_vf_flush(lua_State *L) {
 
 static int w_vf_read(lua_State *L) {
     vfile_t *vf = luaX_checkvfile(L, 1);
-    int size = luaL_optinteger(L, 2, -1);
+    int size = (int)luaL_optinteger(L, 2, -1);
     mc_sstr_t data;
 
     if (size <= 0) {

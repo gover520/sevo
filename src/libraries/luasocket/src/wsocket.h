@@ -30,4 +30,9 @@ typedef t_socket *p_socket;
 #define AI_NUMERICSERV (0)
 #endif
 
+#ifdef gai_strerror
+#undef gai_strerror
+#define gai_strerror    gai_strerrorA
+#endif
+
 #endif /* WSOCKET_H */

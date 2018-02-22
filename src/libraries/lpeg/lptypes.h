@@ -8,6 +8,9 @@
 #if !defined(lptypes_h)
 #define lptypes_h
 
+#ifdef _DEBUG
+#define LPEG_DEBUG
+#endif
 
 #if !defined(LPEG_DEBUG)
 #ifndef NDEBUG
