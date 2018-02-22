@@ -12,7 +12,12 @@
 static mc_chan_t    *g_chan = NULL;
 
 int event_init(int capacity) {
+    if (g_chan) {
+        return 0;
+    }
+
     g_chan = mc_chan_create(capacity);
+
     return 0;
 }
 

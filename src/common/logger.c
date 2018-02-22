@@ -15,7 +15,12 @@ static int LG_LEVEL = LGL_MIN;
 static mc_sstr_t LG_BUFFER = NULL;
 
 int logger_init(void) {
+    if (LG_BUFFER) {
+        return 0;
+    }
+
     LG_BUFFER = mc_sstr_create(2048);
+
     return 0;
 }
 

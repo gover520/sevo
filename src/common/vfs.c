@@ -16,6 +16,10 @@ static char g_base_dir[MC_MAX_PATH] = { 0 };
 static char g_ident_dir[MC_MAX_PATH] = { 0 };
 
 int vfs_init(const char *argv0) {
+    if (PHYSFS_isInit()) {
+        return 0;
+    }
+
     if (!PHYSFS_init(argv0)) {
         return -1;
     }
