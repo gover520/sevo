@@ -65,21 +65,73 @@ static int w_loader(lua_State *L) {
     return 1;
 }
 
+static const char *g_libext[] = {
+#if defined(_WIN32)
+    ".dll"
+#elif defined(__APPLE__)
+    ".dylib", ".so"
+#else
+    ".so"
+#endif
+};
+
 static int w_extloader(lua_State *L) {
-    static const char *libext[] =
-    {
-    #if defined(_WIN32)
-        ".dll"
-    #elif defined(__APPLE__)
-        ".dylib", ".so"
-    #else
-        ".so"
-    #endif
-    };
+    const char *modname = lua_tostring(L, 1);
+    char *p, name[MC_MAX_PATH] = { 0 };
+    char temp[MC_MAX_PATH] = { 0 };
+    mc_dylib_t handle = NULL;
+    lua_CFunction func;
+    int i, len;
+    vfinfo_t stat;
 
-    /* todo */
+    strcpy(name, modname);
+    len = (int)strlen(name);
 
-    return 0;
+    for (p = name; *p; ++p) {
+        if ('.' == (*p)) {
+            (*p) = '/';
+        }
+    }
+
+    for (i = 0; i < MC_ARRAY_SIZE(g_libext); ++i) {
+        strcpy(name + len, g_libext[i]);
+
+        if ((0 != vfs_info(name, &stat)) || (FILETYPE_DIR == stat.type)) {
+            continue;
+        }
+
+        sprintf(temp, "%s/%s", vfs_realdir(name), name);
+        mc_path_format(temp, MC_PATHSEP);
+
+        handle = mc_dl_handle(temp);
+        if (handle) {
+            break;
+        }
+    }
+
+    if (!handle) {
+        lua_pushfstring(L, "no module %s.", modname);
+        return 1;
+    }
+
+    name[len] = '\0';
+
+    for (p = name; *p; ++p) {
+        if ('/' == (*p)) {
+            (*p) = '_';
+        }
+    }
+    sprintf(temp, "luaopen_%s", name);
+
+    func = (lua_CFunction)mc_dl_symbol(handle, temp);
+
+    if (!func) {
+        lua_pushfstring(L, "C library '%s' is incompatible.", name);
+        return 1;
+    }
+
+    lua_pushcfunction(L, func);
+    return 1;
 }
 
 static int w_getcwd(lua_State *L) {
