@@ -224,7 +224,7 @@ static int mcl_hash_md5(lua_State * L) {
 static int mcl_sha1_update(lua_State * L) {
     size_t l = 0;
     mc_sha1_ctx *sha1 = luaX_checksha1(L, 1);
-    const char *data = luaL_checklstring(L, 2, &l);
+    const unsigned char *data = (unsigned char *)luaL_checklstring(L, 2, &l);
     unsigned int len = (unsigned int)luaL_optinteger(L, 3, (lua_Integer)l);
 
     mc_sha1_update(sha1, data, len);

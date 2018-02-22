@@ -38,7 +38,7 @@ static int mcl_encode(lua_State * L) {
     len = mc_xtea_encode(xtea, enc, data, len, iv);
 
     lua_pushlstring(L, enc, len);
-    lua_pushlstring(L, iv, sizeof(iv));
+    lua_pushlstring(L, (const char *)iv, sizeof(iv));
 
     mc_free(enc);
     return 2;
@@ -67,7 +67,7 @@ static int mcl_decode(lua_State * L) {
     len = mc_xtea_decode(xtea, dec, data, len, iv);
 
     lua_pushlstring(L, dec, len);
-    lua_pushlstring(L, iv, sizeof(iv));
+    lua_pushlstring(L, (const char *)iv, sizeof(iv));
 
     mc_free(dec);
     return 2;
@@ -81,7 +81,7 @@ static int mcl_xtea(lua_State * L) {
     if (l != 16) {
         return luaL_error(L, "The key length must be 16 bytes.");
     }
-    
+
     xtea = (mc_xtea_t *)luaX_newuserdata(L, g_meta_xtea, sizeof(mc_xtea_t));
     mc_xtea_setkeys(xtea, key);
     return 1;

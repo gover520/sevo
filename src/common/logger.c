@@ -38,7 +38,7 @@ int logger_level(int level) {
 
 void logger_flush(void) {
     if (LG_BUFFER) {
-        fprintf(stdout, LG_BUFFER);
+        fprintf(stdout, "%s", LG_BUFFER);
         mc_sstr_clear(LG_BUFFER);
     }
 }

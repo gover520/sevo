@@ -57,3 +57,5 @@ dkms.conf
 objs/
 *.user
 bin
+Makefile
+*.make
