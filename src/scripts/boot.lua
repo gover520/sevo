@@ -15,6 +15,26 @@ local function error_handler(errmsg)
 end
 
 function sevo.boot()
+    -- Hack require for extensions
+    env.require = _G["require"]
+    _G["require"] = function(name)
+        local ok, mod
+
+        -- find global
+        ok, mod = pcall(env.require, name)
+        if ok then return mod end
+
+        -- find sevo extensions
+        ok, mod = pcall(env.require, "_extensions_." .. name)
+        if ok then return mod end
+
+        -- find project extensions
+        ok, mod = pcall(env.require, "extensions." .. name)
+        if ok then return mod end
+
+        return error("module '" .. name .. "' not found:")
+    end
+
     require("sevo.logger")
     require("sevo.vfs")
 
@@ -43,9 +63,9 @@ function sevo.boot()
         return false
     end
 
+    -- source directory
     local fullpath = get_fullpath(arg[2])
     local _, mdir = xpcall(sevo.vfs.mount, error_handler, fullpath, "/")
-
     if not mdir then
         local _, mzip = xpcall(sevo.vfs.mount, error_handler, fullpath .. ".zip", "/")
         if not mzip then

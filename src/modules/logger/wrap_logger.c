@@ -16,7 +16,7 @@ static mc_sstr_t l_buffer_repr(mc_sstr_t s, const char *str, int len) {
         return s;
     }
     while (len--) {
-        if (isprint(*str)) {
+        if (isprint(*str) || isspace(*str)) {
             s = mc_sstr_cat_buffer(s, str, 1);
         } else {
             char tmp[4] = { '\\', 'x', 0, 0 };

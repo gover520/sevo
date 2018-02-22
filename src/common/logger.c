@@ -95,6 +95,6 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     } else {
         fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
     }
-    
+
     return 0;
 }
