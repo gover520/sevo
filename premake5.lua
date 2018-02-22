@@ -77,9 +77,10 @@ solution ( "sevo" )
 
         configuration { "gmake", "macosx" }
             files { "./src/libraries/physfs/src/*.m" }
-            defines { "__APPLE__", "__MACH__", "__MRC__", "macintosh", }
+            defines { "__APPLE__", "__MACH__", "__MRC__", "macintosh", "LUA_USE_MACOSX" }
             links { "Foundation.framework", "IOKit.framework" }
 
         configuration { "gmake", "linux" }
-            defines { "__linux__" }
+            defines { "__linux__", "LUA_USE_LINUX" }
+            linkoptions { "-Wl,-E" }
             links { "m", "pthread", "dl" }
