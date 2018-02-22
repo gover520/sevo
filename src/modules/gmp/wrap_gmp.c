@@ -324,7 +324,7 @@ static int bigint_shr(lua_State* L) {
     return 1;
 }
 
-static int bigint_len(lua_State* L) {
+static int bigint_to_ll(lua_State* L) {
     bigint_t *bi = luaX_checkbigint(L, 1);
     lua_pushinteger(L, bi ? mpz_get_ll(bi->x) : 0);
     return 1;
@@ -434,26 +434,13 @@ int luaopen_sevo_int(lua_State* L) {
         { "__bnot", bigint_bnot },
         { "__shl", bigint_shl },
         { "__shr", bigint_shr },
-        { "__len", bigint_len },
+        { "__len", bigint_to_ll },
         { "__eq",  bigint_eq },
         { "__lt",  bigint_lt },
         { "__le",  bigint_le },
         { "__tostring", bigint_tostring },
         { "__concat", bigint_concat },
         /* methods */
-        { "add", bigint_add },
-        { "sub", bigint_sub },
-        { "mul", bigint_mul },
-        { "div", bigint_div },
-        { "mod", bigint_mod },
-        { "pow", bigint_pow },
-        { "unm", bigint_unm },
-        { "band", bigint_band },
-        { "bor", bigint_bor },
-        { "bxor", bigint_bxor },
-        { "bnot", bigint_bnot },
-        { "shl", bigint_shl },
-        { "shr", bigint_shr },
         { "eq", bigint_eq },
         { "lt",  bigint_lt },
         { "le",  bigint_le },

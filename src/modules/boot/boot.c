@@ -8,7 +8,7 @@
  */
 
 #include "boot.h"
-#define EMBED_BOOT  1
+#define EMBED_BOOT  0
 #if EMBED_BOOT
 #include "boot.lua.h"
 #else

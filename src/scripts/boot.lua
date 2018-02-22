@@ -7,7 +7,7 @@
 --  license: Apache-2.0
 ------------------------------------------------------------
 
-local sevo = require('sevo')
+local sevo = require("sevo")
 local env = {}
 
 local function error_handler(errmsg)
@@ -15,41 +15,41 @@ local function error_handler(errmsg)
 end
 
 function sevo.boot()
-    require('sevo.logger')
-    require('sevo.vfs')
+    require("sevo.logger")
+    require("sevo.vfs")
 
     -- Redirect print to sevo.info
-    _G['print'] = sevo.info
+    _G["print"] = sevo.info
 
     local function get_fullpath(p)
-        local np = p:gsub('\\', '/')
+        local np = p:gsub("\\", "/")
 
-        if np:find('/') == 1 or np:find('%a:') == 1 then
+        if np:find("/") == 1 or np:find("%a:") == 1 then
             return np
         end
 
         local cwd = sevo.vfs.getcwd()
-        cwd = cwd:gsub('\\', '/')
+        cwd = cwd:gsub("\\", "/")
 
-        if cwd:sub(-1) ~= '/' then
-            cwd = cwd .. '/'
+        if cwd:sub(-1) ~= "/" then
+            cwd = cwd .. "/"
         end
 
         return cwd .. np
     end
 
     if #arg < 2 then
-        sevo.error('Parameter error, no working directory!')
+        sevo.error("Parameter error, no working directory!")
         return false
     end
 
     local fullpath = get_fullpath(arg[2])
-    local _, mdir = xpcall(sevo.vfs.mount, error_handler, fullpath, '/')
+    local _, mdir = xpcall(sevo.vfs.mount, error_handler, fullpath, "/")
 
     if not mdir then
-        local _, mzip = xpcall(sevo.vfs.mount, error_handler, fullpath .. '.zip', '/')
+        local _, mzip = xpcall(sevo.vfs.mount, error_handler, fullpath .. ".zip", "/")
         if not mzip then
-            sevo.error('Source mounting failed, ' .. arg[2])
+            sevo.error("Source mounting failed, " .. arg[2])
             return false
         end
     end
@@ -61,7 +61,7 @@ function sevo.init()
     local c = {
         version = sevo._VERSION,
         fps = 100,
-        loglevel = 'debug',
+        loglevel = "debug",
         maxevent = 64,
         modules = {
             int = true,
@@ -77,8 +77,8 @@ function sevo.init()
 
     local result
 
-    if sevo.vfs.info('conf.lua') then
-        result = xpcall(require, error_handler, 'conf');
+    if sevo.vfs.info("conf.lua") then
+        result = xpcall(require, error_handler, "conf");
         if not result then return false end
     end
 
@@ -90,17 +90,17 @@ function sevo.init()
     sevo.loglevel(c.loglevel)
 
     for i, v in ipairs({
-        'int',
-        'id',
-        'time',
-        'event',
-        'hash',
-        'rand',
-        'net',
-        'secure',
+        "int",
+        "id",
+        "time",
+        "event",
+        "hash",
+        "rand",
+        "net",
+        "secure",
     }) do
         if c.modules[v] then
-            require('sevo.' .. v)
+            require("sevo." .. v)
         end
     end
 
@@ -112,7 +112,7 @@ function sevo.init()
                 end,
             }, {
                 __index = function(self, name)
-                    error('Unknown event: ' .. name)
+                    error("Unknown event: " .. name)
                 end,
             })
         end
@@ -130,14 +130,17 @@ function sevo.init()
             sevo.event.push_t(table.pack(...))
         end
         sevo.event.quit = function(a)
-            sevo.event.push('quit', a or 0)
+            sevo.event.push("quit", a or 0)
         end
     end
 
-    if sevo.vfs.info('servo.lua') then
-        result = xpcall(require, error_handler, 'servo');
-        if not result then return false end
+    if not sevo.vfs.info("servo.lua") then
+        sevo.error("'servo.lua' is not found! What can i do for you?")
+        return false
     end
+
+    result = xpcall(require, error_handler, "servo");
+    if not result then return false end
 
     env.fps = c.fps
 
@@ -156,7 +159,7 @@ function sevo.run()
             sevo.event.pump()
 
             for name, a, b, c, d, e, f in sevo.event.poll() do
-                if name == 'quit' then
+                if name == "quit" then
                     if sevo.quit then sevo.quit() end
                     return a or 0
                 end
@@ -165,6 +168,8 @@ function sevo.run()
         end
 
         if sevo.update then sevo.update(fps:delta()) end
+
+        sevo.logflush()
     end
 end
 

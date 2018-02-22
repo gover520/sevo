@@ -91,6 +91,9 @@ static int luaopen_sevo(lua_State * L) {
     lua_pushinteger(L, VERSION_PATCH);
     lua_setfield(L, -2, "_VERSION_PATCH");
 
+    lua_pushinteger(L, mc_cpunum());
+    lua_setfield(L, -2, "_CPUNUM");
+
 #if defined(_WIN32)
     lua_pushstring(L, "Windows");
 #elif defined(__linux__)
@@ -182,6 +185,7 @@ int main(int argc, char *argv[]) {
     }
 
     mc_init();
+    logger_init();
     install_stacktrace();
 
     do {
@@ -189,6 +193,7 @@ int main(int argc, char *argv[]) {
         done = sevo_run(argc, argv, &retval);
     } while (DONE_QUIT != done);
 
+    logger_deinit();
     mc_destroy();
 
     return retval;

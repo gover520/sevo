@@ -12,6 +12,21 @@
 #include "logger.h"
 
 static int LG_LEVEL = LGL_MIN;
+static mc_sstr_t LG_BUFFER = NULL;
+
+int logger_init(void) {
+    LG_BUFFER = mc_sstr_create(2048);
+    return 0;
+}
+
+void logger_deinit(void) {
+    logger_flush();
+
+    if (LG_BUFFER) {
+        mc_sstr_destroy(LG_BUFFER);
+        LG_BUFFER = NULL;
+    }
+}
 
 int logger_level(int level) {
     int old = LG_LEVEL;
@@ -19,6 +34,13 @@ int logger_level(int level) {
         LG_LEVEL = level;
     }
     return old;
+}
+
+void logger_flush(void) {
+    if (LG_BUFFER) {
+        fprintf(stdout, LG_BUFFER);
+        mc_sstr_clear(LG_BUFFER);
+    }
 }
 
 int logger(int type, int level, const char *fmt, ...) {
@@ -63,5 +85,11 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
 
     strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime(&ts));
 
-    return fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
+    if (LG_BUFFER) {
+        LG_BUFFER = mc_sstr_cat_format(LG_BUFFER, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
+    } else {
+        fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
+    }
+    
+    return 0;
 }

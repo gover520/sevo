@@ -11,6 +11,23 @@
 #include "common/logger.h"
 #include <string.h>
 
+static mc_sstr_t l_buffer_repr(mc_sstr_t s, const char *str, int len) {
+    if ((!str) || (len <= 0)) {
+        return s;
+    }
+    while (len--) {
+        if (isprint(*str)) {
+            s = mc_sstr_cat_buffer(s, str, 1);
+        } else {
+            char tmp[4] = { '\\', 'x', 0, 0 };
+            mc_byte2hex(*str, tmp + 2);
+            s = mc_sstr_cat_buffer(s, tmp, sizeof(tmp));
+        }
+        str += 1;
+    }
+    return s;
+}
+
 static mc_sstr_t l_buffer(lua_State *L) {
     int i, top = lua_gettop(L);
     mc_sstr_t buf = mc_sstr_create(1024);
@@ -34,7 +51,7 @@ static mc_sstr_t l_buffer(lua_State *L) {
         if (i > 1) {
             buf = mc_sstr_cat_buffer(buf, "\t", 1);
         }
-        buf = mc_sstr_cat_buffer(buf, s, (int)l);
+        buf = l_buffer_repr(buf, s, (int)l);
 
         lua_pop(L, 1);  /* pop result */
     }
@@ -116,9 +133,15 @@ static int l_loglevel(lua_State *L) {
     return 0;
 }
 
+static int l_logflush(lua_State *L) {
+    logger_flush();
+    return 0;
+}
+
 int luaopen_sevo_logger(lua_State* L) {
     luaL_Reg mod_logger[] = {
         { "loglevel", l_loglevel },
+        { "logflush", l_logflush },
         { "debug", l_debug },
         { "info", l_info },
         { "warn", l_warn },

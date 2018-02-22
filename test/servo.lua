@@ -1,17 +1,18 @@
 
 local test_func = {
     function()
-        print('-- Show version --')
-        print('Sevo Version: ' .. sevo._VERSION)
-        print('Sevo Version Num: ' .. sevo._VERSION_NUM)
-        print('Sevo Version Full: ' .. sevo._VERSION_FULL)
-        print('Sevo Version Major: ' .. sevo._VERSION_MAJOR)
-        print('Sevo Version Minor: ' .. sevo._VERSION_MINOR)
-        print('Sevo Version Patch: ' .. sevo._VERSION_PATCH)
-        print('Sevo OS: ' .. sevo._OS)
+        print("-- Show version --")
+        print("Sevo Version: " .. sevo._VERSION)
+        print("Sevo Version Num: " .. sevo._VERSION_NUM)
+        print("Sevo Version Full: " .. sevo._VERSION_FULL)
+        print("Sevo Version Major: " .. sevo._VERSION_MAJOR)
+        print("Sevo Version Minor: " .. sevo._VERSION_MINOR)
+        print("Sevo Version Patch: " .. sevo._VERSION_PATCH)
+        print("Sevo OS: " .. sevo._OS)
+        print("CPU Num: " .. sevo._CPUNUM)
     end,
     function()
-        print('-- Test re --')
+        print("-- Test re --")
         local re = require("re")
         print(re.find("the number 423 is odd", "[0-9]+"))           --> 12    14
         print(re.match("the number 423 is odd", "({%a+} / .)*"))    --> the    number    is    odd
@@ -19,13 +20,13 @@ local test_func = {
         print(re.gsub("hello World", "[aeiou]", "."))               --> h.ll. W.rld
     end,
     function()
-        print('-- Test socket --')
+        print("-- Test socket --")
         local socket = require("socket")
         local mime = require("mime")
         print("Socket Ver: " .. socket._VERSION .. ", Mime Ver: " .. mime._VERSION .. ".")
     end,
     function()
-        print('-- Test bigint --')
+        print("-- Test bigint --")
         local a = sevo.int(0)
         print(type(a))
         print(type(0))
@@ -41,29 +42,30 @@ local test_func = {
         print(#a)
         print(sevo.int(2) ^ 100)
 
-        local f = sevo.int('1234567890987654321234567890987654321')
+        local f = sevo.int("1234567890987654321234567890987654321")
         print(f)
         print(-f)
-        print(f:bnot())     -- Lua5.3: ~f
+        print(~f)
 
         local e = sevo.int(-9)
         print(e / 2)
         print(e % 2)
-        print(e:div(2))     -- Lua5.3: e / 2 or e // 2
-        print(e:bnot())     -- Lua5.3: ~e
+        print(e / 2)
+        print(e // 2)
+        print(~e)
 
         local b = sevo.int(123456789)
-        print(b:bnot())     -- Lua5.3: ~b
-        print(f:band(b))    -- Lua5.3: f & b
-        print(f:bor(b))     -- Lua5.3: f | b
-        print(f:bxor(b))    -- Lua5.3: f ~ b
+        print(~b)
+        print(f & b)
+        print(f | b)
+        print(f ~ b)
         print(2 * b)
 
-        print(f:mul(b))     -- f * b
-        print(b:unm())      -- -b
+        print(f * b)
+        print(-b)
     end,
     function()
-        print('-- Test factorial --')
+        print("-- Test factorial --")
         local n = 100
         local function fact_iter(accum, step)
             if step <= 1 then
@@ -74,7 +76,7 @@ local test_func = {
         print(fact_iter(sevo.int(1), n))
     end,
     function()
-        print('-- Test fibonacci --')
+        print("-- Test fibonacci --")
         local n = 100
         local function fib_iter(a, b, step)
             if step <= 0 then
@@ -85,7 +87,7 @@ local test_func = {
         print(fib_iter(sevo.int(0), sevo.int(1), n))
     end,
     function()
-        print('-- Test gcd --')
+        print("-- Test gcd --")
         local function gcd(a, b)
             if a:eq(0) then
                 return b
@@ -95,7 +97,7 @@ local test_func = {
         print(gcd(sevo.int(123456789), sevo.int(135792468)))
     end,
     function()
-        print('-- Test id --')
+        print("-- Test id --")
         local ids = {}
 
         sevo.id.init(1234)
@@ -106,30 +108,30 @@ local test_func = {
 
         for i, v in ipairs(ids) do
             local ts, nodeid, seq = sevo.id.split(v)
-            print('ID: ' .. v .. ', Timestamp: ' .. ts .. ', NodeID: ' .. nodeid .. ', Sequence: ' .. seq)
+            print("ID: " .. v .. ", Timestamp: " .. ts .. ", NodeID: " .. nodeid .. ", Sequence: " .. seq)
         end
     end,
     function()
-        print('-- Test timer --')
+        print("-- Test timer --")
         local function timer_iter(t, timeout)
             if t:expired() then
                 if timeout > 0 then
-                    print('Timer expired: ' .. timeout)
+                    print("Timer expired: " .. timeout)
                     t:set(timeout - 1000)
                     return timer_iter(t, timeout - 1000)
                 end
-                print('timer finish')
+                print("timer finish")
             else
-                print('timer sleep')
+                print("timer sleep")
                 sevo.time.sleep(200)
                 return timer_iter(t, timeout)
             end
         end
-        timer_iter(sevo.time.timer(3000), 3000)
+        timer_iter(sevo.time.timer(2000), 2000)
     end,
     function()
-        print('-- Test ffi --')
-        local ffi = require('ffi')
+        print("-- Test ffi --")
+        local ffi = require("ffi")
 
         ffi.cdef[[
             typedef struct { double x, y; } point_t;
@@ -137,13 +139,6 @@ local test_func = {
         ]]
 
         ffi.C.printf("Hello %s!\n", "world")
-
-        if ffi.os == "Windows" then
-            ffi.cdef[[
-                int MessageBoxA(void *w, const char *txt, const char *cap, int type);
-            ]]
-            ffi.C.MessageBoxA(nil, "Hello world!", "Test", 0)
-        end
 
         local point
         local mt = {
@@ -165,13 +160,30 @@ local test_func = {
 
         print(#b)           --> 12.5
     end,
+    function()
+        m1 = sevo.hash.md5()
+        m1:update('123456')
+        print(m1:digest())
+
+        m2 = sevo.hash.md5()
+        m2:update('123456')
+        print(m2:hexdigest())
+
+        s1 = sevo.hash.sha1()
+        s1:update('123456')
+        print(s1:digest())
+
+        s2 = sevo.hash.sha1()
+        s2:update('123456')
+        print(s2:hexdigest())
+    end,
 }
 local test_step = 1
 
 function sevo.load(args)
-    print('sevo load')
-    print('funcs: ' .. #test_func)
-    print('Work Path: ' .. sevo.vfs.getcwd());
+    print("sevo load")
+    print("funcs: " .. #test_func)
+    print("Work Path: " .. sevo.vfs.getcwd());
 
     for i, v in ipairs(args) do
         print(i, v)
@@ -179,16 +191,23 @@ function sevo.load(args)
 end
 
 function sevo.update(delta)
-    print('----- update ' .. delta .. ', ' .. test_step .. ' -----')
+    local t1, t2
+    print("----- update " .. delta .. ", " .. test_step .. " -----")
+
+    t1 = sevo.time.millisec()
+
     if test_step > #test_func then
         sevo.event.quit()
     else
         test_func[test_step]()
         test_step = test_step + 1
     end
-    print('----- end -----')
+
+    t2 = sevo.time.millisec()
+
+    print("----- end " .. t2 - t1 .. "ms -----")
 end
 
 function sevo.quit()
-    print('sevo quit')
+    print("sevo quit")
 end
