@@ -13,7 +13,7 @@
 
 static const char g_meta_xtea[] = { CODE_NAME "meta.xtea" };
 
-#define luaX_checkxtea(L, index)     (mc_xtea_t *)luaL_checkudata(L, index, g_meta_xtea)
+#define luaX_checkxtea(L, idx)  (mc_xtea_t *)luaL_checkudata(L, idx, g_meta_xtea)
 
 static int mcl_encode(lua_State * L) {
     mc_xtea_t *xtea = luaX_checkxtea(L, 1);

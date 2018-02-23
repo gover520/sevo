@@ -13,8 +13,8 @@
 static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
 static const char g_meta_fps[] = { CODE_NAME "meta.fps" };
 
-#define luaX_checktimer(L, idx)     (mc_timer_t *)luaL_checkudata(L, idx, g_meta_timer)
-#define luaX_checkfps(L, index)     (mc_fps_t *)luaL_checkudata(L, index, g_meta_fps)
+#define luaX_checktimer(L, idx) (mc_timer_t *)luaL_checkudata(L, idx, g_meta_timer)
+#define luaX_checkfps(L, idx)   (mc_fps_t *)luaL_checkudata(L, idx, g_meta_fps)
 
 static int mcl_timer_set(lua_State * L) {
     mc_timer_t *tmr = luaX_checktimer(L, 1);
