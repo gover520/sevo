@@ -11,12 +11,12 @@
 
 static mc_chan_t    *g_chan = NULL;
 
-int event_init(int capacity) {
+int event_init(void) {
     if (g_chan) {
         return 0;
     }
 
-    g_chan = mc_chan_create(capacity);
+    g_chan = mc_chan_create(128);
 
     return 0;
 }
@@ -44,17 +44,14 @@ static int event_poll(void) {
 }
 
 static int event_push(int ref) {
-    if (g_chan && mc_chan_can_write(g_chan)) {
-        if (0 == mc_chan_write(g_chan, (void *)(intptr_t)ref)) {
-            return 0;
-        }
+    if (g_chan) {
+        return mc_chan_write(g_chan, (void *)(intptr_t)ref);
     }
     return -1;
 }
 
 static int w_evt_init(lua_State * L) {
-    int qmax = (int)luaL_checkinteger(L, 1);
-    lua_pushboolean(L, 0 == event_init(qmax));
+    lua_pushboolean(L, 0 == event_init());
     return 1;
 }
 

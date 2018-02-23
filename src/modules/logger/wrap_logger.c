@@ -133,15 +133,9 @@ static int l_loglevel(lua_State *L) {
     return 0;
 }
 
-static int l_logflush(lua_State *L) {
-    logger_flush();
-    return 0;
-}
-
 int luaopen_sevo_logger(lua_State* L) {
     luaL_Reg mod_logger[] = {
         { "loglevel", l_loglevel },
-        { "logflush", l_logflush },
         { "debug", l_debug },
         { "info", l_info },
         { "warn", l_warn },

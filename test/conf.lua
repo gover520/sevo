@@ -14,7 +14,6 @@ function sevo.conf(c)
     print("----- end -----")
 
     -- you can modify configure in here
-    c.fps = 60
 
     -- set writeable directory
     sevo.vfs.identity("test")

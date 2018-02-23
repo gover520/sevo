@@ -11,41 +11,85 @@
 #include <stdio.h>
 #include "logger.h"
 
-static int LG_LEVEL = LGL_MIN;
-static mc_sstr_t LG_BUFFER = NULL;
+typedef struct logger_context_t {
+    mc_chan_t   *chan;
+    mc_mutex_t  mtx;
+    mc_cond_t   cnd;
+} logger_context_t;
+
+static int g_level = LGL_MIN;
+
+static void logger_thread(void *param) {
+    logger_context_t *ctx = *(logger_context_t **)param;
+    mc_sstr_t lmsg;
+    mc_fps_t fps;
+    void *p;
+
+    if (ctx) {
+        mc_fps_init(&fps, NULL, 10);
+
+        while (!mc_chan_is_shutdown(ctx->chan)) {
+            mc_fps_wait(&fps, NULL);
+
+            while (mc_chan_can_read(ctx->chan)) {
+                p = NULL;
+                mc_chan_read(ctx->chan, &p);
+                if (p) {
+                    lmsg = (mc_sstr_t)p;
+                    fprintf(stdout, "%s", lmsg);
+                    mc_sstr_destroy(lmsg);
+                }
+            }
+        }
+
+        mc_mutex_lock(&ctx->mtx);
+        mc_cond_signal(&ctx->cnd);
+        mc_mutex_unlock(&ctx->mtx);
+    }
+}
+
+static logger_context_t *g_ctx = NULL;
 
 int logger_init(void) {
-    if (LG_BUFFER) {
+    mc_thread_t t = { logger_thread, &g_ctx };
+
+    if (g_ctx) {
         return 0;
     }
 
-    LG_BUFFER = mc_sstr_create(2048);
+    g_ctx = (logger_context_t *)mc_malloc(sizeof(logger_context_t));
+    g_ctx->chan = mc_chan_create(2048);
+
+    mc_mutex_create(&g_ctx->mtx);
+    mc_cond_create(&g_ctx->cnd);
+
+    mc_thread_exec(&t, 1);
 
     return 0;
 }
 
 void logger_deinit(void) {
-    logger_flush();
+    if (g_ctx) {
+        mc_mutex_lock(&g_ctx->mtx);
+        mc_chan_shutdown(g_ctx->chan);
+        mc_cond_wait(&g_ctx->cnd, &g_ctx->mtx);
+        mc_mutex_unlock(&g_ctx->mtx);
 
-    if (LG_BUFFER) {
-        mc_sstr_destroy(LG_BUFFER);
-        LG_BUFFER = NULL;
+        mc_cond_destroy(&g_ctx->cnd);
+        mc_mutex_destroy(&g_ctx->mtx);
+        mc_chan_destroy(g_ctx->chan);
+
+        mc_free(g_ctx);
+        g_ctx = NULL;
     }
 }
 
 int logger_level(int level) {
-    int old = LG_LEVEL;
+    int old = g_level;
     if ((level >= LGL_MIN) && (level <= LGL_MAX)) {
-        LG_LEVEL = level;
+        g_level = level;
     }
     return old;
-}
-
-void logger_flush(void) {
-    if (LG_BUFFER) {
-        fprintf(stdout, "%s", LG_BUFFER);
-        mc_sstr_clear(LG_BUFFER);
-    }
 }
 
 int logger(int type, int level, const char *fmt, ...) {
@@ -63,11 +107,15 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     static const char c[] = { "#*!?" };
     static const char *p[] = { " C ", "LUA" };
 
+    mc_sstr_t lmsg;
     struct timeval tv;
     time_t ts;
-    char msg[1024];
     char tm[20];
     int ms;
+
+    if (!g_ctx) {
+        return -1;
+    }
 
     if ((type < LGT_MIN) || (type >= LGT_MAX)) {
         return -1;
@@ -77,11 +125,9 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
         return -1;
     }
 
-    if (level < LG_LEVEL) {
+    if (level < g_level) {
         return 0;
     }
-
-    vsnprintf(msg, sizeof(msg), fmt, argv);
 
     gettimeofday(&tv, NULL);
 
@@ -90,10 +136,14 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
 
     strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime(&ts));
 
-    if (LG_BUFFER) {
-        LG_BUFFER = mc_sstr_cat_format(LG_BUFFER, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
-    } else {
-        fprintf(stdout, "[%s] %s.%03d %c %s\n", p[type], tm, ms, c[level], msg);
+    lmsg = mc_sstr_create(128);
+    lmsg = mc_sstr_cat_format(lmsg, "[%s] %s.%03d %c ", p[type], tm, ms, c[level]);
+    lmsg = mc_sstr_cat_vformat(lmsg, fmt, argv);
+    lmsg = mc_sstr_cat_string(lmsg, "\n");
+
+    if (0 != mc_chan_write(g_ctx->chan, lmsg)) {
+        mc_sstr_destroy(lmsg);
+        return -1;
     }
 
     return 0;

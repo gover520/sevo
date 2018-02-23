@@ -25,6 +25,7 @@
 #include "modules/rand/wrap_rand.h"
 #include "modules/net/wrap_net.h"
 #include "modules/secure/wrap_secure.h"
+#include "modules/thread/wrap_thread.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -60,6 +61,7 @@ static int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".rand", luaopen_sevo_rand },
         { CODE_NAME ".net", luaopen_sevo_net },
         { CODE_NAME ".secure", luaopen_sevo_secure },
+        { CODE_NAME ".thread", luaopen_sevo_thread },
         /* vfs */
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
         /* logger */

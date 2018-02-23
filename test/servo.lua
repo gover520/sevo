@@ -269,7 +269,11 @@ function sevo.update(delta)
     t1 = sevo.time.millisec()
 
     if test_step > #test_func then
-        sevo.event.quit()
+        if 0 == delta % 2 then
+            sevo.event.quit()
+        else
+            sevo.event.quit("restart")
+        end
     else
         test_func[test_step]()
         test_step = test_step + 1

@@ -80,9 +80,7 @@ end
 function sevo.init()
     local c = {
         version = sevo._VERSION,
-        fps = 100,
         loglevel = "debug",
-        maxevent = 64,
         modules = {
             int = true,
             id = true,
@@ -92,6 +90,7 @@ function sevo.init()
             rand = true,
             net = true,
             secure = true,
+            thread = true,
         }
     }
 
@@ -118,6 +117,7 @@ function sevo.init()
         "rand",
         "net",
         "secure",
+        "thread",
     }) do
         if c.modules[v] then
             require("sevo." .. v)
@@ -137,7 +137,7 @@ function sevo.init()
             })
         end
 
-        sevo.event.init(c.maxevent)
+        sevo.event.init()
         createhandlers()
 
         sevo.event.poll_i = function()
@@ -162,15 +162,13 @@ function sevo.init()
     result = xpcall(require, error_handler, "servo");
     if not result then return false end
 
-    env.fps = c.fps
-
     return true
 end
 
 function sevo.run()
     if sevo.load then sevo.load(arg) end
 
-    local fps = sevo.time.fps(env.fps)
+    local fps = sevo.time.fps(100)
 
     return function()
         fps:wait();
@@ -188,8 +186,6 @@ function sevo.run()
         end
 
         if sevo.update then sevo.update(fps:delta()) end
-
-        sevo.logflush()
     end
 end
 

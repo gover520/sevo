@@ -1,5 +1,5 @@
 /*
- *  event.h
+ *  wrap_thread.h
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __EVENT_H__
-#define __EVENT_H__
+#ifndef __WRAP_THREAD_H__
+#define __WRAP_THREAD_H__
 
 #include "common/runtime.h"
 
@@ -16,13 +16,10 @@
 extern "C" {
 #endif
 
-    int event_init(void);
-    void event_deinit(void);
-
-    int luaopen_sevo_event(lua_State* L);
+    int luaopen_sevo_thread(lua_State* L);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __EVENT_H__ */
+#endif  /* __WRAP_THREAD_H__ */
