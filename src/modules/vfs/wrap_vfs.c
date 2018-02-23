@@ -12,6 +12,7 @@
 #include "wrap_vfs.h"
 #include "common/vfs.h"
 #include "common/version.h"
+#include "common/logger.h"
 
 static const char g_meta_vfile[] = { CODE_NAME "meta.vfile" };
 
@@ -23,6 +24,7 @@ static int w_load(lua_State *L, const char *name) {
 
     buffer = vfs_read(name, -1);
     if (!buffer) {
+        LG_ERR("Can not load %s.", name);
         return luaL_error(L, "Can not load %s.", name);
     }
 
@@ -30,6 +32,7 @@ static int w_load(lua_State *L, const char *name) {
     mc_sstr_destroy(buffer);
 
     if (0 != retval) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
 

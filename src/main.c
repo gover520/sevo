@@ -170,8 +170,8 @@ static int sevo_run(int argc, char *argv[], int *retval) {
     lua_close(L);
 
 clean:
-    vfs_deinit();
     event_deinit();
+    vfs_deinit();
 
     return done;
 }

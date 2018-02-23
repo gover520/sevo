@@ -28,18 +28,24 @@ local test_func = {
     function()
         print("-- Test bigint --")
         local a = sevo.int(0)
-        print(type(a))
-        print(type(0))
-        print(type(#a))
-        print(a == 0)           -- false, Lua equality must be 2 same objects
-        print(a == sevo.int(0))   -- true
-        print(a:eq(0))          -- a == 0
-        print(a:lt(0))          -- a < 1
-        print(a:le(0))          -- a <= 1
-        print(not a:le(0))      -- a > 0
-        print(not a:lt(0))      -- a >= 0
+        print("type(a):", type(a))
+        print("type(0):", type(0))
+        print("type(#a):", type(#a))
+        print("0 == a:", 0 == a)
+        print("a == 0:", a == 0)    -- false, Lua equality must be 2 same objects
+        print("a == sevo.int(0): ", a == sevo.int(0))   -- true
+        print("a:eq(0):", a:eq(0))  -- a == 0
+        print("a < 0:", a < 0)
+        print("a <= 0:", a <= 0)
+        print("a > 0:", a > 0)
+        print("a >= 0:", a >= 0)
+        print("0 < a:", 0 < a)
+        print("0 <= a:", 0 <= a)
+        print("0 > a:", 0 > a)
+        print("0 >= a:", 0 >= a)
 
-        print(#a)
+        print("a:", a)
+        print("#a:", #a)
         print(sevo.int(2) ^ 100)
 
         local f = sevo.int("1234567890987654321234567890987654321")

@@ -18,9 +18,11 @@
 #include "url.lua.h"
 #include "headers.lua.h"
 #include "mbox.lua.h"
+#include "common/logger.h"
 
 int luaopen_socket(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)socket_lua, sizeof(socket_lua), "socket.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);
@@ -29,6 +31,7 @@ int luaopen_socket(lua_State *L) {
 
 int luaopen_socket_ftp(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)ftp_lua, sizeof(ftp_lua), "ftp.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);
@@ -37,6 +40,7 @@ int luaopen_socket_ftp(lua_State *L) {
 
 int luaopen_socket_http(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)http_lua, sizeof(http_lua), "http.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);
@@ -45,6 +49,7 @@ int luaopen_socket_http(lua_State *L) {
 
 int luaopen_ltn12(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)ltn12_lua, sizeof(ltn12_lua), "ltn12.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);
@@ -53,6 +58,7 @@ int luaopen_ltn12(lua_State *L) {
 
 int luaopen_mime(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)mime_lua, sizeof(mime_lua), "mime.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);
@@ -61,6 +67,7 @@ int luaopen_mime(lua_State *L) {
 
 int luaopen_socket_smtp(lua_State *L) {
     if (0 != luaL_loadbuffer(L, (const char *)smtp_lua, sizeof(smtp_lua), "smtp.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
     lua_call(L, 0, LUA_MULTRET);

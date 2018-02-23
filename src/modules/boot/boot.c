@@ -8,6 +8,7 @@
  */
 
 #include "boot.h"
+#include "common/logger.h"
 #define EMBED_BOOT  1
 #if EMBED_BOOT
 #include "boot.lua.h"
@@ -18,6 +19,7 @@
 int luaopen_sevo_boot(lua_State* L) {
 #if EMBED_BOOT
     if (0 != luaL_loadbuffer(L, (const char *)boot_lua, sizeof(boot_lua), "boot.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
         return luaL_error(L, lua_tostring(L, -1));
     }
 
@@ -39,6 +41,7 @@ int luaopen_sevo_boot(lua_State* L) {
         fclose(fp);
 
         if (0 != retval) {
+            LG_ERR("%s", lua_tostring(L, -1));
             return luaL_error(L, lua_tostring(L, -1));
         }
         lua_pcall(L, 0, 1, LUA_MULTRET);

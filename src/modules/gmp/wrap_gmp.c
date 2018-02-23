@@ -418,7 +418,6 @@ int luaopen_sevo_int(lua_State* L) {
         { NULL, NULL }
     };
     luaL_Reg meta_int[] = {
-        /* operators */
         { "__gc", bigint__gc },
         { "__add", bigint_add },
         { "__sub", bigint_sub },
@@ -440,10 +439,7 @@ int luaopen_sevo_int(lua_State* L) {
         { "__le",  bigint_le },
         { "__tostring", bigint_tostring },
         { "__concat", bigint_concat },
-        /* methods */
-        { "eq", bigint_eq },
-        { "lt",  bigint_lt },
-        { "le",  bigint_le },
+        { "eq", bigint_eq }, /* Lua equality must be 2 same objects */
         { NULL, NULL }
     };
 
