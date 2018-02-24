@@ -249,6 +249,79 @@ local test_func = {
         print(d1, j)
         print(d2)
     end,
+    function()
+        local mode = "udp"
+        local n = sevo.net.new()
+
+        local s = n:server(mode, "0.0.0.0", 12345)
+        local c = n:connect(mode, "127.0.0.1", 12345)
+
+        local a, p = sevo.net.addr(s, "local")
+        print("Listen on " .. a .. ":" .. p)
+
+        local function addrstr(a, p)
+            return a .. ":" .. p
+        end
+
+        local function sessmode(e)
+            return "Session(" .. sevo.net.mode(e.who) ..  "://" .. e.who .. ") "
+        end
+
+        local function process_event(n, r)
+            local e = n:recv()
+
+            if not e then
+                return r
+            end
+
+            local a, p = sevo.net.addr(e.who, "remote")
+
+            if e.cmd == "incoming" then
+                print(sessmode(e) .. addrstr(a, p) .. " incoming")
+            elseif e.cmd == "conn-timeout" then
+                print(sessmode(e) .. addrstr(a, p) .. " connect timeout")
+            elseif e.cmd == "halo" then
+                print(sessmode(e) .. addrstr(a, p) .. " halo, " .. e.protover)
+                sevo.net.auth(e.who, "123456")
+            elseif e.cmd == "auth" then
+                print(sessmode(e) .. addrstr(a, p) .. " (" .. sevo.net.addr(e.who, "hwaddr") .. ") auth, " .. e.passwd)
+                if sevo.rand.randint(100) > 10 then
+                    sevo.net.accept(e.who, "Hello Guys!")
+                else
+                    sevo.net.reject(e.who, "Ugly!");
+                end
+            elseif e.cmd == "accepted" then
+                print(sessmode(e) .. addrstr(a, p) .. " accepted, " .. e.welcome)
+                sevo.net.ping(e.who, sevo.time.millisec())
+                sevo.net.send(e.who, "Really Good!")
+            elseif e.cmd == "rejected" then
+                print(sessmode(e) .. addrstr(a, p) .. " rejected, " .. e.reason)
+            elseif e.cmd == "ping" then
+                print(sessmode(e) .. addrstr(a, p) .. " ping, " .. e.time)
+                sevo.net.pong(e.who, e.time)
+            elseif e.cmd == "pong" then
+                print(sessmode(e) .. addrstr(a, p) .. " pong, " .. e.time)
+            elseif e.cmd == "outgoing" then
+                print(sessmode(e) .. addrstr(a, p) .. " outgoing")
+                r = r + 1
+            elseif e.cmd == "data" then
+                print(sessmode(e) .. addrstr(a, p) .. " data, " .. e.data)
+                sevo.net.send(e.who, "That's all right!")
+                sevo.net.close(e.who)
+            end
+
+            return process_event(n, r)
+        end
+
+        local keep_running = 2
+        local f = sevo.time.fps(100)
+
+        while keep_running > 0 do
+            f:wait()
+            keep_running = keep_running - process_event(n, 0)
+            n:update()
+        end
+    end,
 }
 local test_step = 1
 

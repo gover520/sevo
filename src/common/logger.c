@@ -53,18 +53,15 @@ static logger_context_t *g_ctx = NULL;
 int logger_init(void) {
     mc_thread_t t = { logger_thread, &g_ctx };
 
-    if (g_ctx) {
-        return 0;
+    if (!g_ctx) {
+        g_ctx = (logger_context_t *)mc_malloc(sizeof(logger_context_t));
+        g_ctx->chan = mc_chan_create(2048);
+
+        mc_mutex_create(&g_ctx->mtx);
+        mc_cond_create(&g_ctx->cnd);
+
+        mc_thread_exec(&t, 1);
     }
-
-    g_ctx = (logger_context_t *)mc_malloc(sizeof(logger_context_t));
-    g_ctx->chan = mc_chan_create(2048);
-
-    mc_mutex_create(&g_ctx->mtx);
-    mc_cond_create(&g_ctx->cnd);
-
-    mc_thread_exec(&t, 1);
-
     return 0;
 }
 

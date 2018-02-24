@@ -12,6 +12,7 @@
 #include "common/stacktrace.h"
 #include "common/logger.h"
 #include "common/vfs.h"
+#include "common/handle.h"
 #include "modules/gmp/wrap_gmp.h"
 #include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
@@ -132,6 +133,12 @@ static int sevo_run(int argc, char *argv[], int *retval) {
     lua_State *L;
     int done, stack;
 
+    if (0 != handle_init()) {
+        LG_ERR("Handle map init failed.");
+        done = DONE_QUIT;
+        goto clean;
+    }
+
     if (0 != vfs_init(argv[0])) {
         LG_ERR("VFS init failed.");
         done = DONE_QUIT;
@@ -177,6 +184,7 @@ static int sevo_run(int argc, char *argv[], int *retval) {
 clean:
     event_deinit();
     vfs_deinit();
+    handle_deinit();
 
     return done;
 }
