@@ -26,6 +26,7 @@
 #include "modules/net/wrap_net.h"
 #include "modules/secure/wrap_secure.h"
 #include "modules/thread/wrap_thread.h"
+#include "modules/math/wrap_math.h"
 #include <ffi.h>
 
 #define DONE_QUIT       0
@@ -66,6 +67,8 @@ static int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".vfs", luaopen_sevo_vfs },
         /* logger */
         { CODE_NAME ".logger", luaopen_sevo_logger },
+        /* math */
+        { CODE_NAME ".math", luaopen_sevo_math },
         /* boot loader */
         { CODE_NAME ".boot", luaopen_sevo_boot },
         { NULL, NULL }

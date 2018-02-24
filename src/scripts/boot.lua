@@ -35,6 +35,7 @@ function sevo.boot()
         return error("module '" .. name .. "' not found:")
     end
 
+    require("sevo.int")
     require("sevo.logger")
     require("sevo.vfs")
 
@@ -82,7 +83,6 @@ function sevo.init()
         version = sevo._VERSION,
         loglevel = "debug",
         modules = {
-            int = true,
             id = true,
             time = true,
             event = true,
@@ -109,7 +109,6 @@ function sevo.init()
     sevo.loglevel(c.loglevel)
 
     for i, v in ipairs({
-        "int",
         "id",
         "time",
         "event",
