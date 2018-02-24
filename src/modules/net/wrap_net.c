@@ -276,18 +276,18 @@ static int mcl_peer_addr(lua_State *L) {
     struct sockaddr_storage ss;
     mc_addr_t addr = { { 0 }, 0 };
     unsigned char hw[MC_HWADDR_LEN];
-    char hwaddr[MC_HWADDR_LEN * 2 + 1] = { 0 };
+    char hwaddr[MC_HWADDR_LEN * 2 + 6] = { 0 };
 
     if (0 == strcasecmp(ty, "hwaddr") ||
         0 == strcasecmp(ty, "macaddr")) {
         mc_net_hwaddr(peer, hw);
 
-        mc_byte2hex(hw[0], hwaddr + 0);
-        mc_byte2hex(hw[1], hwaddr + 2);
-        mc_byte2hex(hw[2], hwaddr + 4);
-        mc_byte2hex(hw[3], hwaddr + 6);
-        mc_byte2hex(hw[4], hwaddr + 8);
-        mc_byte2hex(hw[5], hwaddr + 10);
+        mc_byte2hex(hw[0], hwaddr + 0); hwaddr[2] = ':';
+        mc_byte2hex(hw[1], hwaddr + 3); hwaddr[5] = ':';
+        mc_byte2hex(hw[2], hwaddr + 6); hwaddr[8] = ':';
+        mc_byte2hex(hw[3], hwaddr + 9); hwaddr[11] = ':';
+        mc_byte2hex(hw[4], hwaddr + 12);hwaddr[14] = ':';
+        mc_byte2hex(hw[5], hwaddr + 15);
 
         lua_pushstring(L, hwaddr);
         return 1;
