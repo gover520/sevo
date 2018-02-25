@@ -31,7 +31,7 @@ static void logger_thread(void *param) {
         while (!mc_chan_is_shutdown(ctx->chan)) {
             mc_fps_wait(&fps, NULL);
 
-            while (mc_chan_can_read(ctx->chan)) {
+            while (mc_chan_readable(ctx->chan)) {
                 p = NULL;
                 mc_chan_read(ctx->chan, &p);
                 if (p) {

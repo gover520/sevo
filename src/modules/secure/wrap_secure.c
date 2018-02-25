@@ -8,7 +8,6 @@
  */
 
 #include "wrap_secure.h"
-#include "common/version.h"
 #include <string.h>
 
 static const char g_meta_xtea[] = { CODE_NAME "meta.xtea" };

@@ -8,7 +8,6 @@
  */
 
 #include "wrap_gmp.h"
-#include "common/version.h"
 
 static const char g_meta_int[] = { CODE_NAME ".meta.int" };
 

@@ -1,5 +1,5 @@
 /*
- *  wrap_thread.h
+ *  sevo.h
  *
  *  copyright (c) 2018 Xiongfei Shi
  *
@@ -7,8 +7,8 @@
  *  license: Apache-2.0
  */
 
-#ifndef __WRAP_THREAD_H__
-#define __WRAP_THREAD_H__
+#ifndef __SEVO_H__
+#define __SEVO_H__
 
 #include "common/runtime.h"
 
@@ -16,13 +16,10 @@
 extern "C" {
 #endif
 
-    int thread_init(void);
-    void thread_deinit(void);
-
-    int luaopen_sevo_thread(lua_State* L);
+    int luaopen_sevo(lua_State* L);
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif  /* __WRAP_THREAD_H__ */
+#endif  /* __SEVO_H__ */

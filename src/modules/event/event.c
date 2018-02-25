@@ -35,7 +35,7 @@ static int event_pump(void) {
 static int event_poll(void) {
     void *p = NULL;
 
-    if (g_chan && mc_chan_can_read(g_chan)) {
+    if (g_chan && mc_chan_readable(g_chan)) {
         if (0 == mc_chan_read(g_chan, &p)) {
             return (int)(intptr_t)p;
         }

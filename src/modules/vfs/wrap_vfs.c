@@ -11,7 +11,6 @@
 #include <string.h>
 #include "wrap_vfs.h"
 #include "common/vfs.h"
-#include "common/version.h"
 #include "common/logger.h"
 
 static const char g_meta_vfile[] = { CODE_NAME "meta.vfile" };

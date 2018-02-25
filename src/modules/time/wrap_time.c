@@ -8,7 +8,6 @@
  */
 
 #include "wrap_time.h"
-#include "common/version.h"
 
 static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
 static const char g_meta_fps[] = { CODE_NAME "meta.fps" };

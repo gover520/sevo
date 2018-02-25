@@ -8,7 +8,6 @@
  */
 
 #include "wrap_hash.h"
-#include "common/version.h"
 #include "modules/gmp/wrap_gmp.h"
 
 static unsigned int g_tbl_crc32[MC_CRC_TABLE_SIZE] = { 0 };

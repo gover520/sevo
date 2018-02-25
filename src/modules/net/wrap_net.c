@@ -8,7 +8,6 @@
  */
 
 #include "wrap_net.h"
-#include "common/version.h"
 #include "common/handle.h"
 #include "modules/gmp/wrap_gmp.h"
 #include <string.h>
