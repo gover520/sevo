@@ -127,7 +127,7 @@ static void thread_worker(void *param) {
     lua_pop(L, 1);
 
     luaX_require(L, CODE_NAME ".parallel");
-    lua_pcall(L, 0, 0, LUA_MULTRET);
+    lua_call(L, 0, LUA_MULTRET);
 
     lua_close(L);
 

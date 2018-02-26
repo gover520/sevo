@@ -8,6 +8,7 @@
  */
 
 #include "wrap_logger.h"
+#include "logger.lua.h"
 #include "common/logger.h"
 #include <string.h>
 
@@ -144,5 +145,12 @@ int luaopen_sevo_logger(lua_State* L) {
     };
 
     luaX_register_funcs(L, mod_logger);
+
+    if (0 != luaL_loadbuffer(L, (const char *)logger_lua, sizeof(logger_lua), "logger.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
+        return luaL_error(L, lua_tostring(L, -1));
+    }
+    lua_call(L, 0, LUA_MULTRET);
+
     return 0;
 }

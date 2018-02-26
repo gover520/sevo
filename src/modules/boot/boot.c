@@ -9,7 +9,7 @@
 
 #include "boot.h"
 #include "common/logger.h"
-#define EMBED_BOOT  0
+#define EMBED_BOOT  1
 #if EMBED_BOOT
 #include "boot.lua.h"
 #include "parallel.lua.h"
@@ -18,7 +18,7 @@
 #endif
 
 #if !EMBED_BOOT
-static load_luafile(lua_State* L, const char *filename) {
+static int load_luafile(lua_State* L, const char *filename) {
     char *buffer = NULL;
     int retval, len = (int)mc_file_length(filename);
     FILE *fp = fopen(filename, "r");
@@ -57,7 +57,6 @@ int luaopen_sevo_boot(lua_State* L) {
 #else
     return load_luafile(L, "src/scripts/boot.lua");
 #endif
-    
 }
 
 int luaopen_sevo_parallel(lua_State* L) {

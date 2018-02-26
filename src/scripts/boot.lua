@@ -15,32 +15,9 @@ local function error_handler(errmsg)
 end
 
 function sevo.boot()
-    -- Hack require for extensions
-    env.require = _G["require"]
-    _G["require"] = function(name)
-        local ok, mod
-
-        -- find global
-        ok, mod = pcall(env.require, name)
-        if ok then return mod end
-
-        -- find sevo extensions
-        ok, mod = pcall(env.require, "_extensions_." .. name)
-        if ok then return mod end
-
-        -- find project extensions
-        ok, mod = pcall(env.require, "extensions." .. name)
-        if ok then return mod end
-
-        return error("module '" .. name .. "' not found:")
-    end
-
     require("sevo.int")
     require("sevo.logger")
     require("sevo.vfs")
-
-    -- Redirect print to sevo.info
-    _G["print"] = sevo.info
 
     local function get_fullpath(p)
         local np = p:gsub("\\", "/")
@@ -138,19 +115,6 @@ function sevo.init()
 
         sevo.event.init()
         createhandlers()
-
-        sevo.event.poll_i = function()
-            return table.unpack(sevo.event.poll_t() or {})
-        end
-        sevo.event.poll = function()
-            return sevo.event.poll_i
-        end
-        sevo.event.push = function(...)
-            sevo.event.push_t(table.pack(...))
-        end
-        sevo.event.quit = function(a)
-            sevo.event.push("quit", a or 0)
-        end
     end
 
     if not sevo.vfs.info("servo.lua") then

@@ -8,6 +8,8 @@
  */
 
 #include "event.h"
+#include "event.lua.h"
+#include "common/logger.h"
 
 static mc_chan_t    *g_chan = NULL;
 
@@ -98,5 +100,14 @@ int luaopen_sevo_event(lua_State* L) {
     };
 
     luaX_register_module(L, "event", mod_event);
+
+    if (0 != luaL_loadbuffer(L, (const char *)event_lua, sizeof(event_lua), "event.lua")) {
+        LG_ERR("%s", lua_tostring(L, -1));
+        return luaL_error(L, lua_tostring(L, -1));
+    }
+
+    lua_call(L, 0, LUA_MULTRET);
+    lua_pop(L, 1);
+
     return 0;
 }
