@@ -67,6 +67,7 @@ int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".math", luaopen_sevo_math },
         /* boot loader */
         { CODE_NAME ".boot", luaopen_sevo_boot },
+        { CODE_NAME ".parallel", luaopen_sevo_parallel },
         { NULL, NULL }
     };
 

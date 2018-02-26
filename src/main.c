@@ -99,9 +99,9 @@ int main(int argc, char *argv[]) {
     }
 
     mc_init();
+    install_stacktrace();
     logger_init();
     thread_init();
-    install_stacktrace();
 
     do {
         retval = -1;

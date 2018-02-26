@@ -322,6 +322,23 @@ local test_func = {
             n:update()
         end
     end,
+    function()
+        local t1 = sevo.thread.new("test-thread")
+        print("Status: " .. t1:status())
+
+        t1:start()
+        print("Status: " .. t1:status())
+
+        t1:write("Hello")
+
+        while not t1:readable() do
+            sevo.time.sleep(10)
+        end
+        print("Read: " .. t1:read())
+
+        t1:join()
+        print("Status: " .. t1:status())
+    end,
 }
 local test_step = 1
 
@@ -342,11 +359,11 @@ function sevo.update(delta)
     t1 = sevo.time.millisec()
 
     if test_step > #test_func then
-        if 0 == delta % 2 then
+        --if 0 == delta % 2 then
             sevo.event.quit()
-        else
-            sevo.event.quit("restart")
-        end
+        --else
+        --    sevo.event.quit("restart")
+        --end
     else
         test_func[test_step]()
         test_step = test_step + 1

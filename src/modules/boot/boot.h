@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
     int luaopen_sevo_boot(lua_State* L);
+    int luaopen_sevo_parallel(lua_State* L);
 
 #ifdef __cplusplus
 };

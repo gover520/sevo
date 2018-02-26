@@ -134,7 +134,7 @@ int vlogger(int type, int level, const char *fmt, va_list argv) {
     strftime(tm, sizeof(tm), "%Y-%m-%d %H:%M:%S", localtime(&ts));
 
     lmsg = mc_sstr_create(128);
-    lmsg = mc_sstr_cat_format(lmsg, "[%s] %s.%03d %c ", p[type], tm, ms, c[level]);
+    lmsg = mc_sstr_cat_format(lmsg, "[%s][%d] %s.%03d %c ", p[type], mc_thread_id(), tm, ms, c[level]);
     lmsg = mc_sstr_cat_vformat(lmsg, fmt, argv);
     lmsg = mc_sstr_cat_string(lmsg, "\n");
 

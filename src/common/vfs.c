@@ -150,18 +150,23 @@ int vfs_info(const char *file, vfinfo_t *info) {
         return -1;
     }
 
-    info->size = stat.filesize;
-    info->modtime = stat.modtime;
-    info->createtime = stat.createtime;
+    if (info) {
+        info->size = stat.filesize;
+        info->modtime = stat.modtime;
+        info->createtime = stat.createtime;
 
-    if (PHYSFS_FILETYPE_REGULAR == stat.filetype) {
-        info->type = FILETYPE_FILE;
-    } else if (PHYSFS_FILETYPE_DIRECTORY == stat.filetype) {
-        info->type = FILETYPE_DIR;
-    } else if (PHYSFS_FILETYPE_SYMLINK == stat.filetype) {
-        info->type = FILETYPE_SYMLINK;
-    } else {
-        info->type = FILETYPE_OTHER;
+        if (PHYSFS_FILETYPE_REGULAR == stat.filetype) {
+            info->type = FILETYPE_FILE;
+        }
+        else if (PHYSFS_FILETYPE_DIRECTORY == stat.filetype) {
+            info->type = FILETYPE_DIR;
+        }
+        else if (PHYSFS_FILETYPE_SYMLINK == stat.filetype) {
+            info->type = FILETYPE_SYMLINK;
+        }
+        else {
+            info->type = FILETYPE_OTHER;
+        }
     }
 
     return 0;
