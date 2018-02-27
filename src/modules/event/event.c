@@ -101,13 +101,9 @@ int luaopen_sevo_event(lua_State* L) {
 
     luaX_register_module(L, "event", mod_event);
 
-    if (0 != luaL_loadbuffer(L, (const char *)event_lua, sizeof(event_lua), "event.lua")) {
-        LG_ERR("%s", lua_tostring(L, -1));
-        return luaL_error(L, lua_tostring(L, -1));
+    if (LUA_OK == luaX_loadbuffer(L, (const char *)event_lua, sizeof(event_lua), "event.lua")) {
+        lua_call(L, 0, LUA_MULTRET);
     }
-
-    lua_call(L, 0, LUA_MULTRET);
-    lua_pop(L, 1);
 
     return 0;
 }

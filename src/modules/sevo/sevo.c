@@ -9,7 +9,6 @@
 
 #include "sevo.h"
 #include "sevo.lua.h"
-#include "common/logger.h"
 #include "modules/gmp/wrap_gmp.h"
 #include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
@@ -114,11 +113,9 @@ int luaopen_sevo(lua_State * L) {
         luaX_preload(L, l->name, l->func);
     }
 
-    if (0 != luaL_loadbuffer(L, (const char *)sevo_lua, sizeof(sevo_lua), "sevo.lua")) {
-        LG_ERR("%s", lua_tostring(L, -1));
-        return luaL_error(L, lua_tostring(L, -1));
+    if (LUA_OK == luaX_loadbuffer(L, (const char *)sevo_lua, sizeof(sevo_lua), "sevo.lua")) {
+        lua_call(L, 0, LUA_MULTRET);
     }
-    lua_call(L, 0, LUA_MULTRET);
 
     return 1;
 }

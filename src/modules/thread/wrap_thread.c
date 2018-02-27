@@ -118,7 +118,7 @@ static void thread_worker(void *param) {
     mc_cond_signal(&thread->cond);
     mc_mutex_unlock(&thread->mutex);
 
-    L = luaL_newstate();
+    L = luaX_newstate();
     luaL_openlibs(L);
 
     luaX_preload(L, CODE_NAME, luaopen_sevo);
@@ -128,7 +128,7 @@ static void thread_worker(void *param) {
 
     luaX_require(L, CODE_NAME ".parallel");
     lua_call(L, 0, LUA_MULTRET);
-
+    
     lua_close(L);
 
     mc_mutex_lock(&thread->mutex);
@@ -155,11 +155,9 @@ static int mcl_thread_run(lua_State * L) {
         thread->status = THREAD_RUNNING;
         mc_mutex_unlock(&thread->mutex);
 
-        if (0 != luaL_loadbuffer(L, data, mc_sstr_length(data), thread->file)) {
-            LG_ERR("%s", lua_tostring(L, -1));
-            luaL_error(L, lua_tostring(L, -1));
+        if (LUA_OK == luaX_loadbuffer(L, data, mc_sstr_length(data), thread->file)) {
+            lua_call(L, 0, LUA_MULTRET);
         }
-        lua_call(L, 0, LUA_MULTRET);
     }
 
     mc_sstr_destroy(data);

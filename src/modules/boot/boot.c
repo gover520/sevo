@@ -8,7 +8,6 @@
  */
 
 #include "boot.h"
-#include "common/logger.h"
 #define EMBED_BOOT  1
 #if EMBED_BOOT
 #include "boot.lua.h"
@@ -20,7 +19,7 @@
 #if !EMBED_BOOT
 static int load_luafile(lua_State* L, const char *filename) {
     char *buffer = NULL;
-    int retval, len = (int)mc_file_length(filename);
+    int len = (int)mc_file_length(filename);
     FILE *fp = fopen(filename, "r");
 
     if (fp) {
@@ -29,16 +28,12 @@ static int load_luafile(lua_State* L, const char *filename) {
         buffer = (char *)mc_calloc(1, len + 1);
         fread(buffer, len, 1, fp);
 
-        retval = luaL_loadbuffer(L, buffer, (size_t)strlen(buffer), mc_base_name(fn, filename, '/'));
+        if (LUA_OK == luaX_loadbuffer(L, buffer, (int)strlen(buffer), mc_base_name(fn, filename, '/'))) {
+            lua_call(L, 0, LUA_MULTRET);
+        }
 
         mc_free(buffer);
         fclose(fp);
-
-        if (0 != retval) {
-            LG_ERR("%s", lua_tostring(L, -1));
-            return luaL_error(L, lua_tostring(L, -1));
-        }
-        lua_call(L, 0, LUA_MULTRET);
     }
 
     return 1;
@@ -47,12 +42,9 @@ static int load_luafile(lua_State* L, const char *filename) {
 
 int luaopen_sevo_boot(lua_State* L) {
 #if EMBED_BOOT
-    if (0 != luaL_loadbuffer(L, (const char *)boot_lua, sizeof(boot_lua), "boot.lua")) {
-        LG_ERR("%s", lua_tostring(L, -1));
-        return luaL_error(L, lua_tostring(L, -1));
+    if (LUA_OK == luaX_loadbuffer(L, boot_lua, sizeof(boot_lua), "boot.lua")) {
+        lua_call(L, 0, LUA_MULTRET);
     }
-
-    lua_call(L, 0, LUA_MULTRET);
     return 1;
 #else
     return load_luafile(L, "src/scripts/boot.lua");
@@ -61,12 +53,9 @@ int luaopen_sevo_boot(lua_State* L) {
 
 int luaopen_sevo_parallel(lua_State* L) {
 #if EMBED_BOOT
-    if (0 != luaL_loadbuffer(L, (const char *)parallel_lua, sizeof(parallel_lua), "parallel.lua")) {
-        LG_ERR("%s", lua_tostring(L, -1));
-        return luaL_error(L, lua_tostring(L, -1));
+    if (LUA_OK == luaX_loadbuffer(L, parallel_lua, sizeof(parallel_lua), "parallel.lua")) {
+        lua_call(L, 0, LUA_MULTRET);
     }
-
-    lua_call(L, 0, LUA_MULTRET);
     return 1;
 #else
     return load_luafile(L, "src/scripts/parallel.lua");

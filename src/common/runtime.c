@@ -9,6 +9,7 @@
 
 #include "runtime.h"
 #include "version.h"
+#include "logger.h"
 
 int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions) {
     const luaL_Reg *l;
@@ -103,6 +104,16 @@ int luaX_getsevo(lua_State *L, const char *name) {
     lua_replace(L, -2);
 
     return 0;
+}
+
+int luaX_loadbuffer(lua_State *L, const void *buff, int size, const char *name) {
+    int retval = luaL_loadbuffer(L, (const char *)buff, size, name);
+
+    if (LUA_OK != retval) {
+        LG_ERR("%s", lua_tostring(L, -1));
+        luaL_error(L, lua_tostring(L, -1));
+    }
+    return retval;
 }
 
 void *luaX_newuserdata(lua_State * L, const char *metaname, int size) {

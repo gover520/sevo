@@ -46,7 +46,7 @@ static int sevo_run(int argc, char *argv[], int *retval) {
         goto clean;
     }
 
-    L = luaL_newstate();
+    L = luaX_newstate();
 
     luaL_checkversion(L);
     luaL_openlibs(L);
