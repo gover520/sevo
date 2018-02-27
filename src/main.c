@@ -15,6 +15,7 @@
 #include "modules/sevo/sevo.h"
 #include "modules/event/event.h"
 #include "modules/thread/wrap_thread.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define DONE_QUIT       0
@@ -90,6 +91,14 @@ clean:
     return done;
 }
 
+MC_DECLARE_ALLOC_CB(sevo_allocator, ptr, size, file, func, line) {
+    if (size) {
+        return realloc(ptr, size);
+    }
+    free(ptr);
+    return NULL;
+}
+
 int main(int argc, char *argv[]) {
     int done, retval;
 
@@ -98,6 +107,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    mc_set_allocator(sevo_allocator);
     mc_init();
     install_stacktrace();
     logger_init();

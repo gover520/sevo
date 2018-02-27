@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-    #define luaX_newstate()     luaL_newstate()
+    lua_State *luaX_newstate(void);
     int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions);
     int luaX_register_type(lua_State *L, const char *metaname, const luaL_Reg *functions);
     int luaX_register_funcs(lua_State *L, const luaL_Reg *functions);

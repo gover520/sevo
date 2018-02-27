@@ -16,10 +16,31 @@ static char g_base_dir[MC_MAX_PATH] = { 0 };
 static char g_ident_dir[MC_MAX_PATH] = { 0 };
 static char g_ext_dir[MC_MAX_PATH] = { 0 };
 
+static void *physfs_malloc(PHYSFS_uint64 size) {
+    return mc_malloc(size);
+}
+
+static void *physfs_realloc(void *mem, PHYSFS_uint64 size) {
+    return mc_realloc(mem, size);
+}
+
+static void physfs_free(void *mem) {
+    mc_free(mem);
+}
+
 int vfs_init(const char *argv0) {
+    PHYSFS_Allocator physfs_allocator = {
+        NULL, NULL,
+        physfs_malloc,
+        physfs_realloc,
+        physfs_free
+    };
+
     if (PHYSFS_isInit()) {
         return 0;
     }
+
+    PHYSFS_setAllocator(&physfs_allocator);
 
     if (!PHYSFS_init(argv0)) {
         return -1;

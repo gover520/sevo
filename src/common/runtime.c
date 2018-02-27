@@ -11,6 +11,24 @@
 #include "version.h"
 #include "logger.h"
 
+static void *luavm_alloc(void *ud, void *ptr, size_t osize, size_t nsize) {
+    (void)ud; (void)osize;
+    return mc_realloc(ptr, nsize);
+}
+
+static int luavm_panic(lua_State *L) {
+    lua_writestringerror("PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1));
+    return 0;
+}
+
+lua_State *luaX_newstate(void) {
+    lua_State *L = lua_newstate(luavm_alloc, NULL);
+    if (L) {
+        lua_atpanic(L, &luavm_panic);
+    }
+    return L;
+}
+
 int luaX_register_module(lua_State *L, const char *name, const luaL_Reg *functions) {
     const luaL_Reg *l;
 
