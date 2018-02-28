@@ -23,6 +23,10 @@
 #include <sys/types.h>
 #include "midl.h"
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4146 4244 4267)
+#endif
+
 /** @defgroup internal	LMDB Internals
  *	@{
  */

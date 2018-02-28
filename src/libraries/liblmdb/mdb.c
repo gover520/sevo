@@ -43,6 +43,10 @@
 #include <windows.h>
 #include <wchar.h>				/* get wcscpy() */
 
+#ifdef _MSC_VER
+# pragma warning(disable : 4146 4172 4244 4267 4333 4996)
+#endif
+
 /** getpid() returns int; MinGW defines pid_t but MinGW64 typedefs it
  *  as int64 which is wrong. MSVC doesn't define it at all, so just
  *  don't use it.

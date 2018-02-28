@@ -339,6 +339,31 @@ local test_func = {
         t1:join()
         print("Status: " .. t1:status())
     end,
+    function()
+        local db = sevo.dbm.open("testdb")
+        db:put("hello", "world")
+        db:put("niubi", "tiger")
+        db:put("aaa", "bbbb")
+        db:put("ccc", "ddd")
+        db:put("eee", "fff")
+        db:put("aaa", "ggg")
+        db:del("ccc")
+        db:del("eee")
+
+        db:sync()
+
+        print(db:get("hello"))
+        print(db:get("niubi"))
+        print(db:get("aaa"))
+
+        local ks = db:keys()
+
+        for k, v in ipairs(ks) do
+            print(k, v)
+        end
+
+        db:close()
+    end,
 }
 local test_step = 1
 

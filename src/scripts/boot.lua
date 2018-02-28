@@ -68,6 +68,7 @@ function sevo.init()
             net = true,
             secure = true,
             thread = true,
+            dbm = true,
         }
     }
 
@@ -94,6 +95,7 @@ function sevo.init()
         "net",
         "secure",
         "thread",
+        "dbm",
     }) do
         if c.modules[v] then
             require("sevo." .. v)
