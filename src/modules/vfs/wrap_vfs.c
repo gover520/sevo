@@ -145,11 +145,27 @@ static int w_identity(lua_State *L) {
 }
 
 static int w_mount(lua_State *L) {
+    size_t l = 0;
     const char *dir = luaL_checkstring(L, 1);
     const char *mount = luaL_checkstring(L, 2);
-    int addpath = luaX_optboolean(L, 3, 1);
+    const char *data = NULL;
+    int addpath = 1;
 
-    lua_pushboolean(L, 0 == vfs_mount(dir, mount, addpath));
+    if (lua_gettop(L) >= 3) {
+        if (lua_isboolean(L, 3)) {
+            addpath = luaX_optboolean(L, 3, 1);
+            data = luaL_optlstring(L, 4, NULL, &l);
+        } else {
+            data = luaL_optlstring(L, 3, NULL, &l);
+            addpath = luaX_optboolean(L, 4, 1);
+        }
+    }
+
+    if (data) {
+        lua_pushboolean(L, 0 == vfs_mount_buffer(data, (int)l, dir, mount, addpath));
+    } else {
+        lua_pushboolean(L, 0 == vfs_mount(dir, mount, addpath));
+    }
     return 1;
 }
 

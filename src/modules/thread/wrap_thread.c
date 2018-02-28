@@ -20,6 +20,7 @@ typedef struct mcl_thread_t {
     int         tid;
     int         status;
     mc_sstr_t   file;
+    mc_sstr_t   progm;
     mc_chan_t   *chan0; /* handle(w) -> thread(r) */
     mc_chan_t   *chan1; /* handle(r) <- thread(w) */
     mc_mutex_t  mutex;
@@ -31,6 +32,7 @@ static mc_tls_t g_tls;
 
 static const char g_meta_thread[] = { CODE_NAME "meta.thread" };
 
+#define QSIZE_NUM                   64
 #define luaX_checkthread(L, idx)    (mcl_thread_t *)luaL_checkudata(L, idx, g_meta_thread)
 #define local_thread()              (mcl_thread_t *)mc_tls_get_value(g_tls)
 #define tidx(i)                     (local_thread() ? ((i) - 1) : (i))
@@ -99,6 +101,9 @@ static int mcl_thread__gc(lua_State * L) {
         mc_cond_destroy(&thread->cond);
         mc_mutex_destroy(&thread->mutex);
 
+        if (thread->progm) {
+            mc_sstr_destroy(thread->progm);
+        }
         mc_sstr_destroy(thread->file);
     }
     return 0;
@@ -128,7 +133,7 @@ static void thread_worker(void *param) {
 
     luaX_require(L, CODE_NAME ".parallel");
     lua_call(L, 0, LUA_MULTRET);
-    
+
     lua_close(L);
 
     mc_mutex_lock(&thread->mutex);
@@ -141,26 +146,29 @@ static void thread_worker(void *param) {
 
 static int mcl_thread_run(lua_State * L) {
     mcl_thread_t *thread = local_thread();
-    mc_sstr_t data;
 
     if (!thread) {
         LG_ERR("Not a thread.");
         return luaL_error(L, "Not a thread.");
     }
 
-    data = vfs_read(thread->file, -1);
-
-    if (data) {
-        mc_mutex_lock(&thread->mutex);
-        thread->status = THREAD_RUNNING;
-        mc_mutex_unlock(&thread->mutex);
-
-        if (LUA_OK == luaX_loadbuffer(L, data, mc_sstr_length(data), thread->file)) {
+    if (thread->progm) {
+        if (LUA_OK == luaX_loadbuffer(L, thread->progm, mc_sstr_length(thread->progm), thread->file)) {
             lua_call(L, 0, LUA_MULTRET);
         }
+    } else {
+        mc_sstr_t data = vfs_read(thread->file, -1);
+        if (data) {
+            if (LUA_OK == luaX_loadbuffer(L, data, mc_sstr_length(data), thread->file)) {
+                lua_call(L, 0, LUA_MULTRET);
+            }
+        }
+        mc_sstr_destroy(data);
     }
 
-    mc_sstr_destroy(data);
+    mc_mutex_lock(&thread->mutex);
+    thread->status = THREAD_RUNNING;
+    mc_mutex_unlock(&thread->mutex);
 
     return 1;
 }
@@ -168,7 +176,7 @@ static int mcl_thread_run(lua_State * L) {
 static int mcl_thread_start(lua_State * L) {
     mcl_thread_t *thread = luaX_checkthread(L, 1);
 
-    if (0 != vfs_info(thread->file, NULL)) {
+    if (!thread->progm && (0 != vfs_info(thread->file, NULL))) {
         return luaL_error(L, "Thread create failed, %s not found.", thread->file);
     }
 
@@ -303,13 +311,28 @@ static int mcl_thread_read_size(lua_State * L) {
 }
 
 static int mcl_thread_new(lua_State * L) {
+    size_t l = 0;
     const char *fn = luaL_checkstring(L, 1);
-    int qsize = (int)luaL_optinteger(L, 2, 512);
-    mcl_thread_t *thread = (mcl_thread_t *)luaX_newuserdata(L, g_meta_thread, sizeof(mcl_thread_t));
+    const char *pgm = NULL;
+    int qsize = QSIZE_NUM;
+    mcl_thread_t *thread;
+
+    if (lua_gettop(L) >= 2) {
+        if (lua_isinteger(L, 2)) {
+            qsize = (int)luaL_optinteger(L, 2, QSIZE_NUM);
+            pgm = luaL_optlstring(L, 3, NULL, &l);
+        } else {
+            pgm = luaL_optlstring(L, 2, NULL, &l);
+            qsize = (int)luaL_optinteger(L, 3, QSIZE_NUM);
+        }
+    }
+
+    thread = (mcl_thread_t *)luaX_newuserdata(L, g_meta_thread, sizeof(mcl_thread_t));
 
     thread->tid = -1;
     thread->status = THREAD_READY;
     thread->file = mc_sstr_format("%s.lua", fn);
+    thread->progm = pgm ? mc_sstr_from_buffer(pgm, (int)l) : NULL;
 
     thread->chan0 = mc_chan_create(qsize);
     thread->chan1 = mc_chan_create(qsize);

@@ -11,6 +11,7 @@
 #include "common/logger.h"
 #include "common/vfs.h"
 #include <lmdb.h>
+#include <string.h>
 
 typedef struct dbm_t {
     MDB_env     *env;
@@ -239,7 +240,7 @@ static int dbm_open(lua_State * L) {
 
     dbm->env = env;
     dbm->dbi = dbi;
-    
+
     return 1;
 }
 
