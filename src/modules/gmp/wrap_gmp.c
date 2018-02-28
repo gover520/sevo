@@ -25,6 +25,7 @@ static void gmp_free(void *mem, size_t size) {
 
 int gmp_init(void) {
     mp_set_memory_functions(gmp_malloc, gmp_realloc, gmp_free);
+    return 0;
 }
 
 void gmp_deinit(void) {

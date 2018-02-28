@@ -9,42 +9,38 @@
 
 #include "allocator.h"
 #include <stdlib.h>
+#include <tlsf.h>
 
-#define USE_TLSF            1
+#ifndef _WIN32
+# include <unistd.h>
+# include <sys/mman.h>
+#else  /* _WIN32 */
+# include <Windows.h>
+# include <errno.h>
+# include <io.h>
 
-#if USE_TLSF
-# include <tlsf.h>
+#define PROT_NONE           0
+#define PROT_READ           1
+#define PROT_WRITE          2
+#define PROT_EXEC           4
 
-# ifndef _WIN32
-#  include <unistd.h>
-#  include <sys/mman.h>
-# else  /* _WIN32 */
-#  include <Windows.h>
-#  include <errno.h>
-#  include <io.h>
+#define MAP_FILE            0
+#define MAP_SHARED          1
+#define MAP_PRIVATE         2
+#define MAP_TYPE            0x0F
+#define MAP_FIXED           0x10
+#define MAP_ANONYMOUS       0x20
+#define MAP_ANON            MAP_ANONYMOUS
 
-# define PROT_NONE          0
-# define PROT_READ          1
-# define PROT_WRITE         2
-# define PROT_EXEC          4
+#define MAP_FAILED          ((void *)-1)
 
-# define MAP_FILE           0
-# define MAP_SHARED         1
-# define MAP_PRIVATE        2
-# define MAP_TYPE           0x0F
-# define MAP_FIXED          0x10
-# define MAP_ANONYMOUS      0x20
-# define MAP_ANON           MAP_ANONYMOUS
+#define MS_ASYNC            1
+#define MS_SYNC             2
+#define MS_INVALIDATE       4
 
-# define MAP_FAILED         ((void *)-1)
-
-# define MS_ASYNC           1
-# define MS_SYNC            2
-# define MS_INVALIDATE      4
-
-# ifndef FILE_MAP_EXECUTE
-#  define FILE_MAP_EXECUTE  0x0020
-# endif
+#ifndef FILE_MAP_EXECUTE
+# define FILE_MAP_EXECUTE   0x0020
+#endif
 
 static int _mmap_error(DWORD err, int deferr) {
     if (0 == err) {
@@ -181,13 +177,13 @@ static int munlock(const void *addr, size_t len) {
     }
     return 0;
 }
-# endif /* _WIN32 */
+#endif /* _WIN32 */
 
-# ifndef MAP_ANONYMOUS
-#  define MAP_ANONYMOUS      MAP_ANON
-# endif
+#ifndef MAP_ANONYMOUS
+# define MAP_ANONYMOUS      MAP_ANON
+#endif
 
-# define DEFAULT_AREA_SIZE   16384
+#define DEFAULT_AREA_SIZE   (1024 * 1024)
 
 static void *get_new_area(size_t *size) {
     static size_t pagesize = 0;
@@ -203,6 +199,9 @@ static void *get_new_area(size_t *size) {
 # endif
     }
 
+    *size += tlsf_block_size_min();
+    *size = (*size > DEFAULT_AREA_SIZE) ? *size : DEFAULT_AREA_SIZE;
+
     *size = MC_ROUNDUP(*size, pagesize);
     area = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
@@ -212,6 +211,8 @@ static void *get_new_area(size_t *size) {
 typedef struct tlsf_ctx_t {
     tlsf_t      tlsf;
     int         spinlock;
+    int         block_num;
+    size_t      total_mem;
 } tlsf_ctx_t;
 
 static tlsf_ctx_t   tlsf_ctx = { 0 };
@@ -222,16 +223,14 @@ static MC_DECLARE_ALLOC_CB(tlsf_allocator, ptr, size, file, func, line) {
     mc_spin_lock(&tlsf_ctx.spinlock);
 
     if (!tlsf_ctx.tlsf) {
-        size_t area_size;
-        void *area;
-
-        area_size = tlsf_block_size_min() + size;
-        area_size = (area_size > DEFAULT_AREA_SIZE) ? area_size : DEFAULT_AREA_SIZE;
-
-        area = get_new_area(&area_size);
+        size_t area_size = size;
+        void *area = get_new_area(&area_size);
 
         if (area) {
             tlsf_ctx.tlsf = tlsf_create_with_pool(area, area_size);
+
+            tlsf_ctx.block_num += 1;
+            tlsf_ctx.total_mem += area_size;
         }
     }
 
@@ -239,17 +238,17 @@ static MC_DECLARE_ALLOC_CB(tlsf_allocator, ptr, size, file, func, line) {
         mem = tlsf_realloc(tlsf_ctx.tlsf, ptr, size);
 
         if (!mem && size) {
-            size_t area_size;
-            void *area;
-
-            area_size = tlsf_block_size_min() + size;
-            area_size = (area_size > DEFAULT_AREA_SIZE) ? area_size : DEFAULT_AREA_SIZE;
-
-            area = get_new_area(&area_size);
+            size_t area_size = size;
+            void *area = get_new_area(&area_size);
 
             if (area) {
                 pool_t pool = tlsf_add_pool(tlsf_ctx.tlsf, area, area_size);
-                /* todo: pool should be managed. */
+
+                tlsf_ctx.block_num += 1;
+                tlsf_ctx.total_mem += area_size;
+
+                /* todo: the pool should be managed. */
+
                 mem = tlsf_realloc(tlsf_ctx.tlsf, ptr, size);
             }
         }
@@ -259,26 +258,16 @@ static MC_DECLARE_ALLOC_CB(tlsf_allocator, ptr, size, file, func, line) {
 
     return mem;
 }
-#else   /* USE_TLSF */
-static MC_DECLARE_ALLOC_CB(default_allocator, ptr, size, file, func, line) {
-    if (size) {
-        return realloc(ptr, size);
-    }
-    free(ptr);
-    return NULL;
-}
-#endif  /* USE_TLSF */
 
-MC_ALLOC_CB_TYPE get_allocator() {
-#if USE_TLSF
-    return tlsf_allocator;
-#else
-    return default_allocator;
-#endif
+MC_ALLOC_CB_TYPE get_allocator(int type) {
+    if (ALOC_TLSF == type) {
+        return tlsf_allocator;
+    }
+    return NULL;
 }
 
 void allocator_cleanup(void) {
-#if USE_TLSF
-    /* todo: free tlsf and pool. */
-#endif
+    if (tlsf_ctx.tlsf) {
+        /* todo: free tlsf and pool. */
+    }
 }

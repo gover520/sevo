@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     atexit(allocator_cleanup);
-    mc_set_allocator(get_allocator());
+    mc_set_allocator(get_allocator(ALOC_DEFAULT));
     mc_init();
     install_stacktrace();
     gmp_init();

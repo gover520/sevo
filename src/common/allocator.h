@@ -16,7 +16,13 @@
 extern "C" {
 #endif
 
-    MC_ALLOC_CB_TYPE get_allocator();
+    enum {
+        ALOC_DEFAULT = -1,
+        ALOC_TLSF,
+        ALOC_MAX
+    };
+
+    MC_ALLOC_CB_TYPE get_allocator(int type);
     void allocator_cleanup(void);
 
 #ifdef __cplusplus
