@@ -21,7 +21,8 @@ solution ( "sevo" )
                         "./src/libraries/luaffifb",
                         "./src/libraries/luaffifb/dynasm",
                         "./src/libraries/lpeg",
-                        "./src/libraries/physfs/src", }
+                        "./src/libraries/physfs/src",
+                        "./src/libraries/tlsf", }
         --libdirs { "" }
         --links { "" }
         files { "./src/*.h", "./src/*.c",
@@ -37,7 +38,9 @@ solution ( "sevo" )
                 "./src/libraries/luasocket/src/*.h",
                 "./src/libraries/luasocket/src/*.c",
                 "./src/libraries/physfs/src/*.h",
-                "./src/libraries/physfs/src/*.c", }
+                "./src/libraries/physfs/src/*.c",
+                "./src/libraries/tlsf/*.h",
+                "./src/libraries/tlsf/*.c", }
         excludes { "./src/libraries/lua/src/lua.c",
                     "./src/libraries/lua/src/luac.c",
                     "./src/libraries/luaffifb/test.c",

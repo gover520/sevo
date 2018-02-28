@@ -11,6 +11,26 @@
 
 static const char g_meta_int[] = { CODE_NAME ".meta.int" };
 
+static void *gmp_malloc(size_t size) {
+    return mc_malloc(size);
+}
+
+static void *gmp_realloc(void *mem, size_t old_size, size_t new_size) {
+    return mc_realloc(mem, new_size);
+}
+
+static void gmp_free(void *mem, size_t size) {
+    mc_free(mem);
+}
+
+int gmp_init(void) {
+    mp_set_memory_functions(gmp_malloc, gmp_realloc, gmp_free);
+}
+
+void gmp_deinit(void) {
+
+}
+
 long long mpz_get_ll(const mpz_t u) {
     long long r = 0;
     mpz_export(&r, NULL, -1, sizeof(long long), 0, 0, u);

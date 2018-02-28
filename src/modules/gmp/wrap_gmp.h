@@ -21,6 +21,9 @@ extern "C" {
         mpz_t   x;
     } bigint_t;
 
+    int gmp_init(void);
+    void gmp_deinit(void);
+
     long long mpz_get_ll(const mpz_t u);
     unsigned long long mpz_get_ull(const mpz_t u);
     void mpz_set_ll(mpz_t r, long long x);

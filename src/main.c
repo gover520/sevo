@@ -7,16 +7,18 @@
  *  license: Apache-2.0
  */
 
+#include "common/allocator.h"
 #include "common/runtime.h"
 #include "common/stacktrace.h"
 #include "common/logger.h"
 #include "common/vfs.h"
 #include "common/handle.h"
 #include "modules/sevo/sevo.h"
+#include "modules/gmp/wrap_gmp.h"
 #include "modules/event/event.h"
 #include "modules/thread/wrap_thread.h"
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define DONE_QUIT       0
 #define DONE_RESTART    1
@@ -91,14 +93,6 @@ clean:
     return done;
 }
 
-MC_DECLARE_ALLOC_CB(sevo_allocator, ptr, size, file, func, line) {
-    if (size) {
-        return realloc(ptr, size);
-    }
-    free(ptr);
-    return NULL;
-}
-
 int main(int argc, char *argv[]) {
     int done, retval;
 
@@ -107,9 +101,11 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    mc_set_allocator(sevo_allocator);
+    atexit(allocator_cleanup);
+    mc_set_allocator(get_allocator());
     mc_init();
     install_stacktrace();
+    gmp_init();
     logger_init();
     thread_init();
 
@@ -120,6 +116,7 @@ int main(int argc, char *argv[]) {
 
     thread_deinit();
     logger_deinit();
+    gmp_deinit();
     mc_destroy();
 
     return retval;
