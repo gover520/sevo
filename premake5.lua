@@ -21,25 +21,30 @@ solution ( "sevo" )
     lua_libraries = os.getenv("LUA_LIBRARIES")
     lua_binaries = os.getenv("LUA_BINARIES")
     lualib = "lua"
+    luadll = "lua.dll"
 
     if lua_include_dir == nil then
-        lua_include_dir = os.findheader(lualib)
+        lua_include_dir = os.findheader("lua.h")
     end
     print("Lua include: " .. lua_include_dir)
 
     if lua_libraries == nil then
-        lua_libraries = os.findlib(lualib)
+        lua_libraries = os.findlib("lua")
     end
     print("Lua libraries: " .. lua_libraries)
 
     if lua_binaries == nil then
-        lua_binaries = lua_libraries
+        local h = io.popen("which lua")
+        local e = h:read()
+        h:close()
+
+        if e ~= nil then
+            lua_binaries = path.getdirectory(e)
+        end
     end
     print("Lua binary: " .. lua_binaries)
 
     if os.target() == "windows" then
-        luadll = "lua.dll"
-
         local l = os.matchfiles(lua_libraries .. "/lua*.lib")
         if l ~= nil then
             lualib = path.getname(l[1])

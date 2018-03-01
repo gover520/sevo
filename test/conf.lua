@@ -15,6 +15,9 @@ function sevo.conf(c)
 
     -- you can modify configure in here
 
+    print(package.path)
+    print(package.cpath)
+
     -- set writeable directory
     sevo.vfs.identity("test")
 end
