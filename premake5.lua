@@ -31,6 +31,9 @@ solution ( "sevo" )
     if lua_libraries == nil then
         lua_libraries = os.findlib("lua")
     end
+    if lua_libraries == nil then
+        lua_libraries = os.findlib("liblua.a")
+    end
     print("Lua libraries: " .. lua_libraries)
 
     if lua_binaries == nil then
