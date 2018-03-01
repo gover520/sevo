@@ -324,10 +324,18 @@ local test_func = {
     end,
     function()
         local t1 = sevo.thread.new("test-thread")
-        print("Status: " .. t1:status())
+        local t2 = sevo.thread.new("th1", [[
+                print("Th1 started.")
+                print("Th1 stop.")
+            ]])
+        print("Status1: " .. t1:status())
+        print("Status2: " .. t2:status())
 
         t1:start()
-        print("Status: " .. t1:status())
+        print("Status1: " .. t1:status())
+
+        t2:start()
+        print("Status2: " .. t2:status())
 
         t1:write("Hello")
 
@@ -337,7 +345,10 @@ local test_func = {
         print("Read: " .. t1:read())
 
         t1:join()
-        print("Status: " .. t1:status())
+        print("Status1: " .. t1:status())
+
+        t2:join()
+        print("Status2: " .. t2:status())
     end,
     function()
         local db = sevo.dbm.open("testdb")
