@@ -19,19 +19,23 @@ solution ( "sevo" )
 
     lua_include_dir = os.getenv("LUA_INCLUDE_DIR")
     lua_libraries = os.getenv("LUA_LIBRARIES")
+    lua_binaries = os.getenv("LUA_BINARIES")
     lualib = "lua"
 
     if lua_include_dir == nil then
         lua_include_dir = os.findheader(lualib)
     end
-
     print("Lua include: " .. lua_include_dir)
 
     if lua_libraries == nil then
         lua_libraries = os.findlib(lualib)
     end
+    print("Lua libraries: " .. lua_libraries)
 
-    print("Lua libdir: " .. lua_libraries)
+    if lua_binaries == nil then
+        lua_binaries = lua_libraries
+    end
+    print("Lua binary: " .. lua_binaries)
 
     if os.target() == "windows" then
         luadll = "lua.dll"
@@ -42,7 +46,7 @@ solution ( "sevo" )
             print("Lua lib: " .. lualib)
         end
 
-        local d = os.matchfiles(lua_libraries .. "/lua*.dll")
+        local d = os.matchfiles(lua_binaries .. "/lua*.dll")
         if d ~= nil then
             luadll = path.getname(d[1])
             print("Lua dll: " .. luadll)
@@ -100,7 +104,7 @@ solution ( "sevo" )
                         "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE",
                         "_CRT_NONSTDC_NO_DEPRECATE", "_WINSOCK_DEPRECATED_NO_WARNINGS" }
             postbuildcommands {
-                "xcopy /Y " .. lua_libraries .. "\\" .. luadll .. " .\\bin\\"
+                "xcopy /Y " .. lua_binaries .. "\\" .. luadll .. " .\\bin\\"
             }
 
         configuration ( "gmake" )
