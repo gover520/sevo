@@ -154,7 +154,6 @@ static int w_mount(lua_State *L) {
     if (lua_gettop(L) >= 3) {
         if (lua_isboolean(L, 3)) {
             addpath = luaX_optboolean(L, 3, 1);
-            data = luaL_optlstring(L, 4, NULL, &l);
         } else {
             data = luaL_optlstring(L, 3, NULL, &l);
             addpath = luaX_optboolean(L, 4, 1);

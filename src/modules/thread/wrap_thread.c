@@ -320,7 +320,6 @@ static int mcl_thread_new(lua_State * L) {
     if (lua_gettop(L) >= 2) {
         if (lua_isinteger(L, 2)) {
             qsize = (int)luaL_optinteger(L, 2, QSIZE_NUM);
-            pgm = luaL_optlstring(L, 3, NULL, &l);
         } else {
             pgm = luaL_optlstring(L, 2, NULL, &l);
             qsize = (int)luaL_optinteger(L, 3, QSIZE_NUM);
