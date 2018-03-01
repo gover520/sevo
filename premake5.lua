@@ -11,6 +11,7 @@ solution ( "sevo" )
         os.remove("sevo.sln")
         os.remove("sevo.vcxproj")
         os.remove("sevo.vcxproj.filters")
+        os.remove("sevo.vcxproj.user")
         os.remove("sevo.make")
         os.remove("Makefile")
         return
@@ -31,9 +32,6 @@ solution ( "sevo" )
     end
 
     print("Lua libdir: " .. lua_libraries)
-
-    sysincludedirs { lua_include_dir }
-    syslibdirs { lua_libraries }
 
     if os.target() == "windows" then
         luadll = "lua.dll"
