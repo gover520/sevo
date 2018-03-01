@@ -12,7 +12,6 @@
 #include "modules/gmp/wrap_gmp.h"
 #include "modules/boot/boot.h"
 #include "modules/lpeg/wrap_lpeg.h"
-#include "modules/socket/wrap_socket.h"
 #include "modules/vfs/wrap_vfs.h"
 #include "modules/logger/wrap_logger.h"
 #include "modules/id/wrap_id.h"
@@ -24,7 +23,6 @@
 #include "modules/secure/wrap_secure.h"
 #include "modules/thread/wrap_thread.h"
 #include "modules/math/wrap_math.h"
-#include "modules/json/wrap_json.h"
 #include "modules/dbm/wrap_dbm.h"
 #include <ffi.h>
 
@@ -35,21 +33,6 @@ int luaopen_sevo(lua_State * L) {
         /* lpeg */
         { "lpeg", luaopen_lpeg },
         { "re", luaopen_re },
-        /* socket */
-        { "socket.core", luaopen_socket_core },
-        { "mime.core", luaopen_mime_core },
-        { "socket", luaopen_socket },
-        { "socket.ftp", luaopen_socket_ftp },
-        { "socket.http", luaopen_socket_http },
-        { "ltn12", luaopen_ltn12 },
-        { "mime", luaopen_mime },
-        { "socket.smtp", luaopen_socket_smtp },
-        { "socket.tp", luaopen_socket_tp },
-        { "socket.url", luaopen_socket_url },
-        { "socket.headers", luaopen_socket_headers },
-        { "mbox", luaopen_mbox },
-        /* dkjson */
-        { "dkjson", luaopen_sevo_dkjson },
         /* gmp */
         { CODE_NAME ".int", luaopen_sevo_int },
         /* mclib */

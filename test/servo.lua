@@ -20,12 +20,6 @@ local test_func = {
         print(re.gsub("hello World", "[aeiou]", "."))               --> h.ll. W.rld
     end,
     function()
-        print("-- Test socket --")
-        local socket = require("socket")
-        local mime = require("mime")
-        print("Socket Ver: " .. socket._VERSION .. ", Mime Ver: " .. mime._VERSION .. ".")
-    end,
-    function()
         print("-- Test bigint --")
         local a = sevo.int(0)
         print("type(a):", type(a))

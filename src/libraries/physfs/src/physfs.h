@@ -223,6 +223,8 @@
 extern "C" {
 #endif
 
+#define PHYSFS_DECL
+
 #if defined(PHYSFS_DECL)
 /* do nothing. */
 #elif (defined _MSC_VER)

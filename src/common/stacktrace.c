@@ -16,6 +16,8 @@
 #include "logger.h"
 
 #ifdef _WIN32
+# pragma warning(disable : 4091)
+
 # include <Windows.h>
 # include <DbgHelp.h>
 # include <signal.h>
