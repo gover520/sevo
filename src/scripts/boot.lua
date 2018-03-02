@@ -10,6 +10,13 @@
 local sevo = require("sevo")
 local env = {}
 
+env.names = {}          -- Process names and PIDs associative table.
+env.processes = {}      -- All the processes in the system.
+env.ondeath = {}        -- Functions to execute on abnormal exit.
+env.ondestruction = {}  -- Functions to execute on termination.
+env.mailboxes = {}      -- Mailboxes associated with processes.
+env.timeouts = {}       -- Timeouts for processes that are suspended.
+
 local function error_handler(errmsg)
     sevo.error(debug.traceback(tostring(errmsg), 3))
 end
@@ -52,6 +59,108 @@ function sevo.boot()
         end
     end
 
+    -- concurrent
+    sevo.whois = function(co)
+        for k, v in pairs(env.processes) do
+            if co == v then return k end
+        end
+    end
+
+    sevo.self = function()
+        local co = coroutine.running()
+        if co then return sevo.whois(co) end
+    end
+
+    sevo.isalive = function(pid)
+        local co = env.processes[pid]
+        if co and type(co) == "thread" and coroutine.status(co) ~= "dead" then
+            return true
+        end
+        return false
+    end
+
+    local function process_destory()
+        for _, fn in ipairs(env.ondestruction) do
+            fn(sevo.self(), "normal")
+        end
+    end
+
+    local function process_die(pid, reason)
+        for _, fn in ipairs(env.ondeath) do
+            fn(pid, reason)
+        end
+    end
+
+    local function process_resume(co, ...)
+        if type(co) ~= "thread" or coroutine.status(co) ~= "suspended" then
+            return
+        end
+        local status, errmsg = coroutine.resume(co, ...)
+        if not status then
+            local pid = sevo.whois(co)
+            process_die(pid, errmsg)
+        end
+        return status, errmsg
+    end
+
+    sevo.spawn = function(func, ...)
+        local co = coroutine.create(
+            function(...)
+                coroutine.yield()
+                func(...)
+                process_destory()
+            end)
+        table.insert(env.processes, co)
+        local pid = #env.processes
+        env.mailboxes[pid] = {}
+        env.timeouts[pid] = 0
+        local status, errmsg = process_resume(co, ...)
+        if not status then return nil, errmsg end
+        return pid
+    end
+
+    sevo.kill = function(pid, reason)
+        if type(env.processes[pid]) == "thread" and
+            coroutine.status(env.processes[pid]) == "suspended"
+        then
+            local status, errmsg = coroutine.resume(env.processes[pid], "exit")
+            process_die(pid, reason)
+        end
+    end
+
+    sevo.whereis = function(name)
+        if type(name) == "number" then return name end
+        if not env.names[name] then return end
+        return env.names[name]
+    end
+
+    sevo.register = function(name, pid)
+        if sevo.whereis(name) then return false end
+        if not pid then pid = sevo.self() end
+        env.names[name] = pid
+        return true
+    end
+
+    sevo.unregister = function(name)
+        if not name then name = sevo.self() end
+        for k, v in pairs(env.names) do
+            if name == k or name == v then
+                env.names[k] = nil
+                return true
+            end
+        end
+        return false
+    end
+
+    sevo.registered = function()
+        local n = {}
+        for k, _ in pairs(env.names) do table.insert(n, k) end
+        return n
+    end
+
+    table.insert(env.ondeath, sevo.unregister)
+    table.insert(env.ondestruction, sevo.unregister)
+
     return true
 end
 
@@ -59,28 +168,18 @@ function sevo.init()
     local c = {
         version = sevo._VERSION,
         loglevel = "debug",
-        modules = {
-            id = true,
-            time = true,
-            event = true,
-            hash = true,
-            rand = true,
-            net = true,
-            secure = true,
-            thread = true,
-            dbm = true,
-        }
+        cookie = "",
     }
 
     local result
 
     if sevo.vfs.info("conf.lua") then
-        result = xpcall(require, error_handler, "conf");
+        result = xpcall(require, error_handler, "conf")
         if not result then return false end
     end
 
     if sevo.conf then
-        result = xpcall(sevo.conf, error_handler, c);
+        result = xpcall(sevo.conf, error_handler, c)
         if not result then return false end
     end
 
@@ -97,9 +196,7 @@ function sevo.init()
         "thread",
         "dbm",
     }) do
-        if c.modules[v] then
-            require("sevo." .. v)
-        end
+        require("sevo." .. v)
     end
 
     if sevo.event then
@@ -124,7 +221,7 @@ function sevo.init()
         return false
     end
 
-    result = xpcall(require, error_handler, "servo");
+    result = xpcall(require, error_handler, "servo")
     if not result then return false end
 
     return true

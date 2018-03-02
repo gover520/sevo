@@ -14,6 +14,7 @@ function sevo.conf(c)
     print("----- end -----")
 
     -- you can modify configure in here
+    c.cookie = "12345678"
 
     print(package.path)
     print(package.cpath)

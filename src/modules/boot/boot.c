@@ -20,15 +20,15 @@
 static int load_luafile(lua_State* L, const char *filename) {
     char *buffer = NULL;
     int len = (int)mc_file_length(filename);
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = fopen(filename, "rb");
 
     if (fp) {
         char fn[MC_MAX_PATH] = { 0 };
 
-        buffer = (char *)mc_calloc(1, len + 1);
+        buffer = (char *)mc_calloc(1, len + 2);
         fread(buffer, len, 1, fp);
 
-        if (LUA_OK == luaX_loadbuffer(L, buffer, (int)strlen(buffer), mc_base_name(fn, filename, '/'))) {
+        if (LUA_OK == luaX_loadbuffer(L, buffer, len, mc_base_name(fn, filename, '/'))) {
             lua_call(L, 0, LUA_MULTRET);
         }
 

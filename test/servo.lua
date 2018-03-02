@@ -369,6 +369,13 @@ local test_func = {
 
         db:close()
     end,
+    function()
+        local pid = sevo.spawn(
+            function(n)
+                print(n)
+            end, 10)
+        print(pid)
+    end,
 }
 local test_step = 1
 
