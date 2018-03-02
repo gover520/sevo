@@ -208,6 +208,7 @@ static void output_stacktrace() {
 #endif
 
 static void signal_handler(int sig) {
+    MC_UNUSED(sig);
     output_stacktrace();
     exit(EXIT_SUCCESS);
 }

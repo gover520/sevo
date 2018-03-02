@@ -161,7 +161,7 @@ int vfs_remove(const char *file) {
 }
 
 int vfs_info(const char *file, vfinfo_t *info) {
-    PHYSFS_Stat stat = { 0 };
+    PHYSFS_Stat stat;
 
     if (!PHYSFS_isInit()) {
         return -1;

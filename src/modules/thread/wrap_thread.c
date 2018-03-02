@@ -259,6 +259,7 @@ static int mcl_thread_write(lua_State * L) {
     int len = (int)luaL_optinteger(L, tidx(3), (lua_Integer)l);
     mc_sstr_t buf = mc_sstr_from_buffer(data, len);
 
+    MC_UNUSED(thread);
     lua_pushboolean(L, 0 == mc_chan_write(chan_w, buf));
     return 1;
 }
@@ -267,6 +268,8 @@ static int mcl_thread_read(lua_State * L) {
     mc_chan_t *chan_r;
     mcl_thread_t *thread = thread_handle(L, 1, &chan_r, NULL);
     void *buf;
+
+    MC_UNUSED(thread);
 
     if (0 == mc_chan_read(chan_r, &buf)) {
         mc_sstr_t data = (mc_sstr_t)buf;
@@ -282,6 +285,7 @@ static int mcl_thread_writeable(lua_State * L) {
     mc_chan_t *chan_w;
     mcl_thread_t *thread = thread_handle(L, 1, NULL, &chan_w);
 
+    MC_UNUSED(thread);
     lua_pushboolean(L, mc_chan_writeable(chan_w));
     return 1;
 }
@@ -290,6 +294,7 @@ static int mcl_thread_readable(lua_State * L) {
     mc_chan_t *chan_r;
     mcl_thread_t *thread = thread_handle(L, 1, &chan_r, NULL);
 
+    MC_UNUSED(thread);
     lua_pushboolean(L, mc_chan_readable(chan_r));
     return 1;
 }
@@ -298,6 +303,7 @@ static int mcl_thread_write_size(lua_State * L) {
     mc_chan_t *chan_w;
     mcl_thread_t *thread = thread_handle(L, 1, NULL, &chan_w);
 
+    MC_UNUSED(thread);
     lua_pushinteger(L, mc_chan_size(chan_w));
     return 1;
 }
@@ -306,6 +312,7 @@ static int mcl_thread_read_size(lua_State * L) {
     mc_chan_t *chan_r;
     mcl_thread_t *thread = thread_handle(L, 1, &chan_r, NULL);
 
+    MC_UNUSED(thread);
     lua_pushinteger(L, mc_chan_size(chan_r));
     return 1;
 }

@@ -205,7 +205,7 @@ static int mcl_md5_hexdigest(lua_State * L) {
 
     mc_md5_final(digest, md5);
 
-    for (i = 0, p = hexdigest; i < sizeof(digest); ++i, p+=2) {
+    for (i = 0, p = hexdigest; i < (int)sizeof(digest); ++i, p+=2) {
         mc_byte2hex(digest[i], p);
     }
     *p = 0;
@@ -248,7 +248,7 @@ static int mcl_sha1_hexdigest(lua_State * L) {
 
     mc_sha1_final(digest, sha1);
 
-    for (i = 0, p = hexdigest; i < sizeof(digest); ++i, p += 2) {
+    for (i = 0, p = hexdigest; i < (int)sizeof(digest); ++i, p += 2) {
         mc_byte2hex(digest[i], p);
     }
     *p = 0;

@@ -215,9 +215,11 @@ typedef struct tlsf_ctx_t {
     size_t      total_mem;
 } tlsf_ctx_t;
 
-static tlsf_ctx_t   tlsf_ctx = { 0 };
+static tlsf_ctx_t   tlsf_ctx = { NULL, 0, 0, 0 };
 
 static MC_DECLARE_ALLOC_CB(tlsf_allocator, ptr, size, file, func, line) {
+    MC_UNUSED(file), MC_UNUSED(func), MC_UNUSED(line);
+
     void *mem = NULL;
 
     mc_spin_lock(&tlsf_ctx.spinlock);
@@ -248,6 +250,7 @@ static MC_DECLARE_ALLOC_CB(tlsf_allocator, ptr, size, file, func, line) {
                 tlsf_ctx.total_mem += area_size;
 
                 /* todo: the pool should be managed. */
+                MC_UNUSED(pool);
 
                 mem = tlsf_realloc(tlsf_ctx.tlsf, ptr, size);
             }

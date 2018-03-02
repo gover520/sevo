@@ -75,6 +75,10 @@ solution ( "sevo" )
     if lua_libdir == nil then
         lua_libdir = os.findlib("lua")
 
+        if lua_libdir == nil then
+            lua_libdir = os.findlib("liblua.a")
+        end
+
         if lua_libdir == nil and os.target() == "windows" then
             local l = os.matchfiles(path.join(lua_bindir, "lua*.lib"))
             if l ~= nil then
@@ -88,8 +92,6 @@ solution ( "sevo" )
                 lua_dll = path.getname(d[1])
                 print("Lua dll: " .. lua_dll)
             end
-        else
-            lua_libdir = os.findlib("liblua.a")
         end
     end
     print("Lua libdir: " .. lua_libdir)
@@ -149,7 +151,7 @@ solution ( "sevo" )
             }
 
         configuration ( "gmake" )
-            warnings  "Extra"
+            warnings  "Default" --"Extra"
             defines { "LINUX_OR_MACOSX" }
 
         configuration { "gmake", "macosx" }

@@ -16,10 +16,12 @@ static void *gmp_malloc(size_t size) {
 }
 
 static void *gmp_realloc(void *mem, size_t old_size, size_t new_size) {
+    MC_UNUSED(old_size);
     return mc_realloc(mem, new_size);
 }
 
 static void gmp_free(void *mem, size_t size) {
+    MC_UNUSED(size);
     mc_free(mem);
 }
 
