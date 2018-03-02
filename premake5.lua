@@ -17,56 +17,89 @@ solution ( "sevo" )
         return
     end
 
-    lua_include_dir = os.getenv("LUA_INCLUDE_DIR")
-    lua_libraries = os.getenv("LUA_LIBRARIES")
-    lua_binaries = os.getenv("LUA_BINARIES")
-    lualib = "lua"
-    luadll = "lua.dll"
-
-    if lua_include_dir == nil then
-        lua_include_dir = os.findheader("lua.h")
-    end
-    print("Lua include: " .. lua_include_dir)
-
-    if lua_libraries == nil then
-        lua_libraries = os.findlib("lua")
-    end
-    if lua_libraries == nil then
-        lua_libraries = os.findlib("liblua.a")
-    end
-    print("Lua libraries: " .. lua_libraries)
-
-    if lua_binaries == nil then
-        local h = io.popen("which lua")
-        local e = h:read()
+    local function shell_exec(cmd)
+        local h = io.popen(cmd)
+        local d = h:read()
         h:close()
+        return d
+    end
 
-        if e ~= nil then
-            lua_binaries = path.getdirectory(e)
+    local function get_dirname(p)
+        return path.getdirectory(p:gsub("\\", "/"))
+    end
+
+    lua_incdir = os.getenv("LUA_INCLUDE_DIR")
+    lua_libdir = os.getenv("LUA_LIBRARIES")
+    lua_bindir = os.getenv("LUA_BINARIES")
+    lua_lib = "lua"
+    lua_dll = "lua.dll"
+
+    if lua_bindir == nil then
+        if os.target() == "windows" then
+            local e = shell_exec("where lua")
+            if e ~= nil then
+                lua_bindir = get_dirname(e)
+            end
+
+            if lua_bindir == nil then
+                e = shell_exec("where lua53")
+                if e ~= nil then
+                    lua_bindir = get_dirname(e)
+                end
+            end
+
+            if lua_bindir == nil then
+                e = shell_exec("where lua5.3")
+                if e ~= nil then
+                    lua_bindir = get_dirname(e)
+                end
+            end
+        else
+            local e = shell_exec("which lua")
+            if e ~= nil then
+                lua_bindir = get_dirname(e)
+            end
         end
     end
-    print("Lua binary: " .. lua_binaries)
+    print("Lua bindir: " .. lua_bindir)
 
-    if os.target() == "windows" then
-        local l = os.matchfiles(lua_libraries .. "/lua*.lib")
-        if l ~= nil then
-            lualib = path.getname(l[1])
-            print("Lua lib: " .. lualib)
-        end
+    if lua_incdir == nil then
+        lua_incdir = os.findheader("lua.h")
 
-        local d = os.matchfiles(lua_binaries .. "/lua*.dll")
-        if d ~= nil then
-            luadll = path.getname(d[1])
-            print("Lua dll: " .. luadll)
+        if lua_incdir == nil and os.target() == "windows" then
+            lua_incdir = path.join(lua_bindir, "include")
         end
     end
+    print("Lua incdir: " .. lua_incdir)
+
+    if lua_libdir == nil then
+        lua_libdir = os.findlib("lua")
+
+        if lua_libdir == nil and os.target() == "windows" then
+            local l = os.matchfiles(path.join(lua_bindir, "lua*.lib"))
+            if l ~= nil then
+                lua_libdir = lua_bindir
+                lua_lib = path.getname(l[1])
+                print("Lua lib: " .. lua_lib)
+            end
+
+            local d = os.matchfiles(path.join(lua_bindir, "lua*.dll"))
+            if d ~= nil then
+                lua_dll = path.getname(d[1])
+                print("Lua dll: " .. lua_dll)
+            end
+        else
+            lua_libdir = os.findlib("liblua.a")
+        end
+    end
+    print("Lua libdir: " .. lua_libdir)
 
     -- A project defines one build target
     project ( "sevo" )
         kind ( "ConsoleApp" )
         language ( "C" )
         targetname ("sevo")
-        includedirs { "./src", lua_include_dir,
+        includedirs { "./src", lua_incdir,
                         "./src/libraries/mclib",
                         "./src/libraries/mini-gmp",
                         "./src/libraries/luaffifb",
@@ -92,8 +125,8 @@ solution ( "sevo" )
                     "PHYSFS_SUPPORTS_ISO9660=0", "PHYSFS_SUPPORTS_VDF=0",
                     "PHYSFS_SUPPORTS_7Z=0", "PHYSFS_NO_CDROM_SUPPORT=1", }
         flags { "StaticRuntime" }
-        libdirs { lua_libraries }
-        links { lualib }
+        libdirs { lua_libdir }
+        links { lua_lib }
 
         configuration ( "Release" )
             optimize "On"
@@ -112,7 +145,7 @@ solution ( "sevo" )
                         "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE",
                         "_CRT_NONSTDC_NO_DEPRECATE", "_WINSOCK_DEPRECATED_NO_WARNINGS" }
             postbuildcommands {
-                "xcopy /Y " .. lua_binaries .. "\\" .. luadll .. " .\\bin\\"
+                "xcopy /Y " .. path.join(lua_bindir, lua_dll):gsub("/", "\\") .. " " .. path.join(".", "bin"):gsub("/", "\\")
             }
 
         configuration ( "gmake" )
