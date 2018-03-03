@@ -34,6 +34,12 @@ static int mcl_timer_new(lua_State * L) {
     return 1;
 }
 
+static int mcl_fps_update(lua_State * L) {
+    mc_fps_t *fps = luaX_checkfps(L, 1);
+    lua_pushboolean(L, 0 == mc_fps_update(fps, NULL));
+    return 1;
+}
+
 static int mcl_fps_wait(lua_State * L) {
     mc_fps_t *fps = luaX_checkfps(L, 1);
     lua_pushinteger(L, mc_fps_wait(fps, NULL));
@@ -99,6 +105,7 @@ int luaopen_sevo_time(lua_State* L) {
         { NULL, NULL }
     };
     luaL_Reg meta_fps[] = {
+        { "update", mcl_fps_update },
         { "wait", mcl_fps_wait },
         { "count", mcl_fps_count },
         { "delta", mcl_fps_delta },

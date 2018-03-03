@@ -79,7 +79,7 @@ local function concurrent()
             end
 
             sevo.scheduler(elapsed)
-            sevo.time.sleep(10)
+            sevo.time.sleep(0)
         end
     end
 
@@ -334,7 +334,7 @@ function sevo.run()
     local fps = sevo.time.fps(env.fps)
 
     return function()
-        fps:wait();
+        fps:update()
 
         if sevo.event then
             sevo.event.pump()
@@ -351,6 +351,8 @@ function sevo.run()
         if sevo.update then sevo.update(fps:delta()) end
 
         sevo.scheduler(fps:delta())
+
+        fps:wait();
     end
 end
 
