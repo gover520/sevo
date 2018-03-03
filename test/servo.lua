@@ -320,6 +320,7 @@ local test_func = {
         local t1 = sevo.thread.new("test-thread")
         local t2 = sevo.thread.new("th1", [[
                 print("Th1 started.")
+                print(coroutine.running())
                 print("Th1 stop.")
             ]])
         print("Status1: " .. t1:status())
@@ -371,10 +372,16 @@ local test_func = {
     end,
     function()
         local pid = sevo.spawn(
-            function(n)
-                print(n)
-            end, 10)
-        print(pid)
+            function()
+                local msg = sevo.receive()
+                print("worker from: " .. msg.from)
+                print("worker body: " .. msg.body)
+                sevo.send(msg.from, { from=sevo.self(), body="Byebye" })
+            end)
+        sevo.send(pid, { from=sevo.self(), body="HelloWorld" })
+        local msg = sevo.receive()
+        print("main from: " .. msg.from)
+        print("main body: " .. msg.body)
     end,
 }
 local test_step = 1
