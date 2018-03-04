@@ -83,6 +83,31 @@ local function concurrent()
         end
     end
 
+    local function process_signal_all(dead, reason)
+        if M.links[dead] == nil then return end
+        for _, v in pairs(M.links[dead]) do
+            M.signal(v, dead, reason)
+        end
+        M.links[dead] = nil
+    end
+
+    local function process_unlink_all()
+        local s = M.self()
+        if M.links[s] == nil then return end
+        for _, v in pairs(M.links[s]) do
+            M.unlink(v)
+        end
+        M.links[s] = nil
+    end
+
+    local function monitor_notify_all(dead, reason)
+        if M.monitors[dead] == nil then return end
+        for _, v in pairs(M.monitors[dead]) do
+            M.notify(v, dead, reason)
+        end
+        M.monitors[dead] = nil
+    end
+
     M.whois = function(co)
         for k, v in pairs(M.processes) do
             if co == v then return k end
@@ -203,8 +228,85 @@ local function concurrent()
         return alive
     end
 
+    M.link = function(dest)
+        local s = M.self()
+        local pid = M.whereis(dest)
+        if not pid then return end
+        if M.links[s] == nil then M.links[s] = {} end
+        if M.links[pid] == nil then M.links[pid] = {} end
+        for _, v in pairs(M.links[s]) do
+            if pid == v then return end
+        end
+        table.insert(M.links[s], pid)
+        table.insert(M.links[pid], s)
+    end
+
+    M.spawnlink = function(...)
+        local pid, errmsg = M.spawn(...)
+        if not pid then return nil, errmsg end
+        M.link(pid)
+        return pid
+    end
+
+    M.unlink = function(dest)
+        local s = M.self()
+        local pid = M.whereis(dest)
+        if not pid then return end
+        if M.links[s] == nil or M.links[pid] == nil then
+            return
+        end
+        for k, v in pairs(M.links[s]) do
+            if pid == v then M.links[s][k] = nil end
+        end
+        for k, v in pairs(M.links[pid]) do
+            if s == v then M.links[pid][k] = nil end
+        end
+    end
+
+    M.signal = function(dest, dead, reason)
+        M.kill(dest, reason)
+    end
+
+    M.monitor = function(dest)
+        local s = M.self()
+        local pid = M.whereis(dest)
+        if not pid then return end
+        if M.monitors[pid] == nil then M.monitors[pid] = {} end
+        for _, v in pairs(M.monitors[pid]) do
+            if s == v then return end
+        end
+        table.insert(M.monitors[pid], s)
+    end
+
+    M.spawnmonitor =  function(...)
+        local pid, errmsg = M.spawn(...)
+        if not pid then return nil, errmsg end
+        M.monitor(pid)
+        return pid
+    end
+
+    M.demonitor = function(dest)
+        local s = M.self()
+        local pid = M.whereis(dest)
+        if not pid then return end
+        if M.monitors[pid] == nil then return end
+        for k, v in pairs(M.monitors[pid]) do
+            if s == v then M.monitors[pid][k] = nil end
+        end
+    end
+
+    M.notify = function(dest, dead, reason)
+        M.send(dest, { signal = 'DOWN', from = dead, reason = reason })
+    end
+
     table.insert(M.ondeath, M.unregister)
     table.insert(M.ondestruction, M.unregister)
+
+    table.insert(M.ondeath, process_signal_all)
+    table.insert(M.ondestruction, process_unlink_all)
+
+    table.insert(M.ondeath, monitor_notify_all)
+    table.insert(M.ondestruction, monitor_notify_all)
 
     return M
 end

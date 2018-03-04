@@ -8,10 +8,10 @@
  */
 
 #include "boot.h"
+#include "parallel.lua.h"
 #define EMBED_BOOT  0
 #if EMBED_BOOT
 #include "boot.lua.h"
-#include "parallel.lua.h"
 #else
 #include <string.h>
 #endif
@@ -52,12 +52,8 @@ int luaopen_sevo_boot(lua_State* L) {
 }
 
 int luaopen_sevo_parallel(lua_State* L) {
-#if EMBED_BOOT
     if (LUA_OK == luaX_loadbuffer(L, parallel_lua, sizeof(parallel_lua), "parallel.lua")) {
         lua_call(L, 0, LUA_MULTRET);
     }
     return 1;
-#else
-    return load_luafile(L, "src/scripts/parallel.lua");
-#endif
 }
