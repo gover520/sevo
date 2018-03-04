@@ -283,6 +283,7 @@ function sevo.init()
         "secure",
         "thread",
         "dbm",
+        "env",
     }) do
         require("sevo." .. v)
     end

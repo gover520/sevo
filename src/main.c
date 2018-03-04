@@ -17,6 +17,7 @@
 #include "modules/gmp/wrap_gmp.h"
 #include "modules/event/event.h"
 #include "modules/thread/wrap_thread.h"
+#include "modules/env/wrap_env.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -39,6 +40,12 @@ static int sevo_run(int argc, char *argv[], int *retval) {
 
     if (0 != handle_init()) {
         LG_ERR("Handle map init failed.");
+        done = DONE_QUIT;
+        goto clean;
+    }
+
+    if (0 != env_init()) {
+        LG_ERR("Env htable init failed.");
         done = DONE_QUIT;
         goto clean;
     }
@@ -88,6 +95,7 @@ static int sevo_run(int argc, char *argv[], int *retval) {
 clean:
     event_deinit();
     vfs_deinit();
+    env_deinit();
     handle_deinit();
 
     return done;

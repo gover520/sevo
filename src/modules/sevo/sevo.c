@@ -24,6 +24,7 @@
 #include "modules/thread/wrap_thread.h"
 #include "modules/math/wrap_math.h"
 #include "modules/dbm/wrap_dbm.h"
+#include "modules/env/wrap_env.h"
 #include <ffi.h>
 
 int luaopen_sevo(lua_State * L) {
@@ -52,6 +53,8 @@ int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".math", luaopen_sevo_math },
         /* dbm */
         { CODE_NAME ".dbm", luaopen_sevo_dbm },
+        /* env */
+        { CODE_NAME ".env", luaopen_sevo_env },
         /* boot loader */
         { CODE_NAME ".boot", luaopen_sevo_boot },
         { CODE_NAME ".parallel", luaopen_sevo_parallel },

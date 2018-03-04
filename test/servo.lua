@@ -383,6 +383,28 @@ local test_func = {
         print("main from: " .. msg.from)
         print("main body: " .. msg.body)
     end,
+    function()
+        print(sevo.env.add("Hello", "World"))
+        print(sevo.env.add("Hello", "Kitty"))
+        print(sevo.env.add("test", "123"))
+        print(sevo.env.set("test", "234"))
+        print(sevo.env.set("abc", "bcd"))
+        print(sevo.env.set("cde", "efg"))
+        print(sevo.env.set("bcd", "wer"))
+        print(sevo.env.set("qwe", "fsdf"))
+        print(sevo.env.get("Hello"))
+        print(sevo.env.get("test"))
+        print(sevo.env.get("abc"))
+        print(sevo.env.get("cde"))
+        print(sevo.env.del("bcd"))
+        print(sevo.env.del("qwe"))
+
+        local ks = sevo.env.keys()
+
+        for k, v in ipairs(ks) do
+            print(k, v)
+        end
+    end,
 }
 local test_step = 1
 
