@@ -15,7 +15,8 @@ function env.error_handler(errmsg)
 end
 
 local function concurrent()
-    local genpid = 1        -- Generate the next process id.
+    -- todo: distributed
+
     local M = {}            -- Submodule for concurrent.
 
     M.names = {}            -- Process names and PIDs associative table.
@@ -165,8 +166,7 @@ local function concurrent()
                 process_destory()
             end)
         table.insert(M.processes, co)
-        local pid = genpid
-        genpid = genpid + 1
+        local pid = #M.processes    -- todo: generate unique process id
         M.mailboxes[pid] = {}
         M.timeouts[pid] = 0
         local status, errmsg = process_resume(co, ...)
@@ -222,7 +222,10 @@ local function concurrent()
                 process_resume(v)
             end
 
-            if not alive and coroutine.status(v) ~= "dead" then alive = true end
+            if not alive and coroutine.status(v) ~= "dead" then
+                if k ~= 0 then alive = true end
+                -- todo: process cleanup
+            end
         end
 
         return alive
@@ -353,11 +356,12 @@ function sevo.boot()
 end
 
 function sevo.init()
-    local c = {
+    env.conf = {
         version = sevo._VERSION,
         loglevel = "debug",
         cookie = "",
         tick = 10,  -- Tick time 10ms
+        forcequit = false,
     }
 
     local result
@@ -369,11 +373,11 @@ function sevo.init()
     end
 
     if sevo.conf then
-        result = xpcall(sevo.conf, env.error_handler, c)
+        result = xpcall(sevo.conf, env.error_handler, env.conf)
         if not result then return false end
     end
 
-    sevo.loglevel(c.loglevel)
+    sevo.loglevel(env.conf.loglevel)
 
     for i, v in ipairs({
         "id",
@@ -426,7 +430,7 @@ function sevo.init()
     if not result then return false end
 
     -- FPS
-    env.fps = 1000 / c.tick
+    env.conf.fps = 1000 / env.conf.tick
 
     return true
 end
@@ -434,10 +438,12 @@ end
 function sevo.run()
     if sevo.load then sevo.load(arg) end
 
-    local fps = sevo.time.fps(env.fps)
+    local fps = sevo.time.fps(env.conf.fps)
 
     return function()
         fps:update()
+
+        local alive = sevo.scheduler(fps:delta())
 
         if sevo.event then
             sevo.event.pump()
@@ -445,6 +451,17 @@ function sevo.run()
             for name, a, b, c, d, e, f in sevo.event.poll() do
                 if name == "quit" then
                     if sevo.quit then sevo.quit() end
+
+                    if alive and not env.conf.forcequit then
+                        sevo.warn("Some process still alived, waiting for scheduling.")
+
+                        while alive do
+                            fps:update()
+                            alive = sevo.scheduler(fps:delta())
+                            fps:wait();
+                        end
+                    end
+
                     return a or 0
                 end
                 env.handlers[name](a, b, c, d, e, f)
@@ -452,8 +469,6 @@ function sevo.run()
         end
 
         if sevo.update then sevo.update(fps:delta()) end
-
-        sevo.scheduler(fps:delta())
 
         fps:wait();
     end

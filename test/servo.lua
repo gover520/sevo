@@ -382,6 +382,45 @@ local test_func = {
         local msg = sevo.receive()
         print("main from: " .. msg.from)
         print("main body: " .. msg.body)
+
+        local function monitor(pid)
+            sevo.monitor(pid)
+            local msg = sevo.receive()
+            print("monitor received signal: " .. msg.signal .. ", from: " .. msg.from .. ", reason: " .. msg.reason)
+        end
+
+        local function ping(n)
+            sevo.link("pong")
+
+            for i = 1, n do
+                sevo.send("pong", { from = sevo.self(), body = "ping" })
+                local msg = sevo.receive()
+                if msg.body == "pong" then
+                    print("ping received pong.")
+                end
+            end
+
+            print("ping finished")
+            sevo.exit("finished")   -- 没有exit调用，pong进程不会结束
+        end
+
+        local function pong()
+            sevo.register("pong", sevo.self())
+
+            while true do
+                local msg = sevo.receive()
+                if msg.body == "ping" then
+                    print("pong received ping")
+                    sevo.send(msg.from, { body = "pong" })
+                end
+            end
+            print("pong finished")
+        end
+
+        pid = sevo.spawn(pong)
+        sevo.spawn(monitor, pid)
+        pid = sevo.spawn(ping, 3)
+        sevo.spawn(monitor, pid)
     end,
     function()
         print(sevo.env.add("Hello", "World"))

@@ -36,7 +36,7 @@ static int env_ht_add(lua_State * L) {
     int retval;
 
     mc_rwlock_wrlock(&env_rwlock);
-    retval = htable_add(env_htable, k, kl, v, vl);
+    retval = htable_add(env_htable, k, (int)kl, v, (int)vl);
     mc_rwlock_wrunlock(&env_rwlock);
 
     lua_pushboolean(L, 0 == retval);
@@ -50,7 +50,7 @@ static int env_ht_set(lua_State * L) {
     int retval;
 
     mc_rwlock_wrlock(&env_rwlock);
-    retval = htable_set(env_htable, k, kl, v, vl);
+    retval = htable_set(env_htable, k, (int)kl, v, (int)vl);
     mc_rwlock_wrunlock(&env_rwlock);
 
     lua_pushboolean(L, 0 == retval);
@@ -63,7 +63,7 @@ static int env_ht_get(lua_State * L) {
     const datum_t *dt;
 
     mc_rwlock_rdlock(&env_rwlock);
-    dt = htable_get(env_htable, k, l);
+    dt = htable_get(env_htable, k, (int)l);
     if (dt) {
         int vl = 0;
         const char *v = datum_value(dt, &vl);
@@ -82,7 +82,7 @@ static int env_ht_del(lua_State * L) {
     int retval;
 
     mc_rwlock_wrlock(&env_rwlock);
-    retval = htable_erase(env_htable, k, l);
+    retval = htable_erase(env_htable, k, (int)l);
     mc_rwlock_wrunlock(&env_rwlock);
 
     lua_pushboolean(L, 0 == retval);

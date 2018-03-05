@@ -10,4 +10,6 @@ print("Thread Read: " .. sevo.thread.read())
 
 sevo.thread.write("World.")
 
+print(sevo.spawn)
+
 print("Thread stop.")

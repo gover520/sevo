@@ -50,7 +50,7 @@ static int htable_compare(const char *k1, int l1, const char *k2, int l2) {
     return memcmp(k1, k2, l1);
 }
 
-static int datum_set(datum_t *e, const char *key, int ksize, const char *val, int vsize) {
+static void datum_set(datum_t *e, const char *key, int ksize, const char *val, int vsize) {
     e->ksize = ksize;
     e->vsize = vsize;
 
@@ -59,6 +59,17 @@ static int datum_set(datum_t *e, const char *key, int ksize, const char *val, in
 
     memcpy(e->key, key, e->ksize);
     memcpy(e->value, val, e->vsize);
+}
+
+static int datum_new(htable_t *ht, unsigned int h, const char *key, int ksize, const char *val, int vsize) {
+    datum_t *e = (datum_t *)mc_calloc(1, sizeof(datum_t) + ksize + vsize);
+
+    datum_set(e, key, ksize, val, vsize);
+
+    e->next = ht->table[h];
+    ht->table[h] = e;
+
+    ht->used += 1;
 
     return 0;
 }
@@ -161,7 +172,6 @@ int htable_clear(htable_t *ht) {
         ht->size = 0;
         ht->mask = 0;
     }
-
     return 0;
 }
 
@@ -189,22 +199,11 @@ int htable_add(htable_t *ht, const char *key, int ksize, const char *val, int vs
 
     while (e) {
         if (0 == htable_compare(key, ksize, e->key, e->ksize)) {
-            /* the element already exists */
-            return -1;
+            return -1;  /* the element already exists */
         }
         e = e->next;
     }
-
-    e = (datum_t *)mc_calloc(1, sizeof(datum_t) + ksize + vsize);
-
-    datum_set(e, key, ksize, val, vsize);
-
-    e->next = ht->table[h];
-    ht->table[h] = e;
-
-    ht->used += 1;
-
-    return 0;
+    return datum_new(ht, h, key, ksize, val, vsize);
 }
 
 int htable_set(htable_t *ht, const char *key, int ksize, const char *val, int vsize) {
@@ -232,22 +231,12 @@ int htable_set(htable_t *ht, const char *key, int ksize, const char *val, int vs
             mc_free(e);
             ht->used -= 1;
 
-            break;
+            return datum_new(ht, h, key, ksize, val, vsize);
         }
         p = e;
         e = e->next;
     }
-
-    e = (datum_t *)mc_calloc(1, sizeof(datum_t) + ksize + vsize);
-
-    datum_set(e, key, ksize, val, vsize);
-
-    e->next = ht->table[h];
-    ht->table[h] = e;
-
-    ht->used += 1;
-
-    return 0;
+    return (0 == datum_new(ht, h, key, ksize, val, vsize)) ? 1 : -1;
 }
 
 int htable_erase(htable_t *ht, const char *key, int ksize) {
@@ -279,7 +268,6 @@ int htable_erase(htable_t *ht, const char *key, int ksize) {
         p = e;
         e = e->next;
     }
-
     return -1;
 }
 
@@ -302,7 +290,6 @@ const datum_t *htable_get(htable_t *ht, const char *key, int ksize) {
         }
         e = e->next;
     }
-
     return NULL;
 }
 
@@ -327,8 +314,7 @@ const datum_t *htable_iter_next(htable_iter_t *iter) {
             }
 
             iter->entry = iter->ht->table[iter->index];
-        }
-        else {
+        } else {
             iter->entry = iter->next;
         }
         if (iter->entry) {

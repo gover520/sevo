@@ -79,21 +79,31 @@ solution ( "sevo" )
             lua_libdir = os.findlib("liblua.a")
         end
 
-        if lua_libdir == nil and os.target() == "windows" then
-            local l = os.matchfiles(path.join(lua_bindir, "lua*.lib"))
-            if l ~= nil then
+        if os.target() == "windows" then
+            local l, d
+
+            l = os.matchfiles(path.join(lua_libdir, "lua*.lib"))
+            if l == nil or #l == 0 then
+                l = os.matchfiles(path.join(lua_bindir, "lua*.lib"))
                 lua_libdir = lua_bindir
-                lua_lib = path.getname(l[1])
-                print("Lua lib: " .. lua_lib)
             end
 
-            local d = os.matchfiles(path.join(lua_bindir, "lua*.dll"))
-            if d ~= nil then
+            if l ~= nil and #l > 0 then
+                lua_lib = path.getname(l[1])
+            end
+
+            d = os.matchfiles(path.join(lua_libdir, "lua*.dll"))
+            if d == nil or #d == 0 then
+                d = os.matchfiles(path.join(lua_bindir, "lua*.dll"))
+            end
+
+            if d ~= nil and #d > 0 then
                 lua_dll = path.getname(d[1])
-                print("Lua dll: " .. lua_dll)
             end
         end
     end
+    print("Lua lib: " .. lua_lib)
+    print("Lua dll: " .. lua_dll)
     print("Lua libdir: " .. lua_libdir)
 
     -- A project defines one build target

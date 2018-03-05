@@ -15,6 +15,7 @@ function sevo.conf(c)
 
     -- you can modify configure in here
     c.cookie = "12345678"
+    --c.forcequit = true    -- 不等待调度完毕
 
     print(package.path)
     print(package.cpath)
