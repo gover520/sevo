@@ -390,6 +390,7 @@ function sevo.init()
         "thread",
         "dbm",
         "env",
+        "socket"
     }) do
         require("sevo." .. v)
     end

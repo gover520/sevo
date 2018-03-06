@@ -20,6 +20,7 @@
 #include "modules/hash/wrap_hash.h"
 #include "modules/rand/wrap_rand.h"
 #include "modules/net/wrap_net.h"
+#include "modules/socket/wrap_socket.h"
 #include "modules/secure/wrap_secure.h"
 #include "modules/thread/wrap_thread.h"
 #include "modules/math/wrap_math.h"
@@ -43,6 +44,7 @@ int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".hash", luaopen_sevo_hash },
         { CODE_NAME ".rand", luaopen_sevo_rand },
         { CODE_NAME ".net", luaopen_sevo_net },
+        { CODE_NAME ".socket", luaopen_sevo_socket },
         { CODE_NAME ".secure", luaopen_sevo_secure },
         { CODE_NAME ".thread", luaopen_sevo_thread },
         /* vfs */
@@ -87,13 +89,13 @@ int luaopen_sevo(lua_State * L) {
     lua_setfield(L, -2, "_CPUNUM");
 
 #if defined(_WIN32)
-    lua_pushstring(L, "Windows");
+    lua_pushliteral(L, "Windows");
 #elif defined(__linux__)
-    lua_pushstring(L, "Linux");
+    lua_pushliteral(L, "Linux");
 #elif defined(__APPLE__)
-    lua_pushstring(L, "OSX");
+    lua_pushliteral(L, "OSX");
 #else
-    lua_pushstring(L, "Unknown");
+    lua_pushliteral(L, "Unknown");
 #endif
     lua_setfield(L, -2, "_OS");
 

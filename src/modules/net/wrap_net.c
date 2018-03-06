@@ -171,43 +171,43 @@ static int mcl_net_recv(lua_State *L) {
 
     switch (evt->command) {
     case MC_NET_INCOMING:
-        lua_pushstring(L, "incoming");
+        lua_pushliteral(L, "incoming");
         lua_setfield(L, -2, "cmd");
         break;
     case MC_NET_CONNECT_TIMEOUT:
-        lua_pushstring(L, "conn-timeout");
+        lua_pushliteral(L, "conn-timeout");
         lua_setfield(L, -2, "cmd");
         break;
     case MC_NET_HALO:
-        lua_pushstring(L, "halo");
+        lua_pushliteral(L, "halo");
         lua_setfield(L, -2, "cmd");
 
         lua_pushinteger(L, evt->halo.proto_version);
         lua_setfield(L, -2, "protover");
         break;
     case MC_NET_AUTH:
-        lua_pushstring(L, "auth");
+        lua_pushliteral(L, "auth");
         lua_setfield(L, -2, "cmd");
 
         lua_pushstring(L, evt->auth.passwd);
         lua_setfield(L, -2, "passwd");
         break;
     case MC_NET_ACCEPTED:
-        lua_pushstring(L, "accepted");
+        lua_pushliteral(L, "accepted");
         lua_setfield(L, -2, "cmd");
 
         lua_pushstring(L, evt->accepted.welcome);
         lua_setfield(L, -2, "welcome");
         break;
     case MC_NET_REJECTED:
-        lua_pushstring(L, "rejected");
+        lua_pushliteral(L, "rejected");
         lua_setfield(L, -2, "cmd");
 
         lua_pushstring(L, evt->rejected.reason);
         lua_setfield(L, -2, "reason");
         break;
     case MC_NET_PING:
-        lua_pushstring(L, "ping");
+        lua_pushliteral(L, "ping");
         lua_setfield(L, -2, "cmd");
 
         bi = new_bigint(L);
@@ -215,7 +215,7 @@ static int mcl_net_recv(lua_State *L) {
         lua_setfield(L, -2, "time");
         break;
     case MC_NET_PONG:
-        lua_pushstring(L, "pong");
+        lua_pushliteral(L, "pong");
         lua_setfield(L, -2, "cmd");
 
         bi = new_bigint(L);
@@ -223,11 +223,11 @@ static int mcl_net_recv(lua_State *L) {
         lua_setfield(L, -2, "time");
         break;
     case MC_NET_OUTGOING:
-        lua_pushstring(L, "outgoing");
+        lua_pushliteral(L, "outgoing");
         lua_setfield(L, -2, "cmd");
         break;
     case MC_NET_DATA:
-        lua_pushstring(L, "data");
+        lua_pushliteral(L, "data");
         lua_setfield(L, -2, "cmd");
 
         lua_pushlstring(L, (const char *)evt->data.ptr, evt->data.size);
@@ -244,7 +244,8 @@ static int mcl_net_recv(lua_State *L) {
 
 static int mcl_net_update(lua_State *L) {
     mcl_net_t *n = luaX_checknet(L, 1);
-    lua_pushboolean(L, 0 == mc_net_update(n->net));
+    unsigned int timeout = (unsigned int)luaL_optinteger(L, 2, 0);
+    lua_pushboolean(L, 0 == mc_net_update(n->net, timeout));
     return 1;
 }
 
@@ -318,11 +319,11 @@ static int mcl_peer_mode(lua_State *L) {
     int type = mc_net_type(peer);
 
     if (MC_NET_TCP == type) {
-        lua_pushstring(L, "tcp");
+        lua_pushliteral(L, "tcp");
     }
 
     if (MC_NET_UDP == type) {
-        lua_pushstring(L, "udp");
+        lua_pushliteral(L, "udp");
     }
 
     return 1;
@@ -397,15 +398,15 @@ static int mcl_peer_status(lua_State *L) {
     mc_peer_t *peer = luaX_checkpeer(L, 1);
 
     if (!peer) {
-        lua_pushstring(L, "closed");
+        lua_pushliteral(L, "closed");
     } else if (mc_net_is_connecting(peer)) {
-        lua_pushstring(L, "connecting");
+        lua_pushliteral(L, "connecting");
     } else if (mc_net_is_connected(peer)) {
-        lua_pushstring(L, "connected");
+        lua_pushliteral(L, "connected");
     } else if (mc_net_is_closing(peer)) {
-        lua_pushstring(L, "closing");
+        lua_pushliteral(L, "closing");
     } else if (mc_net_is_closed(peer)) {
-        lua_pushstring(L, "closed");
+        lua_pushliteral(L, "closed");
     } else {
         return luaL_error(L, "Peer unknown status.");
     }

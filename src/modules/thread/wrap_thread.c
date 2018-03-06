@@ -233,13 +233,13 @@ static int mcl_thread_status(lua_State * L) {
 
     switch (thread->status) {
     case THREAD_READY:
-        lua_pushstring(L, "ready");
+        lua_pushliteral(L, "ready");
         break;
     case THREAD_STARTING:
-        lua_pushstring(L, "starting");
+        lua_pushliteral(L, "starting");
         break;
     case THREAD_RUNNING:
-        lua_pushstring(L, "running");
+        lua_pushliteral(L, "running");
         break;
     default:
         luaL_error(L, "Unknown thread status.");

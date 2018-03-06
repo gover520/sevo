@@ -194,13 +194,13 @@ static int w_info(lua_State *L) {
         lua_createtable(L, 0, 4);
 
         if (FILETYPE_FILE == info.type) {
-            lua_pushstring(L, "file");
+            lua_pushliteral(L, "file");
         } else if (FILETYPE_DIR == info.type) {
-            lua_pushstring(L, "directory");
+            lua_pushliteral(L, "directory");
         } else if (FILETYPE_SYMLINK == info.type) {
-            lua_pushstring(L, "symlink");
+            lua_pushliteral(L, "symlink");
         } else {
-            lua_pushstring(L, "other");
+            lua_pushliteral(L, "other");
         }
         lua_setfield(L, -2, "type");
 

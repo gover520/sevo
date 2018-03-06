@@ -444,6 +444,10 @@ local test_func = {
             print(k, v)
         end
     end,
+    function ()
+        print(sevo.socket.hostname())
+        print(sevo.socket.select({nil, 1234}))
+    end,
 }
 local test_step = 1
 
