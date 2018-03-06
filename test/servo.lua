@@ -446,7 +446,8 @@ local test_func = {
     end,
     function ()
         print(sevo.socket.hostname())
-        print(sevo.socket.select({nil, 1234}))
+        local d = sevo.socket.select({nil, 1234})
+        print(d, #d, type(d))
     end,
 }
 local test_step = 1

@@ -19,6 +19,8 @@
 # define strcasecmp _stricmp
 #endif
 
+#define L_BUFSIZE   8192
+
 static const char g_meta_socket[] = { CODE_NAME "meta.socket" };
 
 typedef struct mcl_socket_t {
@@ -126,7 +128,7 @@ static int mcl_socket_bind(lua_State *L) {
 
     luaX_checksockaddr(L, 2, s, &ss, 1);
     lua_pushboolean(L, 0 == mc_socket_bind(s->sock, &ss));
-    
+
     return 1;
 }
 
@@ -135,7 +137,7 @@ static int mcl_socket_listen(lua_State *L) {
     int backlog = (int)luaL_optinteger(L, 2, MC_SOMAXCONN);
 
     lua_pushboolean(L, 0 == mc_socket_listen(s->sock, backlog));
-    
+
     return 1;
 }
 
@@ -202,7 +204,7 @@ static int mcl_socket_send(lua_State *L) {
     int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
 
     lua_pushinteger(L, mc_socket_send(s->sock, data, len, 0));
-    
+
     return 1;
 }
 
@@ -221,17 +223,73 @@ static int mcl_socket_sendto(lua_State *L) {
 
 static int mcl_socket_recv(lua_State *L) {
     mcl_socket_t *s = luaX_checksocket(L, 1);
+    char buf[L_BUFSIZE];
+    int num = mc_socket_recv(s->sock, buf, (socklen_t)sizeof(buf), 0);
 
+    if (num < 0) {
+        lua_pushnil(L);
+    } else {
+        lua_pushlstring(L, buf, num);
+    }
     return 1;
 }
 
 static int mcl_socket_recvfrom(lua_State *L) {
+    struct sockaddr_storage ss;
+    mcl_socket_t *s = luaX_checksocket(L, 1);
+    char buf[L_BUFSIZE];
+    mc_addr_t addr;
+    int num;
+
+    num = mc_socket_recvfrom(s->sock, &ss, buf, (socklen_t)sizeof(buf), 0);
+
+    if (num < 0) {
+        lua_pushnil(L);
+    } else {
+        lua_pushlstring(L, buf, num);
+    }
+
+    mc_addr_info(&addr, &ss);
+    luaX_returnaddr(L, &addr);
+
+    return 2;
 }
 
 static int mcl_socket_sendall(lua_State *L) {
+    size_t l = 0;
+    mcl_socket_t *s = luaX_checksocket(L, 1);
+    const char *data = luaL_checklstring(L, 2, &l);
+    int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
+
+    lua_pushinteger(L, mc_socket_sendall(s->sock, data, len));
+
+    return 1;
 }
 
 static int mcl_socket_recvall(lua_State *L) {
+    mcl_socket_t *s = luaX_checksocket(L, 1);
+    socklen_t len = luaL_checkinteger(L, 2);
+    char buf[L_BUFSIZE];
+    luaL_Buffer b;
+    int num;
+
+    luaL_buffinitsize(L, &b, len);
+
+    do {
+        num = mc_socket_recvall(s->sock, buf, MC_MIN(len, L_BUFSIZE));
+        if (num > 0) {
+            luaL_addlstring(&b, buf, num);
+            len -= L_BUFSIZE;
+        }
+    } while ((len > 0) && (num > 0));
+
+    luaL_pushresult(&b);
+
+    if (num < 0) {
+        lua_pushnil(L);
+        lua_replace(L, -2);
+    }
+    return 1;
 }
 
 static int mcl_socket_reuseaddr(lua_State *L) {
@@ -265,6 +323,8 @@ static int mcl_socket_select(lua_State *L) {
     if (lua_isnil(L, 2)) {
         wlen = 0;
     }
+
+    return 1;
 }
 
 static int mcl_socket_tcp(lua_State *L) {
@@ -317,7 +377,7 @@ static int mcl_socket_udp(lua_State *L) {
 
     s->sock = sock;
     s->family = family;
-    
+
     return 1;
 }
 
@@ -364,8 +424,8 @@ static int mcl_socket_error(lua_State *L) {
     case MC_ETIMEDOUT:
         lua_pushliteral(L, "timeout");
         break;
-    case MC_EAGAIN:
     case MC_EINPROGRESS:
+    case MC_EAGAIN:
         lua_pushliteral(L, "again");
         break;
     case MC_EISCONN:
