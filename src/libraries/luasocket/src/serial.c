@@ -7,6 +7,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
+#include "luasocket.h"  /* LUASOCKET_API */
 #include "auxiliar.h"
 #include "socket.h"
 #include "options.h"

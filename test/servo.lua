@@ -445,9 +445,10 @@ local test_func = {
         end
     end,
     function ()
-        print(sevo.socket.hostname())
-        local d = sevo.socket.select({nil, 1234})
-        print(d, #d, type(d))
+        local socket = require("socket")
+        local mime = require("mime")
+        print("socket version: " .. socket._VERSION)
+        print("mime version: " .. mime._VERSION)
     end,
 }
 local test_step = 1
