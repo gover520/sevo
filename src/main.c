@@ -101,13 +101,8 @@ clean:
     return done;
 }
 
-int main(int argc, char *argv[]) {
+static int sevo_main(int argc, char *argv[]) {
     int done, retval;
-
-    if ((argc > 1) && (0 == strcmp("--version", argv[1]))) {
-        printf("Sevo %s\n", VERSION);
-        return 0;
-    }
 
     atexit(allocator_cleanup);
     mc_set_allocator(get_allocator(ALOC_DEFAULT));
@@ -128,4 +123,12 @@ int main(int argc, char *argv[]) {
     mc_destroy();
 
     return retval;
+}
+
+int main(int argc, char *argv[]) {
+    if ((argc > 1) && (0 == strcmp("--version", argv[1]))) {
+        printf("Sevo %s\n", VERSION);
+        return 0;
+    }
+    return sevo_main(argc, argv);
 }
