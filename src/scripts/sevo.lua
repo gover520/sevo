@@ -303,7 +303,7 @@ table.insert(M.ondestruction, process_unlink_all)
 table.insert(M.ondeath, monitor_notify_all)
 table.insert(M.ondestruction, monitor_notify_all)
 
-for k, v in pairs(env.concurrent) do
+for k, v in pairs(M) do
     if type(v) == "function" then
         sevo[k] = v
     end
