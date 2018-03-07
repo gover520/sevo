@@ -268,7 +268,7 @@ static int mcl_socket_sendall(lua_State *L) {
 
 static int mcl_socket_recvall(lua_State *L) {
     mcl_socket_t *s = luaX_checksocket(L, 1);
-    socklen_t len = luaL_checkinteger(L, 2);
+    socklen_t len = (socklen_t)luaL_checkinteger(L, 2);
     char buf[L_BUFSIZE];
     luaL_Buffer b;
     int num;

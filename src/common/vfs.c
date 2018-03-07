@@ -14,7 +14,6 @@
 
 static char g_base_dir[MC_MAX_PATH] = { 0 };
 static char g_ident_dir[MC_MAX_PATH] = { 0 };
-static char g_ext_dir[MC_MAX_PATH] = { 0 };
 
 static void *physfs_malloc(PHYSFS_uint64 size) {
     return mc_malloc(size);
@@ -50,20 +49,11 @@ int vfs_init(const char *argv0) {
 
     sprintf(g_base_dir, "%s/." CODE_NAME, mc_home_path());
     mc_path_format(g_base_dir, MC_PATHSEP);
-
     if (!mc_path_exist(g_base_dir)) {
         mc_path_mkdir(g_base_dir);
     }
 
-    sprintf(g_ext_dir, "%s/extensions", g_base_dir);
-    mc_path_format(g_ext_dir, MC_PATHSEP);
-
-    if (!mc_path_exist(g_ext_dir)) {
-        mc_path_mkdir(g_ext_dir);
-    }
-
     vfs_identity("", 1);
-    vfs_mount(g_ext_dir, "/_extensions_", 1);
 
     return 0;
 }
@@ -334,8 +324,4 @@ const char *homedir(void) {
 
 const char *identdir(void) {
     return g_ident_dir;
-}
-
-const char *extdir(void) {
-    return g_ext_dir;
 }

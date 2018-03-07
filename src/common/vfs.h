@@ -68,7 +68,6 @@ extern "C" {
 
     const char *homedir(void);
     const char *identdir(void);
-    const char *extdir(void);
 
 #ifdef __cplusplus
 };
