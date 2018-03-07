@@ -28,8 +28,8 @@ static void logger_thread(void *param) {
     if (ctx) {
         mc_fps_init(&fps, NULL, 10);
 
-        while (!mc_chan_is_shutdown(ctx->chan)) {
-            mc_fps_wait(&fps, NULL);
+        while (!mc_chan_is_shutdown(ctx->chan) || mc_chan_size(ctx->chan) > 0) {
+            mc_fps_update(&fps, NULL);
 
             while (mc_chan_readable(ctx->chan)) {
                 p = NULL;
@@ -40,6 +40,8 @@ static void logger_thread(void *param) {
                     mc_sstr_destroy(lmsg);
                 }
             }
+
+            mc_fps_wait(&fps, NULL);
         }
 
         mc_mutex_lock(&ctx->mtx);
