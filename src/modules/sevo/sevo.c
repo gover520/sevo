@@ -20,8 +20,8 @@
 #include "modules/hash/wrap_hash.h"
 #include "modules/rand/wrap_rand.h"
 #include "modules/net/wrap_net.h"
-#include "modules/socket/wrap_socket.h"
 #include "modules/secure/wrap_secure.h"
+#include "modules/socket/wrap_socket.h"
 #include "modules/thread/wrap_thread.h"
 #include "modules/math/wrap_math.h"
 #include "modules/dbm/wrap_dbm.h"
@@ -35,6 +35,19 @@ int luaopen_sevo(lua_State * L) {
         /* lpeg */
         { "lpeg", luaopen_lpeg },
         { "re", luaopen_re },
+        /* socket */
+        { "socket.core", luaopen_socket_core },
+        { "mime.core", luaopen_mime_core },
+        { "socket", luaopen_socket },
+        { "socket.ftp", luaopen_socket_ftp },
+        { "socket.http", luaopen_socket_http },
+        { "ltn12", luaopen_ltn12 },
+        { "mime", luaopen_mime },
+        { "socket.smtp", luaopen_socket_smtp },
+        { "socket.tp", luaopen_socket_tp },
+        { "socket.url", luaopen_socket_url },
+        { "socket.headers", luaopen_socket_headers },
+        { "mbox", luaopen_mbox },
         /* gmp */
         { CODE_NAME ".int", luaopen_sevo_int },
         /* mclib */
@@ -44,7 +57,6 @@ int luaopen_sevo(lua_State * L) {
         { CODE_NAME ".hash", luaopen_sevo_hash },
         { CODE_NAME ".rand", luaopen_sevo_rand },
         { CODE_NAME ".net", luaopen_sevo_net },
-        { CODE_NAME ".socket", luaopen_sevo_socket },
         { CODE_NAME ".secure", luaopen_sevo_secure },
         { CODE_NAME ".thread", luaopen_sevo_thread },
         /* vfs */

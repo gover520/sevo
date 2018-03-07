@@ -125,6 +125,7 @@ solution ( "sevo" )
                 "./src/libraries/mini-gmp/*.h", "./src/libraries/mini-gmp/*.c",
                 "./src/libraries/luaffifb/*.h", "./src/libraries/luaffifb/*.c",
                 "./src/libraries/lpeg/*.h", "./src/libraries/lpeg/*.c",
+                "./src/libraries/luasocket/src/*.h", "./src/libraries/luasocket/src/*.c",
                 "./src/libraries/physfs/src/*.h", "./src/libraries/physfs/src/*.c",
                 "./src/libraries/tlsf/*.h", "./src/libraries/tlsf/*.c",
                 "./src/libraries/liblmdb/lmdb.h", "./src/libraries/liblmdb/mdb.c",
@@ -153,6 +154,11 @@ solution ( "sevo" )
             defines { "DEBUG", "_DEBUG" }
 
         configuration ( "vs*" )
+            excludes { "./src/libraries/luasocket/src/serial.c",
+                        "./src/libraries/luasocket/src/usocket.*",
+                        "./src/libraries/luasocket/src/unix.*",
+                        "./src/libraries/luasocket/src/unixdgram.*",
+                        "./src/libraries/luasocket/src/unixstream.*", }
             defines { "WIN32", "_WIN32", "_WINDOWS",
                         "_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE",
                         "_CRT_NONSTDC_NO_DEPRECATE", "_WINSOCK_DEPRECATED_NO_WARNINGS" }
@@ -162,6 +168,7 @@ solution ( "sevo" )
 
         configuration ( "gmake" )
             warnings  "Default" --"Extra"
+            excludes { "./src/libraries/luasocket/src/wsocket.*" }
             defines { "LINUX_OR_MACOSX" }
 
         configuration { "gmake", "macosx" }
