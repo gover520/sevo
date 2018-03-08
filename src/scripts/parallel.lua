@@ -14,9 +14,22 @@ function sevo.parallel()
     require("sevo.logger")
     require("sevo.vfs")
     require("sevo.thread")
+    require("sevo.time")
 end
 
 return function()
     sevo.parallel()
-    sevo.thread.run()
+
+    local func, tick = sevo.thread.run()
+    tick = tick or 10
+
+    local alive = true
+    local fps = sevo.time.fps(1000 / tick)
+
+    while alive do
+        fps:update()
+        alive = sevo.scheduler(fps:delta())
+        if alive and func then func(fps:delta()) end
+        fps:wait();
+    end
 end

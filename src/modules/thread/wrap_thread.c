@@ -146,6 +146,7 @@ static void thread_worker(void *param) {
 
 static int mcl_thread_run(lua_State * L) {
     mcl_thread_t *thread = local_thread();
+    int top = lua_gettop(L);
 
     if (!thread) {
         LG_ERR("Not a thread.");
@@ -170,7 +171,7 @@ static int mcl_thread_run(lua_State * L) {
     thread->status = THREAD_RUNNING;
     mc_mutex_unlock(&thread->mutex);
 
-    return 1;
+    return lua_gettop(L) - top;
 }
 
 static int mcl_thread_start(lua_State * L) {
