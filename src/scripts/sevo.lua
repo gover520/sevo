@@ -13,6 +13,7 @@ local M = {}            -- Submodule for concurrent.
 
 M.names = {}            -- Process names and PIDs associative table.
 M.processes = {}        -- All the processes in the system.
+M.slaughters = {}       -- The processes is pending kill
 M.mailboxes = {}        -- Mailboxes associated with processes.
 M.timeouts = {}         -- Timeouts for processes that are suspended.
 M.links = {}            -- Active links between processes.
@@ -171,12 +172,15 @@ M.exit = function(reason)
 end
 
 M.kill = function(pid, reason)
-    if type(M.processes[pid]) == "thread" and
-        coroutine.status(M.processes[pid]) == "suspended"
-    then
-        local status, errmsg = coroutine.resume(M.processes[pid], "EXIT")
-        process_die(pid, reason)
+    if type(M.processes[pid]) == "thread" then
+        if coroutine.status(M.processes[pid]) == "suspended" then
+            local status, errmsg = coroutine.resume(M.processes[pid], "EXIT")
+            process_die(pid, reason)
+            return true
+        end
+        M.slaughters[pid] = reason
     end
+    return false
 end
 
 M.sleep = function(timeout)
@@ -203,6 +207,12 @@ end
 
 M.scheduler = function(delta)
     local alive = false
+
+    for pid, reason in pairs(M.slaughters) do
+        if M.kill(pid, reason) then
+            M.slaughters[pid] = nil
+        end
+    end
 
     for k, v in pairs(M.processes) do
         if M.timeouts[k] then
@@ -307,4 +317,32 @@ for k, v in pairs(M) do
     if type(v) == "function" then
         sevo[k] = v
     end
+end
+
+sevo.settimeout = function(func, timeout, ...)
+    if not func then return end
+    return M.spawn(
+        function(cb, ms, ...)
+            M.sleep(ms)
+            cb(...)
+        end, func, timeout, ...)
+end
+
+sevo.cleartimeout = function(pid)
+    M.kill(pid, "clear timeout")
+end
+
+sevo.setinterval = function(func, interval, ...)
+    if not func then return end
+    return M.spawn(
+        function(cb, ms, ...)
+            while true do
+                M.sleep(ms)
+                cb(...)
+            end
+        end, func, interval, ...)
+end
+
+sevo.clearinterval = function(pid)
+    M.kill(pid, "clear interval")
 end

@@ -38,6 +38,7 @@ extern "C" {
     void logger_deinit(void);
 
     int logger_level(int level);
+    void logger_flush(void);
 
     int logger(int type, int level, const char *fmt, ...);
     int vlogger(int type, int level, const char *fmt, va_list argv);

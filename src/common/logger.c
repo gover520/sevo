@@ -91,6 +91,12 @@ int logger_level(int level) {
     return old;
 }
 
+void logger_flush(void) {
+    while (mc_chan_size(g_ctx->chan) > 0) {
+        mc_sleep(10);
+    }
+}
+
 int logger(int type, int level, const char *fmt, ...) {
     int retval;
     va_list ap;

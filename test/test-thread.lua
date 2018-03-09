@@ -1,12 +1,4 @@
-print("Thread started.")
-
-while not sevo.thread.readable() do
-    sevo.time.sleep(10)
-end
-
-print("Thread Read: " .. sevo.thread.read())
-
-sevo.thread.write("World.")
+print("Thread in.")
 
 local pid = sevo.spawn(
     function()
@@ -16,10 +8,27 @@ local pid = sevo.spawn(
         sevo.send(msg.from, "Thread will end.")
     end)
 
-print("Thread stop.")
+sevo.settimeout(
+    function()
+        sevo.send(pid, { from = sevo.self(), body = "Thread please quit!" })
+        local msg = sevo.receive()
+        print(msg)
+    end, 100)
+
+
+local intval = sevo.setinterval(
+    function()
+        if sevo.thread.readable() then
+            print("Thread Read: " .. sevo.thread.read())
+            sevo.thread.write("World.")
+
+            sevo.clearinterval(sevo.self())
+        end
+    end, 10)
+
+print("Thread interval: " .. intval)
+print("Thread out.")
 
 return function(delta)
-    sevo.send(pid, { from = sevo.self(), body = "Thread please quit!" })
-    local msg = sevo.receive()
-    print(msg)
+    -- This is a tick update callback.
 end
