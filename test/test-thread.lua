@@ -1,5 +1,21 @@
 print("Thread in.")
 
+emiter = sevo.emitter()
+
+emiter:on("test", function(msg)
+        print("test01: " .. msg)
+    end)
+emiter:once("test", function(msg)
+        print("test once: " .. msg)
+    end)
+emiter:on("test", function(msg)
+        print("test02: " .. msg)
+    end)
+
+emiter:emit("test", "Hello")
+emiter:emit("test", "World")
+
+
 local pid = sevo.spawn(
     function()
         print("Thread spawn a worker")

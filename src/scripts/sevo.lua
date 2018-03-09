@@ -346,3 +346,51 @@ end
 sevo.clearinterval = function(pid)
     M.kill(pid, "clear interval")
 end
+
+sevo.emitter = function()
+    local EM = { _callbacks = {} }
+
+    function EM:on(name, func)
+        if not func then return end
+        if not self._callbacks[name] then self._callbacks[name] = {} end
+
+        for i, cb in ipairs(self._callbacks[name]) do
+            if func == cb then return end
+        end
+
+        table.insert(self._callbacks[name], func)
+    end
+
+    function EM:once(name, func)
+        if not func then return end
+
+        local wrap_cb = setmetatable({}, {
+            __call = function(once_cb, ...)
+                self:remove(name, once_cb)
+                return func(...)
+            end})
+        return self:on(name, wrap_cb)
+    end
+
+    function EM:emit(name, ...)
+        if not self._callbacks[name] then return end
+
+        for i = #self._callbacks[name], 1, -1 do
+            self._callbacks[name][i](...)
+        end
+    end
+
+    function EM:remove(name, func)
+        if not self._callbacks[name] then return end
+        if not func then self._callbacks[name] = nil end
+
+        for i, cb in ipairs(self._callbacks[name]) do
+            if func == cb then
+                table.remove(self._callbacks[name], i)
+                break
+            end
+        end
+    end
+
+    return EM
+end
