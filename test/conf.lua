@@ -13,13 +13,11 @@ function sevo.conf(c)
     end
     print("----- end -----")
 
-    -- you can modify configure in here
-    c.cookie = "12345678"
-    --c.forcequit = true    -- 不等待调度完毕
-
     print(package.path)
     print(package.cpath)
 
-    -- set writeable directory
-    sevo.vfs.identity("test")
+    -- you can modify configure in here
+    c.identity = "test"     -- set writeable directory
+    c.cookie = "12345678"
+    --c.forcequit = true    -- 不等待调度完毕
 end

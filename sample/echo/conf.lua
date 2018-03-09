@@ -8,5 +8,5 @@
 ------------------------------------------------------------
 
 function sevo.conf(c)
-    sevo.vfs.identity("echo")   -- 设置服务签名
+    c.identity = "echo"     -- 设置服务签名
 end

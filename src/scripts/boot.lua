@@ -57,6 +57,7 @@ end
 
 function sevo.init()
     env.conf = {
+        identity = nil,
         version = sevo._VERSION,
         loglevel = "debug",
         cookie = "",
@@ -78,6 +79,10 @@ function sevo.init()
     end
 
     sevo.loglevel(env.conf.loglevel)
+
+    if env.conf.identity then
+        sevo.vfs.identity(env.conf.identity)
+    end
 
     for i, v in ipairs({
         "id",
