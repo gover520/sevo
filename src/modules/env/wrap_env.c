@@ -15,7 +15,7 @@ static mc_rwlock_t  env_rwlock = { 0, 0 };
 int env_init(void) {
     if (!env_htable) {
         mc_rwlock_create(&env_rwlock);
-        env_htable = mc_htable_create();
+        env_htable = mc_htable_create(NULL);
     }
     return 0;
 }
