@@ -105,9 +105,9 @@ int luaopen_sevo(lua_State * L) {
 #elif defined(__linux__)
     lua_pushliteral(L, "Linux");
 #elif defined(__APPLE__)
-    lua_pushliteral(L, "OSX");
+    lua_pushliteral(L, "macOS");
 #else
-    lua_pushliteral(L, "Unknown");
+    lua_pushliteral(L, "Untested-OS");
 #endif
     lua_setfield(L, -2, "_OS");
 
