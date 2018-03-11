@@ -29,6 +29,7 @@ local test_func = {
         print("a == 0:", a == 0)    -- false, Lua equality must be 2 same objects
         print("a == sevo.int(0): ", a == sevo.int(0))   -- true
         print("a:eq(0):", a:eq(0))  -- a == 0
+        print("#a == 0:", #a == 0)  -- true
         print("a < 0:", a < 0)
         print("a <= 0:", a <= 0)
         print("a > 0:", a > 0)
@@ -40,61 +41,66 @@ local test_func = {
 
         print("a:", a)
         print("#a:", #a)
-        print(sevo.int(2) ^ 100)
+        print("2 ^ 100:", sevo.int(2) ^ 100)
 
         local f = sevo.int("1234567890987654321234567890987654321")
-        print(f)
-        print(-f)
-        print(~f)
+        print("f:", f)
+        print("-f:", -f)
+        print("~f", ~f)
 
         local e = sevo.int(-9)
-        print(e / 2)
-        print(e % 2)
-        print(e / 2)
-        print(e // 2)
-        print(~e)
+        print("e:", e)
+        print("e / 2:", e / 2)
+        print("e %% 2:", e % 2)
+        print("e // 2:", e // 2)
+        print("~e:", ~e)
 
         local b = sevo.int(123456789)
-        print(~b)
-        print(f & b)
-        print(f | b)
-        print(f ~ b)
-        print(2 * b)
+        print("b:", b)
+        print("~b:", ~b)
+        print("f & b:", f & b)
+        print("f | b:", f | b)
+        print("f ~ b:", f ~ b)
+        print("2 * b:", 2 * b)
 
-        print(f * b)
-        print(-b)
+        print("f * b:", f * b)
+        print("-b:", -b)
     end,
     function()
         print("-- Test factorial --")
-        local n = 100
+
         local function fact_iter(accum, step)
             if step <= 1 then
                 return accum
             end
             return fact_iter(accum * step, step - 1)
         end
-        print(fact_iter(sevo.int(1), n))
+
+        print("factorial(100):", fact_iter(sevo.int(1), 100))
     end,
     function()
         print("-- Test fibonacci --")
-        local n = 100
+
         local function fib_iter(a, b, step)
             if step <= 0 then
                 return a
             end
             return fib_iter(a + b, a, step - 1)
         end
-        print(fib_iter(sevo.int(0), sevo.int(1), n))
+
+        print("fibonacci(100):", fib_iter(sevo.int(0), sevo.int(1), 100))
     end,
     function()
         print("-- Test gcd --")
+
         local function gcd(a, b)
             if a:eq(0) then
                 return b
             end
             return gcd(b % a, a)
         end
-        print(gcd(sevo.int(123456789), sevo.int(135792468)))
+
+        print("gcd:", gcd(sevo.int(123456789), sevo.int(135792468)))
     end,
     function()
         print("-- Test id --")
@@ -152,13 +158,13 @@ local test_func = {
 
         local a = point(3, 4)
 
-        print(a.x, a.y)     --> 3  4
-        print(#a)           --> 5
-        print(a:area())     --> 25
+        print("a.x, a.y:", a.x, a.y)     --> 3  4
+        print("#a:", #a)           --> 5
+        print("a:area():", a:area())     --> 25
 
         local b = a + point(0.5, 8)
 
-        print(#b)           --> 12.5
+        print("#b:", #b)           --> 12.5
     end,
     function()
         print(sevo.hash.h32("123456"))
