@@ -20,6 +20,83 @@ local test_func = {
         print(re.gsub("hello World", "[aeiou]", "."))               --> h.ll. W.rld
     end,
     function()
+        print("-- Test bigint --")
+        local a = sevo.int(0)
+        print("type(a):", type(a))
+        print("type(0):", type(0))
+        print("type(#a):", type(#a))
+        print("0 == a:", 0 == a)
+        print("a == 0:", a == 0)    -- false, Lua equality must be 2 same objects
+        print("a == sevo.int(0): ", a == sevo.int(0))   -- true
+        print("a:eq(0):", a:eq(0))  -- a == 0
+        print("a < 0:", a < 0)
+        print("a <= 0:", a <= 0)
+        print("a > 0:", a > 0)
+        print("a >= 0:", a >= 0)
+        print("0 < a:", 0 < a)
+        print("0 <= a:", 0 <= a)
+        print("0 > a:", 0 > a)
+        print("0 >= a:", 0 >= a)
+
+        print("a:", a)
+        print("#a:", #a)
+        print(sevo.int(2) ^ 100)
+
+        local f = sevo.int("1234567890987654321234567890987654321")
+        print(f)
+        print(-f)
+        print(~f)
+
+        local e = sevo.int(-9)
+        print(e / 2)
+        print(e % 2)
+        print(e / 2)
+        print(e // 2)
+        print(~e)
+
+        local b = sevo.int(123456789)
+        print(~b)
+        print(f & b)
+        print(f | b)
+        print(f ~ b)
+        print(2 * b)
+
+        print(f * b)
+        print(-b)
+    end,
+    function()
+        print("-- Test factorial --")
+        local n = 100
+        local function fact_iter(accum, step)
+            if step <= 1 then
+                return accum
+            end
+            return fact_iter(accum * step, step - 1)
+        end
+        print(fact_iter(sevo.int(1), n))
+    end,
+    function()
+        print("-- Test fibonacci --")
+        local n = 100
+        local function fib_iter(a, b, step)
+            if step <= 0 then
+                return a
+            end
+            return fib_iter(a + b, a, step - 1)
+        end
+        print(fib_iter(sevo.int(0), sevo.int(1), n))
+    end,
+    function()
+        print("-- Test gcd --")
+        local function gcd(a, b)
+            if a:eq(0) then
+                return b
+            end
+            return gcd(b % a, a)
+        end
+        print(gcd(sevo.int(123456789), sevo.int(135792468)))
+    end,
+    function()
         print("-- Test id --")
         local ids = {}
 
