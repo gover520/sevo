@@ -17,7 +17,7 @@ function sevo.conf(c)
     print(package.cpath)
 
     -- you can modify configure in here
-    c.identity = "test"     -- set writeable directory
+    c.nodename = "test" -- 设置节点名称，@前半部分将会是个可写目录
     c.cookie = "12345678"
     --c.forcequit = true    -- 不等待调度完毕
 end

@@ -377,6 +377,8 @@ local test_func = {
         db:close()
     end,
     function()
+        print(sevo.node())
+
         local pid = sevo.spawn(
             function()
                 local msg = sevo.receive()

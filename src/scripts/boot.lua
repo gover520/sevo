@@ -59,7 +59,7 @@ end
 
 function sevo.init()
     M.conf = {
-        identity = nil,
+        nodename = nil,
         version = sevo._VERSION,
         loglevel = "debug",
         cookie = "",
@@ -82,8 +82,26 @@ function sevo.init()
 
     sevo.loglevel(M.conf.loglevel)
 
-    if M.conf.identity then
-        sevo.vfs.identity(M.conf.identity)
+    -- nodename
+    if M.conf.nodename then
+        if not string.find(M.conf.nodename, '@') then
+            local socket = require("socket")
+            local hostname = socket.dns.gethostname()
+            local _, resolver = socket.dns.toip(hostname)
+            local fqdn
+            for _, v in pairs(resolver.ip) do
+                fqdn, _ = socket.dns.tohostname(v)
+                if string.find(fqdn, '%w+%.%w+') then break end
+                fqdn = nil
+            end
+
+            M.conf.nodename = M.conf.nodename .. "@" .. (fqdn or hostname)
+        end
+
+        local node, host = string.match(M.conf.nodename, "^(%a[%w_]*)@(.+)$")
+
+        sevo.node(M.conf.nodename)
+        sevo.vfs.identity(node)
     end
 
     -- event

@@ -27,6 +27,31 @@
 #include "modules/env/wrap_env.h"
 #include <ffi.h>
 
+#ifndef FQDN_LEN
+# define FQDN_LEN   MC_MAX_PATH
+#endif
+
+/* The node's unique name */
+static char sevo_nodename[FQDN_LEN] = { 0 };
+
+static int sevo_node(lua_State * L) {
+    if (!sevo_nodename[0]) {
+        const char *node = luaL_optstring(L, 1, NULL);
+
+        if (node) {
+            strncpy(sevo_nodename, node, sizeof(sevo_nodename));
+        }
+    }
+
+    if (sevo_nodename[0]) {
+        lua_pushstring(L, sevo_nodename);
+    } else {
+        lua_pushnil(L);
+    }
+
+    return 1;
+}
+
 int luaopen_sevo(lua_State * L) {
     luaL_Reg *l, modules[] = {
         /* ffi */
@@ -108,6 +133,9 @@ int luaopen_sevo(lua_State * L) {
     lua_pushliteral(L, "Untested-OS");
 #endif
     lua_setfield(L, -2, "_OS");
+
+    lua_pushcfunction(L, sevo_node);
+    lua_setfield(L, -2, "node");
 
     /* Preload module loaders */
     for (l = modules; NULL != l->name; ++l) {

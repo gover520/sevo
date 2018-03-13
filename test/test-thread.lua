@@ -15,6 +15,7 @@ emiter:on("test", function(msg)
 emiter:emit("test", "Hello")
 emiter:emit("test", "World")
 
+print(sevo.node())
 
 local pid = sevo.spawn(
     function()

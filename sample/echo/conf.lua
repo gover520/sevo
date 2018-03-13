@@ -8,5 +8,5 @@
 ------------------------------------------------------------
 
 function sevo.conf(c)
-    c.identity = "echo"     -- 设置服务签名
+    c.nodename = "echo"     -- 设置服务签名
 end
