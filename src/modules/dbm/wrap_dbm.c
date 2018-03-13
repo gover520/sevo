@@ -18,7 +18,7 @@ typedef struct dbm_t {
     MDB_dbi     dbi;
 } dbm_t;
 
-static const char g_meta_dbm[] = { CODE_NAME "meta.dbm" };
+static const char g_meta_dbm[] = { CODE_NAME ".meta.dbm" };
 
 #define luaX_checkdbm(L, idx)   (dbm_t *)luaL_checkudata(L, idx, g_meta_dbm)
 

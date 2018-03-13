@@ -10,7 +10,7 @@
 #include "wrap_secure.h"
 #include <string.h>
 
-static const char g_meta_xtea[] = { CODE_NAME "meta.xtea" };
+static const char g_meta_xtea[] = { CODE_NAME ".meta.xtea" };
 
 #define luaX_checkxtea(L, idx)  (mc_xtea_t *)luaL_checkudata(L, idx, g_meta_xtea)
 

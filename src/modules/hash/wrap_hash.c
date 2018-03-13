@@ -13,8 +13,8 @@
 static unsigned int g_tbl_crc32[MC_CRC_TABLE_SIZE] = { 0 };
 static unsigned long long g_tbl_crc64[MC_CRC_TABLE_SIZE] = { 0 };
 
-static const char g_meta_md5[] = { CODE_NAME "meta.md5" };
-static const char g_meta_sha1[] = { CODE_NAME "meta.sha1" };
+static const char g_meta_md5[] = { CODE_NAME ".meta.md5" };
+static const char g_meta_sha1[] = { CODE_NAME ".meta.sha1" };
 
 #define luaX_checkmd5(L, idx)   (mc_md5_ctx *)luaL_checkudata(L, idx, g_meta_md5)
 #define luaX_checksha1(L, idx)  (mc_sha1_ctx *)luaL_checkudata(L, idx, g_meta_sha1)

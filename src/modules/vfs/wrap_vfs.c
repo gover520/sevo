@@ -13,7 +13,7 @@
 #include "common/vfs.h"
 #include "common/logger.h"
 
-static const char g_meta_vfile[] = { CODE_NAME "meta.vfile" };
+static const char g_meta_vfile[] = { CODE_NAME ".meta.vfile" };
 
 #define luaX_checkvfile(L, idx)     (vfile_t *)luaL_checkudata(L, idx, g_meta_vfile)
 

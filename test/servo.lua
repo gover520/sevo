@@ -256,7 +256,7 @@ local test_func = {
         local s = n:server(mode, "0.0.0.0", 12345)
         local c = n:connect(mode, "127.0.0.1", 12345)
 
-        local a, p = sevo.net.addr(s, "local")
+        local a, p = s:addr("local")
         print("Listen on " .. a .. ":" .. p)
 
         local function addrstr(a, p)
@@ -264,17 +264,17 @@ local test_func = {
         end
 
         local function sessmode(e)
-            return "Session(" .. sevo.net.mode(e.who) ..  "://" .. e.who .. ") "
+            return "Session(" .. e.who:mode() .. ") "
         end
 
         local function process_event(n, r)
-            local e = n:recv()
+            local e = n:receive()
 
             if not e then
                 return r
             end
 
-            local a, p = sevo.net.addr(e.who, "remote")
+            local a, p = e.who:addr("remote")
 
             if e.cmd == "incoming" then
                 print(sessmode(e) .. addrstr(a, p) .. " incoming")
@@ -282,23 +282,23 @@ local test_func = {
                 print(sessmode(e) .. addrstr(a, p) .. " connect timeout")
             elseif e.cmd == "halo" then
                 print(sessmode(e) .. addrstr(a, p) .. " halo, " .. e.protover)
-                sevo.net.auth(e.who, "123456")
+                e.who:auth("123456")
             elseif e.cmd == "auth" then
-                print(sessmode(e) .. addrstr(a, p) .. " (" .. sevo.net.addr(e.who, "hwaddr") .. ") auth, " .. e.passwd)
+                print(sessmode(e) .. addrstr(a, p) .. " (" .. e.who:addr("hwaddr") .. ") auth, " .. e.passwd)
                 if sevo.rand.randint(100) > 10 then
-                    sevo.net.accept(e.who, "Hello Guys!")
+                    e.who:accept("Hello Guys!")
                 else
-                    sevo.net.reject(e.who, "Ugly!");
+                    e.who:reject("Ugly!");
                 end
             elseif e.cmd == "accepted" then
                 print(sessmode(e) .. addrstr(a, p) .. " accepted, " .. e.welcome)
-                sevo.net.ping(e.who, sevo.time.millisec())
-                sevo.net.send(e.who, "Really Good!")
+                e.who:ping(sevo.time.millisec())
+                e.who:send("Really Good!")
             elseif e.cmd == "rejected" then
                 print(sessmode(e) .. addrstr(a, p) .. " rejected, " .. e.reason)
             elseif e.cmd == "ping" then
                 print(sessmode(e) .. addrstr(a, p) .. " ping, " .. e.time)
-                sevo.net.pong(e.who, e.time)
+                e.who:pong(e.time)
             elseif e.cmd == "pong" then
                 print(sessmode(e) .. addrstr(a, p) .. " pong, " .. e.time)
             elseif e.cmd == "outgoing" then
@@ -306,8 +306,8 @@ local test_func = {
                 r = r + 1
             elseif e.cmd == "data" then
                 print(sessmode(e) .. addrstr(a, p) .. " data, " .. e.data)
-                sevo.net.send(e.who, "That's all right!")
-                sevo.net.close(e.who)
+                e.who:send("That's all right!")
+                e.who:close()
             end
 
             return process_event(n, r)

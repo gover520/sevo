@@ -30,7 +30,7 @@ typedef struct mcl_thread_t {
 static int      g_thread_inited = 0;
 static mc_tls_t g_tls;
 
-static const char g_meta_thread[] = { CODE_NAME "meta.thread" };
+static const char g_meta_thread[] = { CODE_NAME ".meta.thread" };
 
 #define QSIZE_NUM                   64
 #define luaX_checkthread(L, idx)    (mcl_thread_t *)luaL_checkudata(L, idx, g_meta_thread)

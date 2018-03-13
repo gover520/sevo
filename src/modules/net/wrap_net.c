@@ -8,7 +8,6 @@
  */
 
 #include "wrap_net.h"
-#include "common/handle.h"
 #include "modules/gmp/wrap_gmp.h"
 #include <string.h>
 
@@ -18,31 +17,48 @@
 
 typedef struct mcl_net_t {
     mc_net_t    *net;
+    int         ref;
+    int         peercnt;
 } mcl_net_t;
 
-typedef struct n_session_t {
+typedef struct mcl_peer_t {
     mcl_net_t   *holder;
-    handle_t    handle;
-} n_session_t;
+    mc_peer_t   *peer;
+    lua_Integer index;
+} mcl_peer_t;
 
-static const char g_meta_net[] = { CODE_NAME "meta.net" };
+static const char g_meta_net[] = { CODE_NAME ".meta.net" };
+static const char g_meta_peer[] = { CODE_NAME ".meta.peer" };
 
 #define luaX_checknet(L, idx)   (mcl_net_t *)luaL_checkudata(L, idx, g_meta_net)
 
+static mcl_peer_t *luaX_checkpeer(lua_State *L, int index) {
+    mcl_peer_t *p = (mcl_peer_t *)luaL_checkudata(L, index, g_meta_peer);
+    if (!p->peer) {
+        luaL_error(L, "Peer is already closed.");
+        return NULL;
+    }
+    return p;
+}
+
 static int mcl_net__gc(lua_State *L) {
     mcl_net_t *n = luaX_checknet(L, -1);
-    if (n && n->net) {
-        mc_net_destroy(n->net);
-        n->net = NULL;
+    if (n) {
+        if (n->net) {
+            mc_net_destroy(n->net);
+            n->net = NULL;
+        }
+
+        luaL_unref(L, LUA_REGISTRYINDEX, n->ref);
+        n->ref = LUA_NOREF;
     }
     return 0;
 }
 
 static void on_peer_delete(mc_peer_t *peer) {
-    n_session_t *sess = (n_session_t *)mc_net_get(peer);
-    if (sess) {
-        handle_unref(sess->handle);
-        mc_free(sess);
+    mcl_peer_t *p = (mcl_peer_t *)mc_net_get(peer);
+    if (p) {
+        p->peer = NULL;
     }
 }
 
@@ -56,16 +72,24 @@ static int net_mode(lua_State *L, const char *mode) {
     return luaL_error(L, "Invalid operand. Expected 'tcp' or 'udp'");
 }
 
-static n_session_t *session_new(mcl_net_t *holder, mc_peer_t *peer) {
-    n_session_t *sess = (n_session_t *)mc_malloc(sizeof(n_session_t));
+static mcl_peer_t *peer_new(lua_State *L, mcl_net_t *holder, mc_peer_t *peer) {
+    mcl_peer_t *p = (mcl_peer_t *)luaX_newuserdata(L, g_meta_peer, sizeof(mcl_peer_t));
 
-    sess->handle = handle_new(peer);
-    sess->holder = holder;
+    p->holder = holder;
+    p->peer = peer;
+    p->index = (lua_Integer)mc_net_socket(peer);
 
-    mc_net_set(peer, sess);
+    holder->peercnt += 1;
+
+    mc_net_set(peer, p);
     mc_net_on_delete(peer, on_peer_delete);
 
-    return sess;
+    lua_rawgeti(L, LUA_REGISTRYINDEX, holder->ref);
+    lua_pushvalue(L, -2);
+    lua_rawseti(L, -2, p->index);
+    lua_pop(L, 1);  /* pop ref */
+
+    return p;
 }
 
 static int mcl_net_server(lua_State *L) {
@@ -74,14 +98,12 @@ static int mcl_net_server(lua_State *L) {
     const char *host = luaL_checkstring(L, 3);
     unsigned short port = (unsigned short)luaL_checkinteger(L, 4);
     int backlog = (int)luaL_optinteger(L, 5, -1);
-    n_session_t *sess;
     mc_peer_t *s;
 
     s = mc_net_server(n->net, net_mode(L, mode), host, port, backlog);
 
     if (s) {
-        sess = session_new(n, s);
-        lua_pushinteger(L, (lua_Integer)sess->handle);
+        peer_new(L, n, s);
     } else {
         lua_pushnil(L);
     }
@@ -93,14 +115,12 @@ static int mcl_net_connect(lua_State *L) {
     const char *mode = luaL_checkstring(L, 2);
     const char *host = luaL_checkstring(L, 3);
     unsigned short port = (unsigned short)luaL_checkinteger(L, 4);
-    n_session_t *sess;
     mc_peer_t *c;
 
     c = mc_net_connect(n->net, net_mode(L, mode), host, port);
 
     if (c) {
-        sess = session_new(n, c);
-        lua_pushinteger(L, (lua_Integer)sess->handle);
+        peer_new(L, n, c);
     } else {
         lua_pushnil(L);
     }
@@ -125,17 +145,17 @@ static int mcl_net_timeout(lua_State *L) {
     return luaL_error(L, "Invalid operand. Expected 'conn' or 'connect', 'auth' or 'authenticate'");
 }
 
-static int mcl_net_recv(lua_State *L) {
+static int mcl_net_receive(lua_State *L) {
     mcl_net_t *n = luaX_checknet(L, 1);
     mc_net_event_t *evt;
     mc_peer_t *parent;
-    n_session_t *sess;
+    mcl_peer_t *p;
     bigint_t *bi;
 
     while (!!(evt = mc_net_recv(n->net))) {
-        sess = (n_session_t *)mc_net_get(evt->peer);
+        p = (mcl_peer_t *)mc_net_get(evt->peer);
 
-        if (sess) {
+        if (p) {
             break;
         }
 
@@ -158,7 +178,9 @@ static int mcl_net_recv(lua_State *L) {
             continue;
         }
 
-        sess = session_new(n, evt->peer);
+        p = peer_new(L, n, evt->peer);
+        lua_pop(L, 1);  /* pop peer */
+
         break;
     }
 
@@ -235,8 +257,10 @@ static int mcl_net_recv(lua_State *L) {
         break;
     }
 
-    lua_pushinteger(L, (lua_Integer)sess->handle);
-    lua_setfield(L, -2, "who");
+    lua_rawgeti(L, LUA_REGISTRYINDEX, p->holder->ref);
+    lua_rawgeti(L, -1, p->index);
+    lua_setfield(L, -3, "who");
+    lua_pop(L, 1);  /* pop ref */
 
     mc_free(evt);
     return 1;
@@ -249,29 +273,26 @@ static int mcl_net_update(lua_State *L) {
     return 1;
 }
 
-static mc_peer_t *luaX_checkpeer(lua_State *L, int index) {
-    handle_t h = (handle_t)luaL_checkinteger(L, index);
-    mc_peer_t *peer;
+static int mcl_peer__gc(lua_State *L) {
+    mcl_peer_t *p = luaX_checkpeer(L, -1);
+    if (p) {
+        if (p->peer) {
+            mc_net_set(p->peer, NULL);
+            mc_net_close(p->peer);
+        }
 
-    if (0 == h) {
-        luaL_error(L, "Invalid session handle.");
-        return NULL;
+        lua_rawgeti(L, LUA_REGISTRYINDEX, p->holder->ref);
+        lua_pushnil(L);
+        lua_rawseti(L, -2, p->index);
+        lua_pop(L, 1);  /* pop ref */
+
+        p->holder->peercnt -= 1;
     }
-
-    peer = handle_ref(h);
-
-    if (!peer) {
-        luaL_error(L, "Peer is already closed.");
-        return NULL;
-    }
-
-    handle_unref(h);
-
-    return peer;
+    return 0;
 }
 
 static int mcl_peer_addr(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     const char *ty = luaL_optstring(L, 2, NULL);
     struct sockaddr_storage ss;
     mc_addr_t addr = { { 0 }, 0 };
@@ -280,7 +301,7 @@ static int mcl_peer_addr(lua_State *L) {
 
     if (0 == strcasecmp(ty, "hwaddr") ||
         0 == strcasecmp(ty, "macaddr")) {
-        mc_net_hwaddr(peer, hw);
+        mc_net_hwaddr(p->peer, hw);
 
         mc_byte2hex(hw[0], hwaddr + 0); hwaddr[2] = ':';
         mc_byte2hex(hw[1], hwaddr + 3); hwaddr[5] = ':';
@@ -294,7 +315,7 @@ static int mcl_peer_addr(lua_State *L) {
     }
 
     if (0 == strcasecmp(ty, "local")) {
-        mc_socket_sockname(mc_net_socket(peer), &ss);
+        mc_socket_sockname(mc_net_socket(p->peer), &ss);
         mc_addr_info(&addr, &ss);
 
         lua_pushstring(L, addr.addr);
@@ -303,7 +324,7 @@ static int mcl_peer_addr(lua_State *L) {
     }
 
     if (0 == strcasecmp(ty, "remote")) {
-        mc_socket_peername(mc_net_socket(peer), &ss);
+        mc_socket_peername(mc_net_socket(p->peer), &ss);
         mc_addr_info(&addr, &ss);
 
         lua_pushstring(L, addr.addr);
@@ -315,8 +336,8 @@ static int mcl_peer_addr(lua_State *L) {
 }
 
 static int mcl_peer_mode(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
-    int type = mc_net_type(peer);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
+    int type = mc_net_type(p->peer);
 
     if (MC_NET_TCP == type) {
         lua_pushliteral(L, "tcp");
@@ -330,40 +351,40 @@ static int mcl_peer_mode(lua_State *L) {
 }
 
 static int mcl_peer_close(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
-    lua_pushboolean(L, 0 == mc_net_close(peer));
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
+    lua_pushboolean(L, 0 == mc_net_close(p->peer));
     return 1;
 }
 
 static int mcl_peer_auth(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     const char *passwd = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_auth(peer, passwd));
+    lua_pushboolean(L, 0 == mc_net_auth(p->peer, passwd));
     return 1;
 }
 
 static int mcl_peer_accept(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     const char *welcome = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_accept(peer, welcome));
+    lua_pushboolean(L, 0 == mc_net_accept(p->peer, welcome));
     return 1;
 }
 
 static int mcl_peer_reject(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     const char *reson = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_reject(peer, reson));
+    lua_pushboolean(L, 0 == mc_net_reject(p->peer, reson));
     return 1;
 }
 
 static int mcl_peer_ping(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     mpz_t ts;
 
     mpz_init(ts);
 
     luaX_checkmpz(L, 2, ts);
-    lua_pushboolean(L, 0 == mc_net_ping(peer, mpz_get_ull(ts)));
+    lua_pushboolean(L, 0 == mc_net_ping(p->peer, mpz_get_ull(ts)));
 
     mpz_clear(ts);
 
@@ -371,13 +392,13 @@ static int mcl_peer_ping(lua_State *L) {
 }
 
 static int mcl_peer_pong(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     mpz_t ts;
 
     mpz_init(ts);
 
     luaX_checkmpz(L, 2, ts);
-    lua_pushboolean(L, 0 == mc_net_pong(peer, mpz_get_ull(ts)));
+    lua_pushboolean(L, 0 == mc_net_pong(p->peer, mpz_get_ull(ts)));
 
     mpz_clear(ts);
 
@@ -385,27 +406,27 @@ static int mcl_peer_pong(lua_State *L) {
 }
 
 static int mcl_peer_send(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
     size_t l = 0;
     const char *data = luaL_checklstring(L, 2, &l);
     int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
 
-    lua_pushboolean(L, 0 == mc_net_send(peer, data, len));
+    lua_pushboolean(L, 0 == mc_net_send(p->peer, data, len));
     return 1;
 }
 
 static int mcl_peer_status(lua_State *L) {
-    mc_peer_t *peer = luaX_checkpeer(L, 1);
+    mcl_peer_t *p = luaX_checkpeer(L, 1);
 
-    if (!peer) {
+    if (!p->peer) {
         lua_pushliteral(L, "closed");
-    } else if (mc_net_is_connecting(peer)) {
+    } else if (mc_net_is_connecting(p->peer)) {
         lua_pushliteral(L, "connecting");
-    } else if (mc_net_is_connected(peer)) {
+    } else if (mc_net_is_connected(p->peer)) {
         lua_pushliteral(L, "connected");
-    } else if (mc_net_is_closing(peer)) {
+    } else if (mc_net_is_closing(p->peer)) {
         lua_pushliteral(L, "closing");
-    } else if (mc_net_is_closed(peer)) {
+    } else if (mc_net_is_closed(p->peer)) {
         lua_pushliteral(L, "closed");
     } else {
         return luaL_error(L, "Peer unknown status.");
@@ -415,7 +436,13 @@ static int mcl_peer_status(lua_State *L) {
 
 static int mcl_net_new(lua_State *L) {
     mcl_net_t *n = (mcl_net_t *)luaX_newuserdata(L, g_meta_net, sizeof(mcl_net_t));
+
+    n->peercnt = 0;
     n->net = mc_net_create();
+
+    lua_newtable(L);
+    n->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
     return 1;
 }
 
@@ -425,12 +452,12 @@ int luaopen_sevo_net(lua_State* L) {
         { "server", mcl_net_server },
         { "connect", mcl_net_connect },
         { "timeout", mcl_net_timeout },
-        { "recv", mcl_net_recv },
+        { "receive", mcl_net_receive },
         { "update", mcl_net_update },
         { NULL, NULL }
     };
-    luaL_Reg mod_net[] = {
-        { "new", mcl_net_new },
+    luaL_Reg meta_peer[] = {
+        { "__gc", mcl_peer__gc },
         { "addr", mcl_peer_addr },
         { "mode", mcl_peer_mode },
         { "close", mcl_peer_close },
@@ -443,8 +470,13 @@ int luaopen_sevo_net(lua_State* L) {
         { "status", mcl_peer_status },
         { NULL, NULL }
     };
+    luaL_Reg mod_net[] = {
+        { "new", mcl_net_new },
+        { NULL, NULL }
+    };
 
     luaX_register_type(L, g_meta_net, meta_net);
+    luaX_register_type(L, g_meta_peer, meta_peer);
     luaX_register_module(L, "net", mod_net);
     return 0;
 }

@@ -9,8 +9,8 @@
 
 #include "wrap_time.h"
 
-static const char g_meta_timer[] = { CODE_NAME "meta.timer" };
-static const char g_meta_fps[] = { CODE_NAME "meta.fps" };
+static const char g_meta_timer[] = { CODE_NAME ".meta.timer" };
+static const char g_meta_fps[] = { CODE_NAME ".meta.fps" };
 
 #define luaX_checktimer(L, idx) (mc_timer_t *)luaL_checkudata(L, idx, g_meta_timer)
 #define luaX_checkfps(L, idx)   (mc_fps_t *)luaL_checkudata(L, idx, g_meta_fps)
