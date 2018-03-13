@@ -8,9 +8,11 @@
 ------------------------------------------------------------
 
 local sevo = require("sevo")
-local env = {}
+local M = {}
 
-function env.error_handler(errmsg)
+M.queue = {}    -- The events queue
+
+function M.error_handler(errmsg)
     sevo.error(debug.traceback(tostring(errmsg), 3))
 end
 
@@ -43,9 +45,9 @@ function sevo.boot()
 
     -- source directory
     local fullpath = get_fullpath(arg[2])
-    local _, mdir = xpcall(sevo.vfs.mount, env.error_handler, fullpath, "/")
+    local _, mdir = xpcall(sevo.vfs.mount, M.error_handler, fullpath, "/")
     if not mdir then
-        local _, mzip = xpcall(sevo.vfs.mount, env.error_handler, fullpath .. ".zip", "/")
+        local _, mzip = xpcall(sevo.vfs.mount, M.error_handler, fullpath .. ".zip", "/")
         if not mzip then
             sevo.error("Source mounting failed, " .. arg[2])
             return false
@@ -56,7 +58,7 @@ function sevo.boot()
 end
 
 function sevo.init()
-    env.conf = {
+    M.conf = {
         identity = nil,
         version = sevo._VERSION,
         loglevel = "debug",
@@ -69,25 +71,55 @@ function sevo.init()
 
     -- configure
     if sevo.vfs.info("conf.lua") then
-        result = xpcall(require, env.error_handler, "conf")
+        result = xpcall(require, M.error_handler, "conf")
         if not result then return false end
     end
 
     if sevo.conf then
-        result = xpcall(sevo.conf, env.error_handler, env.conf)
+        result = xpcall(sevo.conf, M.error_handler, M.conf)
         if not result then return false end
     end
 
-    sevo.loglevel(env.conf.loglevel)
+    sevo.loglevel(M.conf.loglevel)
 
-    if env.conf.identity then
-        sevo.vfs.identity(env.conf.identity)
+    if M.conf.identity then
+        sevo.vfs.identity(M.conf.identity)
     end
+
+    -- event
+    sevo.event = {}
+
+    sevo.event.pump = function()
+    end
+
+    sevo.event.poll = function()
+        return function()
+            local data = table.remove(M.queue, 1)
+            return table.unpack(data or {})
+        end
+    end
+
+    sevo.event.push = function(...)
+        table.insert(M.queue, table.pack(...))
+    end
+
+    sevo.event.quit = function(a)
+        sevo.event.push("quit", a or 0)
+    end
+
+    M.handlers = setmetatable({
+        quit = function()
+            return
+        end,
+    }, {
+        __index = function(self, name)
+            error("Unknown event: " .. name)
+        end,
+    })
 
     for i, v in ipairs({
         "id",
         "time",
-        "event",
         "hash",
         "rand",
         "net",
@@ -99,35 +131,17 @@ function sevo.init()
         require("sevo." .. v)
     end
 
-    -- event
-    if sevo.event then
-        local function createhandlers()
-            env.handlers = setmetatable({
-                quit = function()
-                    return
-                end,
-            }, {
-                __index = function(self, name)
-                    error("Unknown event: " .. name)
-                end,
-            })
-        end
-
-        sevo.event.init()
-        createhandlers()
-    end
-
     -- servo
     if not sevo.vfs.info("servo.lua") then
         sevo.error("'servo.lua' is not found! What can i do for you?")
         return false
     end
 
-    result = xpcall(require, env.error_handler, "servo")
+    result = xpcall(require, M.error_handler, "servo")
     if not result then return false end
 
     -- FPS
-    env.conf.fps = 1000 / env.conf.tick
+    M.conf.fps = 1000 / M.conf.tick
 
     return true
 end
@@ -135,7 +149,7 @@ end
 function sevo.run()
     if sevo.load then sevo.load(arg) end
 
-    local fps = sevo.time.fps(env.conf.fps)
+    local fps = sevo.time.fps(M.conf.fps)
 
     return function()
         fps:update()
@@ -149,7 +163,7 @@ function sevo.run()
                 if name == "quit" then
                     if sevo.quit then sevo.quit() end
 
-                    if alive and not env.conf.forcequit then
+                    if alive and not M.conf.forcequit then
                         sevo.warn("Some process still alived, waiting for scheduling.")
 
                         while alive do
@@ -161,7 +175,7 @@ function sevo.run()
 
                     return a or 0
                 end
-                env.handlers[name](a, b, c, d, e, f)
+                M.handlers[name](a, b, c, d, e, f)
             end
         end
 
@@ -175,13 +189,13 @@ return function ()
     local func
 
     local function earlyinit()
-        local _, isbooted = xpcall(sevo.boot, env.error_handler)
+        local _, isbooted = xpcall(sevo.boot, M.error_handler)
         if not isbooted then return 1 end
 
-        local _, isinited = xpcall(sevo.init, env.error_handler)
+        local _, isinited = xpcall(sevo.init, M.error_handler)
         if not isinited then return 1 end
 
-        local result, main = xpcall(sevo.run, env.error_handler)
+        local result, main = xpcall(sevo.run, M.error_handler)
         if not result then return 1 end
 
         func = main
@@ -190,7 +204,7 @@ return function ()
     func = earlyinit
 
     while func do
-        local _, retval = xpcall(func, env.error_handler)
+        local _, retval = xpcall(func, M.error_handler)
         if retval then return retval end
         coroutine.yield()
     end

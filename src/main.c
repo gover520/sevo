@@ -15,7 +15,6 @@
 #include "common/handle.h"
 #include "modules/sevo/sevo.h"
 #include "modules/gmp/wrap_gmp.h"
-#include "modules/event/event.h"
 #include "modules/thread/wrap_thread.h"
 #include "modules/env/wrap_env.h"
 #include <string.h>
@@ -93,7 +92,6 @@ static int sevo_run(int argc, char *argv[], int *retval) {
     lua_close(L);
 
 clean:
-    event_deinit();
     vfs_deinit();
     env_deinit();
     handle_deinit();
