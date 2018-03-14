@@ -83,26 +83,30 @@ function sevo.init()
     sevo.loglevel(M.conf.loglevel)
 
     -- nodename
-    if M.conf.nodename then
-        if not string.find(M.conf.nodename, '@') then
-            local socket = require("socket")
-            local hostname = socket.dns.gethostname()
-            local _, resolver = socket.dns.toip(hostname)
-            local fqdn
-            for _, v in pairs(resolver.ip) do
-                fqdn, _ = socket.dns.tohostname(v)
-                if string.find(fqdn, '%w+%.%w+') then break end
-                fqdn = nil
-            end
+    if not M.conf.nodename then
+        local np = arg[2]:gsub("\\", "/")
+        local entry = string.match(np, "^.+/(.+)$") or np
+        M.conf.nodename = string.match(entry, "(.+)%.%w+$") or entry
+    end
 
-            M.conf.nodename = M.conf.nodename .. "@" .. (fqdn or hostname)
+    if not string.find(M.conf.nodename, '@') then
+        local socket = require("socket")
+        local hostname = socket.dns.gethostname()
+        local _, resolver = socket.dns.toip(hostname)
+        local fqdn
+        for _, v in pairs(resolver.ip) do
+            fqdn, _ = socket.dns.tohostname(v)
+            if string.find(fqdn, '%w+%.%w+') then break end
+            fqdn = nil
         end
 
-        local node, host = string.match(M.conf.nodename, "^(%a[%w_]*)@(.+)$")
-
-        sevo.node(M.conf.nodename)
-        sevo.vfs.identity(node)
+        M.conf.nodename = M.conf.nodename .. "@" .. (fqdn or hostname)
     end
+
+    local node, host = string.match(M.conf.nodename, "^(%a[%w_]*)@(.+)$")
+
+    sevo.node(M.conf.nodename)
+    sevo.vfs.identity(node)
 
     -- event
     sevo.event = {}

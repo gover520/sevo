@@ -293,7 +293,7 @@ static int mcl_peer__gc(lua_State *L) {
 
 static int mcl_peer_addr(lua_State *L) {
     mcl_peer_t *p = luaX_checkpeer(L, 1);
-    const char *ty = luaL_optstring(L, 2, NULL);
+    const char *ty = luaL_checkstring(L, 2);
     struct sockaddr_storage ss;
     mc_addr_t addr = { { 0 }, 0 };
     unsigned char hw[MC_HWADDR_LEN];
@@ -372,8 +372,8 @@ static int mcl_peer_accept(lua_State *L) {
 
 static int mcl_peer_reject(lua_State *L) {
     mcl_peer_t *p = luaX_checkpeer(L, 1);
-    const char *reson = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_reject(p->peer, reson));
+    const char *reason = luaL_checkstring(L, 2);
+    lua_pushboolean(L, 0 == mc_net_reject(p->peer, reason));
     return 1;
 }
 

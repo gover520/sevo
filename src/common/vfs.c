@@ -53,8 +53,6 @@ int vfs_init(const char *argv0) {
         mc_path_mkdir(g_base_dir);
     }
 
-    vfs_identity("", 1);
-
     return 0;
 }
 
