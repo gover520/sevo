@@ -7,7 +7,6 @@
  *  license: Apache-2.0
  */
 
-#include <mclib.h>
 #include "handle.h"
 
 static mc_resmap_t *g_resmap = NULL;

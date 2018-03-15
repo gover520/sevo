@@ -7,11 +7,10 @@
  *  license: Apache-2.0
  */
 
-#include <mclib.h>
-#include <string.h>
 #include "wrap_vfs.h"
 #include "common/vfs.h"
 #include "common/logger.h"
+#include <string.h>
 
 static const char g_meta_vfile[] = { CODE_NAME ".meta.vfile" };
 

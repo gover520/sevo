@@ -10,7 +10,7 @@
 #ifndef __VFS_H__
 #define __VFS_H__
 
-#include <mclib.h>
+#include "typedef.h"
 
 #ifdef __cplusplus
 extern "C" {

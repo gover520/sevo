@@ -10,7 +10,7 @@
 #ifndef __ALLOCATOR_H__
 #define __ALLOCATOR_H__
 
-#include <mclib.h>
+#include "typedef.h"
 
 #ifdef __cplusplus
 extern "C" {

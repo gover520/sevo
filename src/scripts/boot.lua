@@ -149,6 +149,7 @@ function sevo.init()
         "thread",
         "dbm",
         "env",
+        "math",
     }) do
         require("sevo." .. v)
     end

@@ -8,7 +8,388 @@
 */
 
 #include "wrap_math.h"
+#include "common/vector.h"
+
+typedef struct l_vec2_t {
+    vec2_t      vec2;
+} l_vec2_t;
+
+typedef struct l_vec3_t {
+    vec3_t      vec3;
+} l_vec3_t;
+
+#define v2(l)   l->vec2
+#define v3(l)   l->vec3
+
+static const char g_meta_vec2[] = { CODE_NAME ".meta.vec2" };
+static const char g_meta_vec3[] = { CODE_NAME ".meta.vec3" };
+
+#define luaX_checkvec2(L, idx)  (l_vec2_t *)luaL_checkudata(L, idx, g_meta_vec2)
+#define luaX_checkvec3(L, idx)  (l_vec3_t *)luaL_checkudata(L, idx, g_meta_vec3)
+#define new_vec2(L)             (l_vec2_t *)luaX_newuserdata(L, g_meta_vec2, sizeof(l_vec2_t));
+#define new_vec3(L)             (l_vec3_t *)luaX_newuserdata(L, g_meta_vec3, sizeof(l_vec3_t));
+
+static int l_vec_concat(lua_State* L) {
+    if (!luaL_callmeta(L, 1, "__tostring")) {
+        lua_pushvalue(L, 1);
+    }
+
+    if (!luaL_callmeta(L, 2, "__tostring")) {
+        lua_pushvalue(L, 2);
+    }
+
+    lua_concat(L, 2);
+
+    return 1;
+}
+
+static int l_vec2_add(lua_State* L) {
+    l_vec2_t *r = new_vec2(L)
+    l_vec2_t *a = luaX_checkvec2(L, 1);
+    l_vec2_t *b = luaX_checkvec2(L, 2);
+
+    vec2_add(v2(r), v2(a), v2(b));
+
+    return 1;
+}
+
+static int l_vec2_sub(lua_State* L) {
+    l_vec2_t *r = new_vec2(L);
+    l_vec2_t *a = luaX_checkvec2(L, 1);
+    l_vec2_t *b = luaX_checkvec2(L, 2);
+
+    vec2_sub(v2(r), v2(a), v2(b));
+
+    return 1;
+}
+
+static int l_vec2_mul(lua_State* L) {
+    l_vec2_t *r = new_vec2(L);
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+    real_t s = (real_t)luaL_checknumber(L, 2);
+
+    vec2_mul(v2(r), v2(v), s);
+
+    return 1;
+}
+
+static int l_vec2_div(lua_State* L) {
+    l_vec2_t *r = new_vec2(L);
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+    real_t s = (real_t)luaL_checknumber(L, 2);
+
+    vec2_div(v2(r), v2(v), s);
+
+    return 1;
+}
+
+static int l_vec2_unm(lua_State* L) {
+    l_vec2_t *r = new_vec2(L);
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+
+    vec2_neg(v2(r), v2(v));
+
+    return 1;
+}
+
+static int l_vec2_len(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+
+    lua_pushnumber(L, (lua_Number)vec2_len(v2(v)));
+
+    return 1;
+}
+
+static int l_vec2_eq(lua_State* L) {
+    l_vec2_t *a = luaX_checkvec2(L, 1);
+    l_vec2_t *b = luaX_checkvec2(L, 2);
+
+    lua_pushboolean(L, r_equal(vx(v2(a)), vx(v2(b)))
+        && r_equal(vy(v2(a)), vy(v2(b))));
+
+    return 1;
+}
+
+static int l_vec2_tostring(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+    char buffer[64] = { 0 };
+
+    sprintf(buffer, "vec2(x: %lf, y: %lf)", vx(v2(v)), vy(v2(v)));
+    lua_pushstring(L, buffer);
+
+    return 1;
+}
+
+static int l_vec2_dim(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+
+    lua_pushinteger(L, 2);
+
+    return 1;
+}
+
+static int l_vec2_lensq(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+
+    lua_pushnumber(L, (lua_Number)vec2_lensq(v2(v)));
+
+    return 1;
+}
+
+static int l_vec2_dot(lua_State* L) {
+    l_vec2_t *a = luaX_checkvec2(L, 1);
+    l_vec2_t *b = luaX_checkvec2(L, 2);
+    
+    lua_pushnumber(L, (lua_Number)vec2_dot(v2(a), v2(b)));
+
+    return 1;
+}
+
+static int l_vec2_cross(lua_State* L) {
+    l_vec2_t *a = luaX_checkvec2(L, 1);
+    l_vec2_t *b = luaX_checkvec2(L, 2);
+
+    lua_pushnumber(L, (lua_Number)vec2_cross(v2(a), v2(b)));
+
+    return 1;
+}
+
+static int l_vec2_normalize(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+    real_t len = (real_t)luaL_optnumber(L, 2, r_one);
+
+    lua_pushnumber(L, vec2_normalize(v2(v), len));
+
+    return 1;
+}
+
+static int l_vec2_xy(lua_State* L) {
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+
+    lua_pushnumber(L, vx(v2(v)));
+    lua_pushnumber(L, vy(v2(v)));
+
+    return 2;
+}
+
+static int l_vec3_add(lua_State* L) {
+    l_vec3_t *r = new_vec3(L)
+        l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *b = luaX_checkvec3(L, 2);
+
+    vec3_add(v3(r), v3(a), v3(b));
+
+    return 1;
+}
+
+static int l_vec3_sub(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *b = luaX_checkvec3(L, 2);
+
+    vec3_sub(v3(r), v3(a), v3(b));
+
+    return 1;
+}
+
+static int l_vec3_mul(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t s = (real_t)luaL_checknumber(L, 2);
+
+    vec3_mul(v3(r), v3(v), s);
+
+    return 1;
+}
+
+static int l_vec3_div(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t s = (real_t)luaL_checknumber(L, 2);
+
+    vec3_div(v3(r), v3(v), s);
+
+    return 1;
+}
+
+static int l_vec3_unm(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+
+    vec3_neg(v3(r), v3(v));
+
+    return 1;
+}
+
+static int l_vec3_len(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+
+    lua_pushnumber(L, (lua_Number)vec3_len(v3(v)));
+
+    return 1;
+}
+
+static int l_vec3_eq(lua_State* L) {
+    l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *b = luaX_checkvec3(L, 2);
+
+    lua_pushboolean(L, r_equal(vx(v3(a)), vx(v3(b)))
+        && r_equal(vy(v3(a)), vy(v3(b)))
+        && r_equal(vz(v3(a)), vz(v3(b))));
+
+    return 1;
+}
+
+static int l_vec3_tostring(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    char buffer[64] = { 0 };
+
+    sprintf(buffer, "vec3(x: %lf, y: %lf, z: %lf)", vx(v3(v)), vy(v3(v)), vz(v3(v)));
+    lua_pushstring(L, buffer);
+
+    return 1;
+}
+
+static int l_vec3_dim(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+
+    lua_pushinteger(L, 3);
+
+    return 1;
+}
+
+static int l_vec3_lensq(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+
+    lua_pushnumber(L, (lua_Number)vec3_lensq(v3(v)));
+
+    return 1;
+}
+
+static int l_vec3_dot(lua_State* L) {
+    l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *b = luaX_checkvec3(L, 2);
+
+    lua_pushnumber(L, (lua_Number)vec3_dot(v3(a), v3(b)));
+
+    return 1;
+}
+
+static int l_vec3_cross(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *b = luaX_checkvec3(L, 2);
+
+    vec3_cross(v3(r), v3(a), v3(b));
+
+    return 1;
+}
+
+static int l_vec3_normalize(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t len = (real_t)luaL_optnumber(L, 2, r_one);
+
+    lua_pushnumber(L, vec3_normalize(v3(v), len));
+
+    return 1;
+}
+
+static int l_vec3_xyz(lua_State* L) {
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+
+    lua_pushnumber(L, vx(v3(v)));
+    lua_pushnumber(L, vy(v3(v)));
+    lua_pushnumber(L, vz(v3(v)));
+
+    return 3;
+}
+
+static int l_vec2_new(lua_State* L) {
+    int top = lua_gettop(L);
+    l_vec2_t *v = new_vec2(L);
+
+    if (2 == top) {
+        vx(v2(v)) = (real_t)luaL_checknumber(L, 1);
+        vy(v2(v)) = (real_t)luaL_checknumber(L, 2);
+    } else if (1 == top) {
+        vx(v2(v)) = vy(v2(v)) = (real_t)luaL_checknumber(L, 1);
+    } else {
+        vx(v2(v)) = vy(v2(v)) = r_zero;
+    }
+
+    return 1;
+}
+
+static int l_vec3_new(lua_State* L) {
+    int top = lua_gettop(L);
+    l_vec3_t *v = new_vec3(L);
+
+    if (3 == top) {
+        vx(v3(v)) = (real_t)luaL_checknumber(L, 1);
+        vy(v3(v)) = (real_t)luaL_checknumber(L, 2);
+        vz(v3(v)) = (real_t)luaL_checknumber(L, 3);
+    }
+    else if (2 == top) {
+        vx(v3(v)) = (real_t)luaL_checknumber(L, 1);
+        vy(v3(v)) = (real_t)luaL_checknumber(L, 2);
+        vz(v3(v)) = r_one;
+    } else if (1 == top) {
+        vx(v3(v)) = vy(v3(v)) = (real_t)luaL_checknumber(L, 1);
+        vz(v3(v)) = r_one;
+    }
+    else {
+        vx(v3(v)) = vy(v3(v)) = vz(v3(v)) = r_zero;
+    }
+
+    return 1;
+}
 
 int luaopen_sevo_math(lua_State* L) {
+    luaL_Reg mod_math[] = {
+        { "vec2", l_vec2_new },
+        { "vec3", l_vec3_new },
+        { NULL, NULL }
+    };
+    luaL_Reg meta_vec2[] = {
+        { "__add", l_vec2_add },
+        { "__sub", l_vec2_sub },
+        { "__mul", l_vec2_mul },
+        { "__div", l_vec2_div },
+        { "__unm", l_vec2_unm },
+        { "__len", l_vec2_len },
+        { "__eq",  l_vec2_eq },
+        { "__tostring", l_vec2_tostring },
+        { "__concat", l_vec_concat },
+        { "dim", l_vec2_dim },
+        { "lensq", l_vec2_lensq },
+        { "dot", l_vec2_dot },
+        { "cross", l_vec2_cross },
+        { "normalize", l_vec2_normalize },
+        { "xy", l_vec2_xy },
+        { NULL, NULL }
+    };
+    luaL_Reg meta_vec3[] = {
+        { "__add", l_vec3_add },
+        { "__sub", l_vec3_sub },
+        { "__mul", l_vec3_mul },
+        { "__div", l_vec3_div },
+        { "__unm", l_vec3_unm },
+        { "__len", l_vec3_len },
+        { "__eq",  l_vec3_eq },
+        { "__tostring", l_vec3_tostring },
+        { "__concat", l_vec_concat },
+        { "dim", l_vec3_dim },
+        { "lensq", l_vec3_lensq },
+        { "dot", l_vec3_dot },
+        { "cross", l_vec3_cross },
+        { "normalize", l_vec3_normalize },
+        { "xyz", l_vec3_xyz },
+        { NULL, NULL }
+    };
+
+    luaX_register_type(L, g_meta_vec2, meta_vec2);
+    luaX_register_type(L, g_meta_vec3, meta_vec3);
+    luaX_register_module(L, "math", mod_math);
+
     return 0;
 }

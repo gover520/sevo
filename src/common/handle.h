@@ -10,6 +10,8 @@
 #ifndef __HANDLE_H__
 #define __HANDLE_H__
 
+#include "typedef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

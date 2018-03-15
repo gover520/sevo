@@ -10,6 +10,7 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include "typedef.h"
 #include <stdarg.h>
 
 #ifdef __cplusplus

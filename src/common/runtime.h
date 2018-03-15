@@ -10,10 +10,7 @@
 #ifndef __RUNTIME_H__
 #define __RUNTIME_H__
 
-#include <mclib.h>
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
+#include "typedef.h"
 #include "version.h"
 
 #ifdef __cplusplus

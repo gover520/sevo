@@ -7,9 +7,8 @@
  *  license: Apache-2.0
  */
 
-#include <mclib.h>
-#include <stdio.h>
 #include "logger.h"
+#include <stdio.h>
 
 typedef struct logger_context_t {
     mc_chan_t   *chan;
