@@ -17,10 +17,45 @@ real_t vec2_normalize(vec2_t v, real_t length) {
     return ls;
 }
 
+void vec2_rotate(vec2_t r, const vec2_t v, real_t theta) {
+    real_t cos_theta = r_cos(theta);
+    real_t sin_theta = r_sin(theta);
+
+    vx(r) = vx(v)*cos_theta - vy(v)*sin_theta;
+    vy(r) = vx(v)*sin_theta + vy(v)*cos_theta;
+}
+
 real_t vec3_normalize(vec3_t v, real_t length) {
     real_t ls = vec3_len(v);
     if (!r_equal(ls, r_zero)) {
         vec3_mul(v, v, length / ls);
     }
     return ls;
+}
+
+void vec3_rotate_x(vec3_t r, const vec3_t v, real_t theta) {
+    real_t cos_theta = r_cos(theta);
+    real_t sin_theta = r_sin(theta);
+
+    vx(r) = vx(v);
+    vy(r) = vy(v)*cos_theta - vz(v)*sin_theta;
+    vz(r) = vy(v)*sin_theta + vz(v)*cos_theta;
+}
+
+void vec3_rotate_y(vec3_t r, const vec3_t v, real_t theta) {
+    real_t cos_theta = r_cos(theta);
+    real_t sin_theta = r_sin(theta);
+
+    vx(r) = vz(v)*sin_theta + vx(v)*cos_theta;
+    vy(r) = vy(v);
+    vz(r) = vz(v)*cos_theta - vx(v)*sin_theta;
+}
+
+void vec3_rotate_z(vec3_t r, const vec3_t v, real_t theta) {
+    real_t cos_theta = r_cos(theta);
+    real_t sin_theta = r_sin(theta);
+
+    vx(r) = vx(v)*cos_theta - vy(v)*sin_theta;;
+    vy(r) = vx(v)*sin_theta + vy(v)*cos_theta;;
+    vz(r) = vz(v);
 }

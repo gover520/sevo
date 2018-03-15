@@ -503,6 +503,7 @@ local test_func = {
         print("c", c)
         print("#c", #c)
         print("c:lensq", c:lensq())
+        print("c:dot(c:rotate(rad(90)))", c:dot(c:rotate(sevo.math.radian(90))))
 
         print("-g", -g)
         print("g + h", g + h)
@@ -516,6 +517,9 @@ local test_func = {
         print("h", h)
         print("#h", #h)
         print("h:lensq", h:lensq())
+        print("h:dot(h:rotatx(rad(90)))", h:dot(h:rotatex(sevo.math.radian(90))))
+        print("h:dot(h:rotaty(rad(90)))", h:dot(h:rotatey(sevo.math.radian(90))))
+        print("h:dot(h:rotatz(rad(90)))", h:dot(h:rotatez(sevo.math.radian(90))))
 
         print("c:xy", c:xy())
         print("h:xyz", h:xyz())

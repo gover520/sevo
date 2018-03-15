@@ -9,6 +9,7 @@
 
 #include "wrap_math.h"
 #include "common/vector.h"
+#include "common/matrix.h"
 
 typedef struct l_vec2_t {
     vec2_t      vec2;
@@ -163,6 +164,16 @@ static int l_vec2_normalize(lua_State* L) {
     return 1;
 }
 
+static int l_vec2_rotate(lua_State* L) {
+    l_vec2_t *r = new_vec2(L);
+    l_vec2_t *v = luaX_checkvec2(L, 1);
+    real_t theta = (real_t)luaL_checknumber(L, 2);
+
+    vec2_rotate(v2(r), v2(v), theta);
+
+    return 1;
+}
+
 static int l_vec2_xy(lua_State* L) {
     l_vec2_t *v = luaX_checkvec2(L, 1);
 
@@ -173,8 +184,8 @@ static int l_vec2_xy(lua_State* L) {
 }
 
 static int l_vec3_add(lua_State* L) {
-    l_vec3_t *r = new_vec3(L)
-        l_vec3_t *a = luaX_checkvec3(L, 1);
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *a = luaX_checkvec3(L, 1);
     l_vec3_t *b = luaX_checkvec3(L, 2);
 
     vec3_add(v3(r), v3(a), v3(b));
@@ -294,6 +305,36 @@ static int l_vec3_normalize(lua_State* L) {
     return 1;
 }
 
+static int l_vec3_rotatex(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t theta = (real_t)luaL_checknumber(L, 2);
+
+    vec3_rotate_x(v3(r), v3(v), theta);
+
+    return 1;
+}
+
+static int l_vec3_rotatey(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t theta = (real_t)luaL_checknumber(L, 2);
+
+    vec3_rotate_y(v3(r), v3(v), theta);
+
+    return 1;
+}
+
+static int l_vec3_rotatez(lua_State* L) {
+    l_vec3_t *r = new_vec3(L);
+    l_vec3_t *v = luaX_checkvec3(L, 1);
+    real_t theta = (real_t)luaL_checknumber(L, 2);
+
+    vec3_rotate_z(v3(r), v3(v), theta);
+
+    return 1;
+}
+
 static int l_vec3_xyz(lua_State* L) {
     l_vec3_t *v = luaX_checkvec3(L, 1);
 
@@ -332,10 +373,9 @@ static int l_vec3_new(lua_State* L) {
     else if (2 == top) {
         vx(v3(v)) = (real_t)luaL_checknumber(L, 1);
         vy(v3(v)) = (real_t)luaL_checknumber(L, 2);
-        vz(v3(v)) = r_one;
+        vz(v3(v)) = r_zero;
     } else if (1 == top) {
-        vx(v3(v)) = vy(v3(v)) = (real_t)luaL_checknumber(L, 1);
-        vz(v3(v)) = r_one;
+        vx(v3(v)) = vy(v3(v)) = vz(v3(v)) = (real_t)luaL_checknumber(L, 1);
     }
     else {
         vx(v3(v)) = vy(v3(v)) = vz(v3(v)) = r_zero;
@@ -344,10 +384,30 @@ static int l_vec3_new(lua_State* L) {
     return 1;
 }
 
+static int l_radian(lua_State* L) {
+    static const real_t deg2rad = (real_t)(MC_PI / 180.0);
+    real_t deg = (real_t)luaL_checknumber(L, 1);
+
+    lua_pushnumber(L, deg * deg2rad);
+
+    return 1;
+}
+
+static int l_degree(lua_State* L) {
+    static const real_t rad2deg = (real_t)(180.0 / MC_PI);
+    real_t rad = (real_t)luaL_checknumber(L, 1);
+
+    lua_pushnumber(L, rad * rad2deg);
+
+    return 1;
+}
+
 int luaopen_sevo_math(lua_State* L) {
     luaL_Reg mod_math[] = {
         { "vec2", l_vec2_new },
         { "vec3", l_vec3_new },
+        { "radian", l_radian },
+        { "degree", l_degree },
         { NULL, NULL }
     };
     luaL_Reg meta_vec2[] = {
@@ -365,6 +425,7 @@ int luaopen_sevo_math(lua_State* L) {
         { "dot", l_vec2_dot },
         { "cross", l_vec2_cross },
         { "normalize", l_vec2_normalize },
+        { "rotate", l_vec2_rotate },
         { "xy", l_vec2_xy },
         { NULL, NULL }
     };
@@ -383,6 +444,9 @@ int luaopen_sevo_math(lua_State* L) {
         { "dot", l_vec3_dot },
         { "cross", l_vec3_cross },
         { "normalize", l_vec3_normalize },
+        { "rotatex", l_vec3_rotatex },
+        { "rotatey", l_vec3_rotatey },
+        { "rotatez", l_vec3_rotatez },
         { "xyz", l_vec3_xyz },
         { NULL, NULL }
     };

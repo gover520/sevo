@@ -45,6 +45,9 @@ extern "C" {
     /* vx,vy = vx*(length/vlen), vy*(length/vlen) */
     real_t vec2_normalize(vec2_t v, real_t length);
 
+    /* rx, ry = x*cos(theta) - y*sin(theta), x*sin(theta) + y*cos(theta) */
+    void vec2_rotate(vec2_t r, const vec2_t v, real_t theta);
+
 
     /* vx*vx + vy*vy + vz*vz */
     #define vec3_lensq(v)       (vx(v)*vx(v) + vy(v)*vy(v) + vz(v)*vz(v))
@@ -69,6 +72,13 @@ extern "C" {
 
     /* vx,vy,vz = vx*(length/vlen), vy*(length/vlen), vz*(length/vlen) */
     real_t vec3_normalize(vec3_t v, real_t length);
+
+    /* ry, rz = vy*cos(theta) - vz*sin(theta), vy*sin(theta) + vz*cos(theta) */
+    void vec3_rotate_x(vec3_t r, const vec3_t v, real_t theta);
+    /* rx, rz = vz*sin(theta) + vx*cos(theta), vz*cos(theta) - vx*sin(theta) */
+    void vec3_rotate_y(vec3_t r, const vec3_t v, real_t theta);
+    /* rx, ry = vx*cos(theta) - vy*sin(theta), vx*sin(theta) + vy*cos(theta) */
+    void vec3_rotate_z(vec3_t r, const vec3_t v, real_t theta);
 
 
 #ifdef __cplusplus
