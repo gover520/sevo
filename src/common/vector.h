@@ -80,7 +80,6 @@ extern "C" {
     /* rx, ry = vx*cos(theta) - vy*sin(theta), vx*sin(theta) + vy*cos(theta) */
     void vec3_rotate_z(vec3_t r, const vec3_t v, real_t theta);
 
-
 #ifdef __cplusplus
 };
 #endif

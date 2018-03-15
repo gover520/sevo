@@ -288,7 +288,7 @@ local test_func = {
                 if sevo.rand.randint(100) > 10 then
                     e.who:accept("Hello Guys!")
                 else
-                    e.who:reject("Ugly!");
+                    e.who:reject("Ugly!")
                 end
             elseif e.cmd == "accepted" then
                 print(sessmode(e) .. addrstr(a, p) .. " accepted, " .. e.welcome)
@@ -470,9 +470,9 @@ local test_func = {
 
         local m = sevo.math.mat33()
         local n = sevo.math.mat33(11, 22, 33)
-        local k = sevo.math.mat33(1, 2, 3,
-                                  4, 5, 6,
-                                  7, 8, 9)
+        local k = sevo.math.mat33(1, 0, 5,
+                                  2, 1, 6,
+                                  3, 4, 0)
 
         print("a", a)
         print("#a", #a)
@@ -510,6 +510,7 @@ local test_func = {
         print("#c", #c)
         print("c:lensq", c:lensq())
         print("c:dot(c:rotate(rad(90)))", c:dot(c:rotate(sevo.math.radian(90))))
+        print("a == vec(0, 0)", a == sevo.math.vec2(0, 0))
 
         print("-g", -g)
         print("g + h", g + h)
@@ -526,13 +527,38 @@ local test_func = {
         print("h:dot(h:rotatx(rad(90)))", h:dot(h:rotatex(sevo.math.radian(90))))
         print("h:dot(h:rotaty(rad(90)))", h:dot(h:rotatey(sevo.math.radian(90))))
         print("h:dot(h:rotatz(rad(90)))", h:dot(h:rotatez(sevo.math.radian(90))))
+        print("e == vec(0, 0, 0)", e == sevo.math.vec3(0, 0, 0))
 
         print("c:xy", c:xy())
         print("h:xyz", h:xyz())
 
         print("m", m)
         print("n", n)
-        print("k", k);
+        print("k", k)
+
+        print("n + k", n + k)
+        print("n - k", n - k)
+        print("n * k", n * k)
+        print("-k", -k)
+        print("k:dim", k:dim())
+        print("k:transpose", k:transpose())
+        print("k:determinant", k:determinant())
+        m:transformation(1, 2, sevo.math.radian(90), 3, 4, 5, 6, 7, 8)
+        print("m:transformation", m)
+        print("m:transformxy(3, 5)", m:transformxy(3, 7))
+        print("m:transformxy(c)", m:transformxy(c))
+        print("m:transformxyz(1, 5, 7)", m:transformxyz(1, 5, 7))
+        print("m:transformxyz(h)", m:transformxyz(h))
+        n:identity()
+        m:identity()
+        print("n:identity", n)
+        print("m == n", m == n)
+        print("k:row(1)", k:row(1))
+        print("k:row(2)", k:row(2))
+        print("k:row(3)", k:row(3))
+        print("k:column(1)", k:column(1))
+        print("k:column(2)", k:column(2))
+        print("k:column(3)", k:column(3))
     end,
 }
 local test_step = 1
@@ -540,7 +566,7 @@ local test_step = 1
 function sevo.load(args)
     print("sevo load")
     print("funcs: " .. #test_func)
-    print("Work Path: " .. sevo.vfs.getcwd());
+    print("Work Path: " .. sevo.vfs.getcwd())
 
     for i, v in ipairs(args) do
         print(i, v)
