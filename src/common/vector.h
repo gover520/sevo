@@ -56,7 +56,7 @@ extern "C" {
     /* ax*bx + ay*by + az*bz */
     #define vec3_dot(a, b)      (vx(a)*vx(b) + vy(a)*vy(b) + vz(a)*vz(b))
     /* rx, ry, rz = ay*bz - az*by, az*bx - ax*bz, ax*by - ay*bx */
-    #define vec3_cross(r, a, b) do { vx(r) = vy(a)*vz(b) - vz(a)*vy(b); \
+    #define vec3_cross(r, a, b) do {vx(r) = vy(a)*vz(b) - vz(a)*vy(b);  \
                                     vy(r) = vz(a)*vx(b) - vx(a)*vz(b);  \
                                     vz(r) = vx(a)*vy(b) - vy(a)*vx(b); } while ( 0 )
     /* rx,ry,rz = -vx, -vy, -vz */

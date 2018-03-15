@@ -468,6 +468,12 @@ local test_func = {
         local g = sevo.math.vec3(5, 7)
         local h = sevo.math.vec3(8, 6, 4)
 
+        local m = sevo.math.mat33()
+        local n = sevo.math.mat33(11, 22, 33)
+        local k = sevo.math.mat33(1, 2, 3,
+                                  4, 5, 6,
+                                  7, 8, 9)
+
         print("a", a)
         print("#a", #a)
         print("a:lensq", a:lensq())
@@ -523,6 +529,10 @@ local test_func = {
 
         print("c:xy", c:xy())
         print("h:xyz", h:xyz())
+
+        print("m", m)
+        print("n", n)
+        print("k", k);
     end,
 }
 local test_step = 1

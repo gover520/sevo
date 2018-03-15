@@ -19,16 +19,24 @@ typedef struct l_vec3_t {
     vec3_t      vec3;
 } l_vec3_t;
 
+typedef struct l_mat33_t {
+    mat33_t     mat33;
+} l_mat33_t;
+
 #define v2(l)   l->vec2
 #define v3(l)   l->vec3
+#define m33(l)  l->mat33
 
 static const char g_meta_vec2[] = { CODE_NAME ".meta.vec2" };
 static const char g_meta_vec3[] = { CODE_NAME ".meta.vec3" };
+static const char g_meta_mat33[] = { CODE_NAME ".meta.mat33" };
 
 #define luaX_checkvec2(L, idx)  (l_vec2_t *)luaL_checkudata(L, idx, g_meta_vec2)
 #define luaX_checkvec3(L, idx)  (l_vec3_t *)luaL_checkudata(L, idx, g_meta_vec3)
+#define luaX_checkmat33(L, idx) (l_mat33_t *)luaL_checkudata(L, idx, g_meta_mat33)
 #define new_vec2(L)             (l_vec2_t *)luaX_newuserdata(L, g_meta_vec2, sizeof(l_vec2_t));
 #define new_vec3(L)             (l_vec3_t *)luaX_newuserdata(L, g_meta_vec3, sizeof(l_vec3_t));
+#define new_mat33(L)            (l_mat33_t *)luaX_newuserdata(L, g_meta_mat33, sizeof(l_mat33_t));
 
 static int l_vec_concat(lua_State* L) {
     if (!luaL_callmeta(L, 1, "__tostring")) {
@@ -115,7 +123,7 @@ static int l_vec2_tostring(lua_State* L) {
     l_vec2_t *v = luaX_checkvec2(L, 1);
     char buffer[64] = { 0 };
 
-    sprintf(buffer, "vec2(x: %lf, y: %lf)", vx(v2(v)), vy(v2(v)));
+    sprintf(buffer, "vec2(%lf %lf)", vx(v2(v)), vy(v2(v)));
     lua_pushstring(L, buffer);
 
     return 1;
@@ -255,7 +263,7 @@ static int l_vec3_tostring(lua_State* L) {
     l_vec3_t *v = luaX_checkvec3(L, 1);
     char buffer[64] = { 0 };
 
-    sprintf(buffer, "vec3(x: %lf, y: %lf, z: %lf)", vx(v3(v)), vy(v3(v)), vz(v3(v)));
+    sprintf(buffer, "vec3(%lf %lf %lf)", vx(v3(v)), vy(v3(v)), vz(v3(v)));
     lua_pushstring(L, buffer);
 
     return 1;
@@ -345,6 +353,19 @@ static int l_vec3_xyz(lua_State* L) {
     return 3;
 }
 
+static int l_mat33_tostring(lua_State* L) {
+    l_mat33_t *m = luaX_checkmat33(L, 1);
+    char buffer[160] = { 0 };
+
+    sprintf(buffer, "mat33(%lf %lf %lf, %lf %lf %lf, %lf %lf %lf)", 
+        m33(m)[0], m33(m)[3], m33(m)[6],
+        m33(m)[1], m33(m)[4], m33(m)[7],
+        m33(m)[2], m33(m)[5], m33(m)[8]);
+    lua_pushstring(L, buffer);
+
+    return 1;
+}
+
 static int l_vec2_new(lua_State* L) {
     int top = lua_gettop(L);
     l_vec2_t *v = new_vec2(L);
@@ -384,6 +405,35 @@ static int l_vec3_new(lua_State* L) {
     return 1;
 }
 
+static int l_mat33_new(lua_State* L) {
+    int top = lua_gettop(L);
+    l_mat33_t *m = new_mat33(L);
+
+    if (9 == top) {
+        m33(m)[0] = (real_t)luaL_checknumber(L, 1);
+        m33(m)[3] = (real_t)luaL_checknumber(L, 2);
+        m33(m)[6] = (real_t)luaL_checknumber(L, 3);
+
+        m33(m)[1] = (real_t)luaL_checknumber(L, 4);
+        m33(m)[4] = (real_t)luaL_checknumber(L, 5);
+        m33(m)[7] = (real_t)luaL_checknumber(L, 6);
+
+        m33(m)[2] = (real_t)luaL_checknumber(L, 7);
+        m33(m)[5] = (real_t)luaL_checknumber(L, 8);
+        m33(m)[8] = (real_t)luaL_checknumber(L, 9);
+    } else if (3 == top) {
+        mat33_identity(m33(m));
+
+        m33(m)[0] = (real_t)luaL_checknumber(L, 1);
+        m33(m)[4] = (real_t)luaL_checknumber(L, 2);
+        m33(m)[8] = (real_t)luaL_checknumber(L, 3);
+    } else {
+        mat33_identity(m33(m));
+    }
+
+    return 1;
+}
+
 static int l_radian(lua_State* L) {
     static const real_t deg2rad = (real_t)(MC_PI / 180.0);
     real_t deg = (real_t)luaL_checknumber(L, 1);
@@ -406,6 +456,7 @@ int luaopen_sevo_math(lua_State* L) {
     luaL_Reg mod_math[] = {
         { "vec2", l_vec2_new },
         { "vec3", l_vec3_new },
+        { "mat33", l_mat33_new },
         { "radian", l_radian },
         { "degree", l_degree },
         { NULL, NULL }
@@ -450,9 +501,14 @@ int luaopen_sevo_math(lua_State* L) {
         { "xyz", l_vec3_xyz },
         { NULL, NULL }
     };
+    luaL_Reg meta_mat33[] = {
+        { "__tostring", l_mat33_tostring },
+        { NULL, NULL }
+    };
 
     luaX_register_type(L, g_meta_vec2, meta_vec2);
     luaX_register_type(L, g_meta_vec3, meta_vec3);
+    luaX_register_type(L, g_meta_mat33, meta_mat33);
     luaX_register_module(L, "math", mod_math);
 
     return 0;
