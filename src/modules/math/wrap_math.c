@@ -596,6 +596,14 @@ static int l_quat_unm(lua_State* L) {
     return 1;
 }
 
+static int l_quat_len(lua_State* L) {
+    l_quat_t *q = luaX_checkquat(L, 1);
+
+    lua_pushnumber(L, (lua_Number)quat_len(qr(q)));
+
+    return 1;
+}
+
 static int l_quat_eq(lua_State* L) {
     l_quat_t *a = luaX_checkquat(L, 1);
     l_quat_t *b = luaX_checkquat(L, 2);
@@ -676,8 +684,7 @@ static int l_quat_rotate(lua_State* L) {
         vz(v) = (real_t)luaL_checknumber(L, 4);
 
         quat_rotate(v3(r), qr(q), v);
-    }
-    else {
+    } else {
         l_vec3_t *v = luaX_checkvec3(L, 2);
 
         quat_rotate(v3(r), qr(q), v3(v));
@@ -687,12 +694,61 @@ static int l_quat_rotate(lua_State* L) {
 }
 
 static int l_quat_matrix(lua_State* L) {
+    l_quat_t *q = luaX_checkquat(L, 1);
+    l_mat33_t *m = new_mat33(L);
+
+    quat_tomatrix(m3(m), qr(q));
+
+    return 1;
 }
 
 static int l_quat_euler(lua_State* L) {
+    int top = lua_gettop(L);
+    l_quat_t *q = luaX_checkquat(L, 1);
+
+    if (1 == top) {
+        l_vec3_t *r = new_vec3(L);
+
+        quat_toeuler(v3(r), qr(q));
+
+        return 1;
+    }
+
+    if (4 == top) {
+        vec3_t v;
+        vx(v) = (real_t)luaL_checknumber(L, 2);
+        vy(v) = (real_t)luaL_checknumber(L, 3);
+        vz(v) = (real_t)luaL_checknumber(L, 4);
+
+        quat_fromeuler(qr(q), v);
+    } else {
+        l_vec3_t *v = luaX_checkvec3(L, 2);
+
+        quat_fromeuler(qr(q), v3(v));
+    }
+
+    return 0;
 }
 
 static int l_quat_angleaxis(lua_State* L) {
+    int top = lua_gettop(L);
+    l_quat_t *q = luaX_checkquat(L, 1);
+    real_t theta = (real_t)luaL_checknumber(L, 2);
+
+    if (5 == top) {
+        vec3_t v;
+        vx(v) = (real_t)luaL_checknumber(L, 3);
+        vy(v) = (real_t)luaL_checknumber(L, 4);
+        vz(v) = (real_t)luaL_checknumber(L, 5);
+
+        quat_fromangleaxis(qr(q), v, theta);
+    } else {
+        l_vec3_t *v = luaX_checkvec3(L, 3);
+
+        quat_fromangleaxis(qr(q), v3(v), theta);
+    }
+
+    return 0;
 }
 
 static int l_vec2_new(lua_State* L) {
@@ -780,32 +836,12 @@ static int l_quat_new(lua_State* L) {
     return 1;
 }
 
-static int l_radian(lua_State* L) {
-    static const real_t deg2rad = (real_t)(MC_PI / 180.0);
-    real_t deg = (real_t)luaL_checknumber(L, 1);
-
-    lua_pushnumber(L, deg * deg2rad);
-
-    return 1;
-}
-
-static int l_degree(lua_State* L) {
-    static const real_t rad2deg = (real_t)(180.0 / MC_PI);
-    real_t rad = (real_t)luaL_checknumber(L, 1);
-
-    lua_pushnumber(L, rad * rad2deg);
-
-    return 1;
-}
-
 int luaopen_sevo_math(lua_State* L) {
     luaL_Reg mod_math[] = {
         { "vec2", l_vec2_new },
         { "vec3", l_vec3_new },
         { "mat33", l_mat33_new },
         { "quat", l_quat_new },
-        { "radian", l_radian },
-        { "degree", l_degree },
         { NULL, NULL }
     };
     luaL_Reg meta_vec2[] = {
@@ -872,6 +908,7 @@ int luaopen_sevo_math(lua_State* L) {
         { "__sub", l_quat_sub },
         { "__mul", l_quat_mul },
         { "__unm", l_quat_unm },
+        { "__len", l_quat_len },
         { "__eq",  l_quat_eq },
         { "__tostring", l_quat_tostring },
         { "__concat", l_math_concat },
