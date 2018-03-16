@@ -21,12 +21,12 @@ void mat33_transformation(mat33_t r, real_t x, real_t y, real_t theta,
      *   move    rotate    scale     skew      origin
      **/
 
-    r[0] = c * sx - ky * s * sy;    /* = a */
-    r[1] = s * sx + ky * c * sy;    /* = b */
-    r[3] = kx * c * sx - s * sy;    /* = c */
-    r[4] = kx * s * sx + c * sy;    /* = d */
-    r[6] = x - ox * r[0] - oy * r[3];
-    r[7] = y - ox * r[1] - oy * r[4];
-    r[2] = r[5] = r_zero;
-    r[8] = r_one;
+    e11(r) = c * sx - ky * s * sy;    /* = a */
+    e21(r) = s * sx + ky * c * sy;    /* = b */
+    e12(r) = kx * c * sx - s * sy;    /* = c */
+    e22(r) = kx * s * sx + c * sy;    /* = d */
+    e13(r) = x - ox * e11(r) - oy * e12(r);
+    e23(r) = y - ox * e21(r) - oy * e22(r);
+    e31(r) = e32(r) = r_zero;
+    e33(r) = r_one;
 }

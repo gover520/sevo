@@ -12,7 +12,8 @@
 real_t vec2_normalize(vec2_t v, real_t length) {
     real_t ls = vec2_len(v);
     if (!r_equal(ls, r_zero)) {
-        vec2_mul(v, v, length / ls);
+        length = length / ls;
+        vec2_mul(v, v, length);
     }
     return ls;
 }
@@ -28,7 +29,8 @@ void vec2_rotate(vec2_t r, const vec2_t v, real_t theta) {
 real_t vec3_normalize(vec3_t v, real_t length) {
     real_t ls = vec3_len(v);
     if (!r_equal(ls, r_zero)) {
-        vec3_mul(v, v, length / ls);
+        length = length / ls;
+        vec3_mul(v, v, length);
     }
     return ls;
 }

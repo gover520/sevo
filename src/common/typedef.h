@@ -32,6 +32,7 @@ extern "C" {
     #define r_abs(x)        fabs(x)
     #define r_sin(x)        sin(x)
     #define r_cos(x)        cos(x)
+    #define r_acos(x)       acos(x)
     #define r_equal(a, b)   (r_abs((a) - (b)) < r_epsilon)
 
 #ifdef __cplusplus

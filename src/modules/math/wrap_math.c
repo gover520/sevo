@@ -1,11 +1,11 @@
 /*
-*  wrap_math.c
-*
-*  copyright (c) 2018 Xiongfei Shi
-*
-*  author: Xiongfei Shi <jenson.shixf(a)gmail.com>
-*  license: Apache-2.0
-*/
+ *  wrap_math.c
+ *
+ *  copyright (c) 2018 Xiongfei Shi
+ *
+ *  author: Xiongfei Shi <jenson.shixf(a)gmail.com>
+ *  license: Apache-2.0
+ */
 
 #include "wrap_math.h"
 #include "common/vector.h"
@@ -25,7 +25,7 @@ typedef struct l_mat33_t {
 
 #define v2(l)   l->vec2
 #define v3(l)   l->vec3
-#define m33(l)  l->mat33
+#define m3(l)   l->mat33
 
 static const char g_meta_vec2[] = { CODE_NAME ".meta.vec2" };
 static const char g_meta_vec3[] = { CODE_NAME ".meta.vec3" };
@@ -358,7 +358,7 @@ static int l_mat33_add(lua_State* L) {
     l_mat33_t *b = luaX_checkmat33(L, 2);
     l_mat33_t *m = new_mat33(L);
 
-    mat33_add(m33(m), m33(a), m33(b));
+    mat33_add(m3(m), m3(a), m3(b));
 
     return 1;
 }
@@ -368,7 +368,7 @@ static int l_mat33_sub(lua_State* L) {
     l_mat33_t *b = luaX_checkmat33(L, 2);
     l_mat33_t *m = new_mat33(L);
 
-    mat33_sub(m33(m), m33(a), m33(b));
+    mat33_sub(m3(m), m3(a), m3(b));
 
     return 1;
 }
@@ -378,7 +378,7 @@ static int l_mat33_mul(lua_State* L) {
     l_mat33_t *b = luaX_checkmat33(L, 2);
     l_mat33_t *m = new_mat33(L);
 
-    mat33_mul(m33(m), m33(a), m33(b));
+    mat33_mul(m3(m), m3(a), m3(b));
 
     return 1;
 }
@@ -387,7 +387,7 @@ static int l_mat33_unm(lua_State* L) {
     l_mat33_t *e = luaX_checkmat33(L, 1);
     l_mat33_t *m = new_mat33(L);
 
-    mat33_inverse(m33(m), m33(e));
+    mat33_inverse(m3(m), m3(e));
 
     return 1;
 }
@@ -396,15 +396,15 @@ static int l_mat33_eq(lua_State* L) {
     l_mat33_t *a = luaX_checkmat33(L, 1);
     l_mat33_t *b = luaX_checkmat33(L, 2);
 
-    lua_pushboolean(L, r_equal(m33(a)[0], m33(b)[0])
-        && r_equal(m33(a)[1], m33(b)[1])
-        && r_equal(m33(a)[2], m33(b)[2])
-        && r_equal(m33(a)[3], m33(b)[3])
-        && r_equal(m33(a)[4], m33(b)[4])
-        && r_equal(m33(a)[5], m33(b)[5])
-        && r_equal(m33(a)[6], m33(b)[6])
-        && r_equal(m33(a)[7], m33(b)[7])
-        && r_equal(m33(a)[8], m33(b)[8]));
+    lua_pushboolean(L, r_equal(e11(m3(a)), e11(m3(b)))
+        && r_equal(e21(m3(a)), e21(m3(b)))
+        && r_equal(e31(m3(a)), e31(m3(b)))
+        && r_equal(e12(m3(a)), e12(m3(b)))
+        && r_equal(e22(m3(a)), e22(m3(b)))
+        && r_equal(e32(m3(a)), e32(m3(b)))
+        && r_equal(e13(m3(a)), e13(m3(b)))
+        && r_equal(e23(m3(a)), e23(m3(b)))
+        && r_equal(e33(m3(a)), e33(m3(b))));
 
     return 1;
 }
@@ -414,9 +414,9 @@ static int l_mat33_tostring(lua_State* L) {
     char buffer[160] = { 0 };
 
     sprintf(buffer, "mat33(%lf %lf %lf, %lf %lf %lf, %lf %lf %lf)", 
-        m33(m)[0], m33(m)[3], m33(m)[6],
-        m33(m)[1], m33(m)[4], m33(m)[7],
-        m33(m)[2], m33(m)[5], m33(m)[8]);
+        e11(m3(m)), e12(m3(m)), e13(m3(m)),
+        e21(m3(m)), e22(m3(m)), e23(m3(m)),
+        e31(m3(m)), e32(m3(m)), e33(m3(m)));
     lua_pushstring(L, buffer);
 
     return 1;
@@ -434,7 +434,7 @@ static int l_mat33_dim(lua_State* L) {
 static int l_mat33_identity(lua_State* L) {
     l_mat33_t *m = luaX_checkmat33(L, 1);
 
-    mat33_identity(m33(m));
+    mat33_identity(m3(m));
 
     return 0;
 }
@@ -442,7 +442,7 @@ static int l_mat33_identity(lua_State* L) {
 static int l_mat33_determinant(lua_State* L) {
     l_mat33_t *m = luaX_checkmat33(L, 1);
 
-    lua_pushnumber(L, mat33_determinant(m33(m)));
+    lua_pushnumber(L, mat33_determinant(m3(m)));
 
     return 1;
 }
@@ -451,7 +451,7 @@ static int l_mat33_transpose(lua_State* L) {
     l_mat33_t *e = luaX_checkmat33(L, 1);
     l_mat33_t *m = new_mat33(L);
 
-    mat33_transpose(m33(m), m33(e));
+    mat33_transpose(m3(m), m3(e));
 
     return 1;
 }
@@ -468,7 +468,7 @@ static int l_mat33_transformation(lua_State* L) {
     real_t kx = (real_t)luaL_checknumber(L, 9);
     real_t ky = (real_t)luaL_checknumber(L, 10);
 
-    mat33_transformation(m33(m), x, y, theta, sx, sy, ox, oy, kx, ky);
+    mat33_transformation(m3(m), x, y, theta, sx, sy, ox, oy, kx, ky);
 
     return 0;
 }
@@ -483,11 +483,11 @@ static int l_mat33_transformxy(lua_State* L) {
         vx(v) = (real_t)luaL_checknumber(L, 2);
         vy(v) = (real_t)luaL_checknumber(L, 3);
 
-        mat33_transformxy(v2(r), m33(m), v);
+        mat33_transformxy(v2(r), m3(m), v);
     } else {
         l_vec2_t *v = luaX_checkvec2(L, 2);
 
-        mat33_transformxy(v2(r), m33(m), v2(v));
+        mat33_transformxy(v2(r), m3(m), v2(v));
     }
 
     return 1;
@@ -504,11 +504,11 @@ static int l_mat33_transformxyz(lua_State* L) {
         vy(v) = (real_t)luaL_checknumber(L, 3);
         vz(v) = (real_t)luaL_checknumber(L, 4);
 
-        mat33_transformxyz(v3(r), m33(m), v);
+        mat33_transformxyz(v3(r), m3(m), v);
     } else {
         l_vec3_t *v = luaX_checkvec3(L, 2);
 
-        mat33_transformxyz(v3(r), m33(m), v3(v));
+        mat33_transformxyz(v3(r), m3(m), v3(v));
     }
 
     return 1;
@@ -523,9 +523,9 @@ static int l_mat33_row(lua_State* L) {
         return luaL_error(L, "Invalid operand. Expected 1, 2 or 3");
     }
 
-    vx(v3(r)) = m33(m)[idx - 1];
-    vy(v3(r)) = m33(m)[idx + 2];
-    vz(v3(r)) = m33(m)[idx + 5];
+    vx(v3(r)) = m3(m)[idx - 1];
+    vy(v3(r)) = m3(m)[idx + 2];
+    vz(v3(r)) = m3(m)[idx + 5];
 
     return 1;
 }
@@ -541,9 +541,9 @@ static int l_mat33_column(lua_State* L) {
 
     idx = (idx - 1) * 3;
 
-    vx(v3(r)) = m33(m)[idx];
-    vy(v3(r)) = m33(m)[idx + 1];
-    vz(v3(r)) = m33(m)[idx + 2];
+    vx(v3(r)) = m3(m)[idx];
+    vy(v3(r)) = m3(m)[idx + 1];
+    vz(v3(r)) = m3(m)[idx + 2];
 
     return 1;
 }
@@ -592,25 +592,25 @@ static int l_mat33_new(lua_State* L) {
     l_mat33_t *m = new_mat33(L);
 
     if (9 == top) {
-        m33(m)[0] = (real_t)luaL_checknumber(L, 1);
-        m33(m)[3] = (real_t)luaL_checknumber(L, 2);
-        m33(m)[6] = (real_t)luaL_checknumber(L, 3);
+        e11(m3(m)) = (real_t)luaL_checknumber(L, 1);
+        e12(m3(m)) = (real_t)luaL_checknumber(L, 2);
+        e13(m3(m)) = (real_t)luaL_checknumber(L, 3);
 
-        m33(m)[1] = (real_t)luaL_checknumber(L, 4);
-        m33(m)[4] = (real_t)luaL_checknumber(L, 5);
-        m33(m)[7] = (real_t)luaL_checknumber(L, 6);
+        e21(m3(m)) = (real_t)luaL_checknumber(L, 4);
+        e22(m3(m)) = (real_t)luaL_checknumber(L, 5);
+        e23(m3(m)) = (real_t)luaL_checknumber(L, 6);
 
-        m33(m)[2] = (real_t)luaL_checknumber(L, 7);
-        m33(m)[5] = (real_t)luaL_checknumber(L, 8);
-        m33(m)[8] = (real_t)luaL_checknumber(L, 9);
+        e31(m3(m)) = (real_t)luaL_checknumber(L, 7);
+        e32(m3(m)) = (real_t)luaL_checknumber(L, 8);
+        e33(m3(m)) = (real_t)luaL_checknumber(L, 9);
     } else if (3 == top) {
-        mat33_identity(m33(m));
+        mat33_identity(m3(m));
 
-        m33(m)[0] = (real_t)luaL_checknumber(L, 1);
-        m33(m)[4] = (real_t)luaL_checknumber(L, 2);
-        m33(m)[8] = (real_t)luaL_checknumber(L, 3);
+        e11(m3(m)) = (real_t)luaL_checknumber(L, 1);
+        e22(m3(m)) = (real_t)luaL_checknumber(L, 2);
+        e33(m3(m)) = (real_t)luaL_checknumber(L, 3);
     } else {
-        mat33_identity(m33(m));
+        mat33_identity(m3(m));
     }
 
     return 1;
