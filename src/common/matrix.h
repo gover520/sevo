@@ -68,9 +68,9 @@ extern "C" {
                                             e32(r) = e31(a)*e12(b) + e32(a)*e22(b) + e33(a)*e32(b); \
                                             e33(r) = e31(a)*e13(b) + e32(a)*e23(b) + e33(a)*e33(b); } while ( 0 )
 
-    #define mat33_determinant(e)        (e11(e)*(e22(e)*e33(e) - e32(e)*e23(e)) \
-                                        -e21(e)*(e12(e)*e33(e) - e32(e)*e13(e)) \
-                                        +e31(e)*(e12(e)*e23(e) - e22(e)*e13(e)))
+    #define mat33_determinant(e)        (e11(e) * (e22(e)*e33(e) - e32(e)*e23(e)) - \
+                                         e21(e) * (e12(e)*e33(e) - e32(e)*e13(e)) + \
+                                         e31(e) * (e12(e)*e23(e) - e22(e)*e13(e)))
 
     #define mat33_inverse(r, e)         do { real_t det = mat33_determinant(e); \
                                             det = r_one / det; \

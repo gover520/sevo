@@ -25,14 +25,19 @@ extern "C" {
     typedef lua_Number      real_t;
 
     #define r_zero          0.0
+    #define r_half          0.5
     #define r_one           1.0
+    #define r_two           2.0
+    #define r_negone        -1.0
     #define r_epsilon       DBL_EPSILON
 
     #define r_sqrt(x)       sqrt(x)
     #define r_abs(x)        fabs(x)
     #define r_sin(x)        sin(x)
     #define r_cos(x)        cos(x)
+    #define r_asin(x)       asin(x)
     #define r_acos(x)       acos(x)
+    #define r_atan2(y, x)   atan2(y, x)
     #define r_equal(a, b)   (r_abs((a) - (b)) < r_epsilon)
 
 #ifdef __cplusplus

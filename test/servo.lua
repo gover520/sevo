@@ -473,6 +473,9 @@ local test_func = {
         local k = sevo.math.mat33(1, 0, 5,
                                   2, 1, 6,
                                   3, 4, 0)
+        local q = sevo.math.quat()
+        local p = sevo.math.quat(1, 0.5, 0.5, 0.75)
+        local r = sevo.math.quat(1, 0, 1, 0)
 
         print("a", a)
         print("#a", #a)
@@ -528,6 +531,8 @@ local test_func = {
         print("h:dot(h:rotaty(rad(90)))", h:dot(h:rotatey(sevo.math.radian(90))))
         print("h:dot(h:rotatz(rad(90)))", h:dot(h:rotatez(sevo.math.radian(90))))
         print("e == vec(0, 0, 0)", e == sevo.math.vec3(0, 0, 0))
+        print("vec3(1 2 3):dot(vec3(4 5 6))", sevo.math.vec3(1, 2, 3):dot(sevo.math.vec3(4, 5, 6)))
+        print("vec3(1 2 3):cross(vec3(4 5 6))", sevo.math.vec3(1, 2, 3):cross(sevo.math.vec3(4, 5, 6)))
 
         print("c:xy", c:xy())
         print("h:xyz", h:xyz())
@@ -545,10 +550,10 @@ local test_func = {
         print("k:det", k:det())
         m:transform(1, 2, sevo.math.radian(90), 3, 4, 5, 6, 7, 8)
         print("m:transform", m)
-        print("m:transformxy(3, 5)", m:transformxy(3, 7))
-        print("m:transformxy(c)", m:transformxy(c))
-        print("m:transformxyz(1, 5, 7)", m:transformxyz(1, 5, 7))
-        print("m:transformxyz(h)", m:transformxyz(h))
+        print("m:transform2(3, 5)", m:transform2(3, 7))
+        print("m:transform2(c)", m:transform2(c))
+        print("m:transform3(1, 5, 7)", m:transform3(1, 5, 7))
+        print("m:transform3(h)", m:transform3(h))
         n:identity()
         m:identity()
         print("n:identity", n)
@@ -559,6 +564,11 @@ local test_func = {
         print("k:column(1)", k:column(1))
         print("k:column(2)", k:column(2))
         print("k:column(3)", k:column(3))
+        print("mat(4.1 0 4.0, 0 3.1 0, 0 20.0 0.1):transform3(1, 2, 3)", sevo.math.mat33(4.1,0,4.0, 0,3.1,0, 0,20.0,0.1):transform3(1, 2, 3))
+
+        print("q", q)
+        print("p", p)
+        print("r", r)
     end,
 }
 local test_step = 1
