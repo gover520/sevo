@@ -200,6 +200,10 @@ static int mcl_net_receive(lua_State *L) {
         lua_pushliteral(L, "conn-timeout");
         lua_setfield(L, -2, "cmd");
         break;
+    case MC_NET_UNAUTHORIZED:
+        lua_pushliteral(L, "unauth");
+        lua_setfield(L, -2, "cmd");
+        break;
     case MC_NET_HALO:
         lua_pushliteral(L, "halo");
         lua_setfield(L, -2, "cmd");
@@ -358,22 +362,31 @@ static int mcl_peer_close(lua_State *L) {
 
 static int mcl_peer_auth(lua_State *L) {
     mcl_peer_t *p = luaX_checkpeer(L, 1);
-    const char *passwd = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_auth(p->peer, passwd));
+    size_t l = 0;
+    const char *passwd = luaL_checklstring(L, 2, &l);
+    int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
+
+    lua_pushboolean(L, 0 == mc_net_auth(p->peer, passwd, len));
     return 1;
 }
 
 static int mcl_peer_accept(lua_State *L) {
     mcl_peer_t *p = luaX_checkpeer(L, 1);
-    const char *welcome = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_accept(p->peer, welcome));
+    size_t l = 0;
+    const char *welcome = luaL_checklstring(L, 2, &l);
+    int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
+
+    lua_pushboolean(L, 0 == mc_net_accept(p->peer, welcome, len));
     return 1;
 }
 
 static int mcl_peer_reject(lua_State *L) {
     mcl_peer_t *p = luaX_checkpeer(L, 1);
-    const char *reason = luaL_checkstring(L, 2);
-    lua_pushboolean(L, 0 == mc_net_reject(p->peer, reason));
+    size_t l = 0;
+    const char *reason = luaL_checklstring(L, 2, &l);
+    int len = (int)luaL_optinteger(L, 3, (lua_Integer)l);
+
+    lua_pushboolean(L, 0 == mc_net_reject(p->peer, reason, len));
     return 1;
 }
 
